@@ -15,6 +15,28 @@ const initHeaderScroll = () => {
     });
 };
 
+const initFollowPrompt = () => {
+    const followPrompt = document.querySelector('.follow-prompt');
+    if (!followPrompt) return;
+
+    const observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'data-section') {
+                const currentSection = document.body.getAttribute('data-section');
+                if (currentSection === 'home' || currentSection === 'contact') {
+                    followPrompt.classList.add('visible');
+                } else {
+                    followPrompt.classList.remove('visible');
+                }
+            }
+        });
+    });
+
+    observer.observe(document.body, {
+        attributes: true //configure it to listen to attribute changes
+    });
+};
+
 const initSectionObserver = () => {
     const sections = document.querySelectorAll('.full-page-section');
     if (!sections.length) return;
@@ -34,5 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM fully loaded and parsed');
     initHeaderScroll();
     initSectionObserver();
+    initFollowPrompt();
 });
 

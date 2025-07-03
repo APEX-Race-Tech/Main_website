@@ -78,6 +78,10 @@
     gap: 1.5rem;
 }
 
+.nav-links a {
+    color: #ffffff;
+}
+
 .hamburger-btn {
     display: none; /* Hidden on desktop */
 }
@@ -110,12 +114,23 @@
 
 /* Footer */
 .site-footer {
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100vw; /* Full viewport width */
+    width: 100%;
     padding: 2rem 0;
     background-color: #0a0a0a;
     text-align: center;
+}
+
+#contact {
+    /* Override general section rules */
+    justify-content: space-between; /* Push content to top and bottom */
+    padding: 0; /* Remove horizontal padding to allow full-width footer */
+}
+
+#contact > h1 {
+    /* Create space for the fixed header */
+    margin-top: calc(var(--header-height) + 2rem);
+    /* Align title with content in other sections */
+    padding: 0 5%;
+    /* Ensure the padding works correctly */
+    width: 100%;
 }
