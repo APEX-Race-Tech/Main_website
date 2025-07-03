@@ -21,16 +21,34 @@
 
 /* Full Page Sections */
 .full-page-section {
-    height: 100vh;
+    min-height: 100vh;
     width: 100%;
     scroll-snap-align: start;
     scroll-snap-stop: always;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
     position: relative; /* For absolute positioning inside */
     padding: 0 5%;
+}
+
+/* Section Content Container */
+.section-content {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: calc(var(--header-height) + 2rem) 0 2rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Section Headings */
+.full-page-section h1 {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    color: var(--text-color);
+    align-self: flex-start;
+    width: 100%;
 }
 
 /* Header */
@@ -121,16 +139,10 @@
 }
 
 #contact {
-    /* Override general section rules */
-    justify-content: space-between; /* Push content to top and bottom */
-    padding: 0; /* Remove horizontal padding to allow full-width footer */
+    justify-content: space-between;
+    padding: 0;
 }
 
-#contact > h1 {
-    /* Create space for the fixed header */
-    margin-top: calc(var(--header-height) + 2rem);
-    /* Align title with content in other sections */
-    padding: 0 5%;
-    /* Ensure the padding works correctly */
-    width: 100%;
+#contact .section-content {
+    padding-bottom: 120px; /* Extra space for footer */
 }
