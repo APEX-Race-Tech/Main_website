@@ -36,6 +36,44 @@
         max-width: 90%;
     }
 
+    .home-content h1 {
+        font-size: 2.5rem;
+    }
+
+    .home-content .sub-headline {
+        font-size: 1.1rem;
+    }
+
+    .purpose-columns {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .product-showcase {
+        grid-template-columns: 1fr;
+    }
+
+    .form-section-container {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+    }
+
+    .footer-content {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .footer-nav {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem 1.5rem;
+    }
+
+    .footer-nav a {
+        margin-right: 0;
+    }
+
     /* Mobile Nav Panel */
     .mobile-nav {
         position: fixed;
