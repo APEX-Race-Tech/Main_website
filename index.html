@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APEX Race Technologies</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script> <!-- TODO: Add new Font Awesome kit URL -->
+</head>
+<body>
+
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <!-- Placeholder for loading animation -->
+    </div>
+
+    <!-- Background Animations -->
+    <div class="background-animations">
+        <canvas id="track-animation"></canvas>
+        <div class="racing-lines"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav-container">
+            <a href="#home" class="header__logo">
+                <img src="assets\images\apex_orange_Horizontal.svg" alt="APEX Race Technologies Logo" class="logo--full">
+                <img src="assets\images\apex_orange_ONLY LOGO.svg" alt="APEX Race Technologies Icon" class="logo--icon">
+            </a>
+            <div class="nav-right">
+                <ul class="nav-links">
+                    <li><a href="#about">About Us</a></li>
+                    <li><a href="#products">Products</a></li>
+                    <li><a href="#waitlist">Waitlist</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+                <div class="header-action-item">
+                    <a href="#waitlist" class="btn btn-primary">Join Now</a>
+                </div>
+            </div>
+            <button class="hamburger-btn" aria-label="Toggle menu">
+                <span class="hamburger-btn__bar"></span>
+                <span class="hamburger-btn__bar"></span>
+                <span class="hamburger-btn__bar"></span>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="scroll-container">
+        <section id="home" class="full-page-section">
+            <h1>Home</h1>
+        </section>
+        <section id="about" class="full-page-section">
+            <h1>About Us</h1>
+        </section>
+        <section id="products" class="full-page-section">
+            <h1>Products</h1>
+        </section>
+        <section id="waitlist" class="full-page-section">
+            <h1>Waitlist</h1>
+        </section>
+        <section id="contact" class="full-page-section">
+            <h1>Contact</h1>
+            <footer class="site-footer">
+                <p>&copy; 2024 APEX Race Technologies. All rights reserved.</p>
+            </footer>
+        </section>
+    </main>
+
+    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/track-animation.js"></script>
+</body>
+</html>

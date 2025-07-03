@@ -1,0 +1,29 @@
+/*
+    Component Styles
+    --------------------------------------------------
+    Buttons, cards, forms, etc.
+*/
+
+/* --- Buttons --- */
+.btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all var(--transition-speed) ease-in-out;
+    border: 1px solid transparent;
+    cursor: pointer;
+    text-align: center;
+}
+
+.btn-primary {
+    background: var(--primary-gradient);
+    color: var(--text-color);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(252, 33, 13, 0.15);
+}

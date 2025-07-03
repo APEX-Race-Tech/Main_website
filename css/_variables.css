@@ -1,0 +1,21 @@
+:root {
+    /* Colors */
+    --primary-color: #f53518;
+    --primary-gradient: linear-gradient(225deg, #ff7b00, #ff3c1f);
+    --dark-bg: #000000;
+    --card-bg: #111111;
+    --border-color: #2c2c2c;
+    --text-color: #FFFFFF;
+    --text-muted: #999999;
+
+    /* Fonts */
+    --font-family: 'Inter', sans-serif;
+
+    /* Spacing */
+    --header-height: 80px;
+    --header-height-scrolled: 60px;
+    --spacing-unit: 1rem; /* 16px */
+
+    /* Transitions */
+    --transition-speed: 0.3s;
+}

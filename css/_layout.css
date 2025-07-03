@@ -1,0 +1,121 @@
+/*
+    Layout Styles
+    --------------------------------------------------
+    Main page structure, header, footer, and grids.
+*/
+
+/* Scroll Container */
+.scroll-container {
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-snap-type: y mandatory;
+    scroll-padding-top: calc(var(--header-height-scrolled) + 20px); /* Header height + extra padding */
+    scrollbar-width: none; /* For Firefox */
+    -ms-overflow-style: none;  /* For Internet Explorer and Edge */
+}
+
+.scroll-container::-webkit-scrollbar {
+    display: none; /* For Chrome, Safari, and Opera */
+}
+
+/* Full Page Sections */
+.full-page-section {
+    height: 100vh;
+    width: 100%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative; /* For absolute positioning inside */
+    padding: 0 5%;
+}
+
+/* Header */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    height: var(--header-height);
+    display: flex;
+    align-items: center;
+    padding: 0 2rem;
+    transition: height var(--transition-speed) ease-in-out, padding var(--transition-speed) ease-in-out;
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1400px;
+    margin: 50px auto 0;
+    transition: all var(--transition-speed) ease-in-out;
+}
+
+.header__logo .logo--icon {
+    display: none;
+}
+
+.header__logo .logo--full {
+    display: block;
+    height: 40px;
+    transition: all var(--transition-speed) ease-in-out;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.nav-links {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.hamburger-btn {
+    display: none; /* Hidden on desktop */
+}
+
+/* --- Header Scrolled State --- */
+.header.scrolled {
+    height: var(--header-height-scrolled);
+    padding: 0;
+}
+
+.header.scrolled .nav-container {
+    max-width: 800px;
+    height: 100%;
+    background-color: rgba(20, 20, 20, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    padding: 0 1.5rem;
+}
+
+.header.scrolled .header__logo .logo--full {
+    display: none;
+}
+
+.header.scrolled .header__logo .logo--icon {
+    display: block;
+    height: 30px;
+}
+
+/* Footer */
+.site-footer {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100vw; /* Full viewport width */
+    padding: 2rem 0;
+    background-color: #0a0a0a;
+    text-align: center;
+}

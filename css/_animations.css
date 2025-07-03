@@ -1,0 +1,31 @@
+/*
+    Animation Styles
+    --------------------------------------------------
+    Keyframes and animation classes.
+*/
+
+/* Background Animation Container */
+.background-animations {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Place it behind all content */
+    overflow: hidden;
+}
+
+/* Racing Lines Effect */
+#track-animation {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.4; /* Increased opacity for better visibility of the new effect */
+    transition: opacity 0.5s ease-in-out;
+}
+
+body[data-section="home"] #track-animation {
+    opacity: 0;
+}
