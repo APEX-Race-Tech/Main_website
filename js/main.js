@@ -60,10 +60,30 @@ const initSectionObserver = () => {
     sections.forEach(section => observer.observe(section));
 };
 
+const initMobileNav = () => {
+    const hamburgerBtn = document.querySelector('.hamburger-btn');
+    const mobileNav = document.querySelector('.mobile-nav');
+    const mobileNavLinks = document.querySelectorAll('.mobile-nav .nav-links a');
+
+    if (hamburgerBtn && mobileNav) {
+        hamburgerBtn.addEventListener('click', () => {
+            hamburgerBtn.classList.toggle('open');
+            mobileNav.classList.toggle('open');
+        });
+
+        mobileNavLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                hamburgerBtn.classList.remove('open');
+                mobileNav.classList.remove('open');
+            });
+        });
+    }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM fully loaded and parsed');
     initHeaderScroll();
     initSectionObserver();
     initFollowPrompt();
+    initMobileNav();
 });
-

@@ -51,13 +51,15 @@
     width: 100%;
 }
 
+
+
 /* Header */
 .header {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    z-index: 1000;
+    z-index: 1010;
     height: var(--header-height);
     display: flex;
     align-items: center;
@@ -102,6 +104,20 @@
 
 .hamburger-btn {
     display: none; /* Hidden on desktop */
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 1001;
+}
+
+.hamburger-btn__bar {
+    display: block;
+    width: 25px;
+    height: 3px;
+    margin: 5px 0;
+    background-color: var(--text-color);
+    transition: all var(--transition-speed) ease-in-out;
 }
 
 /* --- Header Scrolled State --- */
