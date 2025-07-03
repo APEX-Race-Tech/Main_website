@@ -23,7 +23,7 @@ const initFollowPrompt = () => {
         mutations.forEach(mutation => {
             if (mutation.type === 'attributes' && mutation.attributeName === 'data-section') {
                 const currentSection = document.body.getAttribute('data-section');
-                if (currentSection === 'home' || currentSection === 'contact') {
+                if (currentSection === 'contact') {
                     followPrompt.classList.add('visible');
                 } else {
                     followPrompt.classList.remove('visible');
@@ -31,6 +31,14 @@ const initFollowPrompt = () => {
             }
         });
     });
+
+    // Initial check in case we're already on the home section
+    const currentSection = document.body.getAttribute('data-section');
+    if (currentSection === 'contact') {
+        followPrompt.classList.add('visible');
+    } else {
+        followPrompt.classList.remove('visible');
+    }
 
     observer.observe(document.body, {
         attributes: true //configure it to listen to attribute changes
