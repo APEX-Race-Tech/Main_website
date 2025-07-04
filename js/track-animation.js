@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'assets/bg animation/Austin.csv', 
         // , 'assets/bg animation/Budapest.csv',
         // 'assets/bg animation/Catalunya.csv', 'assets/bg animation/Hockenheim.csv', 
-        'assets/bg animation/IMS.csv',
+        //'assets/bg animation/IMS.csv',
         'assets/bg animation/Melbourne.csv', 'assets/bg animation/MexicoCity.csv',
         //  'assets/bg animation/Montreal.csv',
         'assets/bg animation/Monza.csv', 'assets/bg animation/MoscowRaceway.csv', 
