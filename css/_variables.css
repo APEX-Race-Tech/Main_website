@@ -8,6 +8,10 @@
     --text-color: #FFFFFF;
     --text-muted: #999999;
 
+    /* Animation Colors */
+    --track-animation-trail-color: var(--primary-color);
+    --track-animation-static-color: 128, 128, 128; /* Used as an RGB value for rgba() */
+
     /* Fonts */
     --font-family: 'Inter', sans-serif;
 
