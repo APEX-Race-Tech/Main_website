@@ -1,7 +1,52 @@
 /* --- Mobile Responsiveness --- */
+@media (min-width: 1000px) {
+    .scroll-container {
+        scroll-snap-type: y mandatory;
+    }
+
+    .full-page-section {
+        scroll-snap-align: start;
+        scroll-snap-stop: always;
+        min-height: 100vh;
+    }
+    .mobile-nav {
+        display: none;
+    }
+}
+
+@media (max-width: 992px) {
+    .about-container {
+        flex-direction: column;
+        gap: 3rem;
+    }
+
+    .product-showcase,
+    .form-section-container {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+    }
+    .mobile-nav {
+        display: none;
+    }
+}
+
 @media (max-width: 768px) {
     .scroll-container {
         scroll-snap-type: none; /* Disable scroll snapping on mobile */
+    }
+    .mobile-nav {
+        display: none;
+    }
+    /* --- Mobile Header & Navigation --- */
+    .header {
+        padding: 0 1.5rem;
+    }
+
+    .nav-container {
+        margin: 0 auto;
+        height: 100%;
+        position: relative;
+        top: 15px;
     }
 
     .nav-right {
@@ -12,22 +57,24 @@
         display: block; /* Show hamburger menu */
     }
 
-    .nav-container {
-        margin: 0 auto;
-        height: 100%;
-        position: relative;
-        top: 15px;
+    /* --- Mobile Logo Logic --- */
+    /* When header is NOT scrolled, show full logo */
+    .header:not(.scrolled) .header__logo .logo--full {
+        display: block;
+        height: 35px;
+        width: auto;
     }
 
-    .header {
-        padding: 0 1.5rem;
+    .header:not(.scrolled) .header__logo .logo--icon {
+        display: none;
     }
-
-    .header__logo .logo--full {
+    
+    /* When header IS scrolled, show icon logo */
+    .header.scrolled .header__logo .logo--full {
         display: none;
     }
 
-    .header__logo .logo--icon {
+    .header.scrolled .header__logo .logo--icon {
         display: block;
         height: 30px;
     }
@@ -36,6 +83,7 @@
         max-width: 90%;
     }
 
+    /* --- Mobile Section Layouts --- */
     .home-content h1 {
         font-size: 2.5rem;
     }
@@ -49,15 +97,7 @@
         gap: 2rem;
     }
 
-    .product-showcase {
-        grid-template-columns: 1fr;
-    }
-
-    .form-section-container {
-        grid-template-columns: 1fr;
-        gap: 3rem;
-    }
-
+    /* --- Mobile Footer --- */
     .footer-content {
         flex-direction: column;
         gap: 1.5rem;
@@ -74,7 +114,7 @@
         margin-right: 0;
     }
 
-    /* Mobile Nav Panel */
+    /* --- Mobile Nav Panel --- */
     .mobile-nav {
         position: fixed;
         top: 0;
@@ -108,7 +148,7 @@
         margin-top: 2rem;
     }
 
-    /* Hamburger animation to 'X' */
+    /* --- Hamburger Animation --- */
     .hamburger-btn.open .hamburger-btn__bar:nth-child(1) {
         transform: translateY(8px) rotate(45deg);
     }

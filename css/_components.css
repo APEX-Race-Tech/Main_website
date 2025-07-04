@@ -1,7 +1,7 @@
 /*
     Component Styles
     --------------------------------------------------
-    Buttons, cards, forms, etc.
+    Buttons, forms, cards, and other reusable components.
 */
 
 /* --- Buttons --- */
@@ -26,6 +26,118 @@
 .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(252, 33, 13, 0.15);
+}
+
+/* Form Styles */
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(255, 99, 71, 0.2);
+}
+
+::placeholder {
+    color: var(--text-color-secondary);
+    opacity: 0.8; /* Firefox */
+}
+
+select:required:invalid {
+    color: var(--text-color-secondary);
+    opacity: 0.8;
+}
+
+.form-group label {
+    display: none; /* Hide labels, using placeholders instead */
+}
+
+.contact-form .btn,
+.waitlist-form .btn {
+    width: 100%;
+}
+
+.form-group-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-group-checkbox input[type="checkbox"] {
+    width: auto;
+    height: auto;
+    accent-color: var(--primary-color);
+    flex-shrink: 0;
+}
+
+.form-group-checkbox label {
+    display: inline-block; /* Make label visible again for checkbox */
+    color: var(--text-color-secondary);
+    font-size: 0.9rem;
+    margin: 0;
+    line-height: 1.4;
+}
+
+
+
+/* Product Features List */
+.product-features {
+    padding: 0;
+    margin: 1.5rem 0 2rem 0; /* Added more bottom margin */
+}
+
+.feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    color: var(--text-color-secondary);
+    line-height: 1.5;
+}
+
+.feature-item i {
+    color: var(--primary-color);
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+    margin-top: 0.2rem;
+    flex-shrink: 0;
+}
+
+.feature-item span strong {
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+/* Disabled Button with Loader */
+.btn-disabled {
+    background-color: var(--background-color-secondary);
+    color: var(--text-color-secondary);
+    cursor: not-allowed;
+    opacity: 0.7;
+    pointer-events: none; /* Make it non-clickable */
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.btn-disabled .loader {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--text-color-secondary);
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 /* --- Social Media Bar --- */

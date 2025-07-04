@@ -55,9 +55,24 @@ const initSectionObserver = () => {
                 document.body.setAttribute('data-section', entry.target.id);
             }
         });
-    }, { threshold: 0.7 }); // Trigger when 70% of the section is visible
+    }, { threshold: 0.1 }); // Trigger when 10% of the section is visible
 
     sections.forEach(section => observer.observe(section));
+};
+
+const initSocialMediaVisibility = () => {
+    const homeSection = document.querySelector('#home');
+    if (homeSection) {
+        // Set initial state on page load
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    document.body.setAttribute('data-section', 'home');
+                }
+            });
+        }, { threshold: 0.7 });
+        observer.observe(homeSection);
+    }
 };
 
 const initMobileNav = () => {
@@ -86,4 +101,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initSectionObserver();
     initFollowPrompt();
     initMobileNav();
+    initSocialMediaVisibility();
 });
