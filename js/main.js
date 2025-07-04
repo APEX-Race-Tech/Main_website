@@ -96,6 +96,17 @@ const initMobileNav = () => {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+    // --- Loading Screen Logic ---
+    const loadingScreen = document.getElementById('loading-screen');
+
+    // Ensure the loading screen is visible initially
+    if (loadingScreen) {
+        // Set a timeout to hide the loading screen after 5 seconds
+        setTimeout(() => {
+            loadingScreen.classList.add('hidden');
+        }, 5000); // 5000 milliseconds = 5 seconds
+    }
+
     console.log('DOM fully loaded and parsed');
     initHeaderScroll();
     initSectionObserver();

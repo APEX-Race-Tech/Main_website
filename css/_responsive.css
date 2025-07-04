@@ -1,5 +1,5 @@
 /* --- Mobile Responsiveness --- */
-@media (min-width: 1000px) {
+@media (min-width: 992px) {
     .scroll-container {
         scroll-snap-type: y mandatory;
     }
@@ -8,6 +8,11 @@
         scroll-snap-align: start;
         scroll-snap-stop: always;
         min-height: 100vh;
+    }
+
+    /* Override last section height to make footer visible with scroll-snapping */
+    #contact.full-page-section {
+        min-height: auto;
     }
     .mobile-nav {
         display: none;

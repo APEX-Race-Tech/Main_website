@@ -23,3 +23,11 @@ There is no server-side setup required. To view the website, simply open the `in
 1.  Clone or download this repository.
 2.  Navigate to the project's root directory.
 3.  Open `index.html` in your browser (e.g., Chrome, Firefox, Safari).
+
+## Contact Form
+
+The contact form is powered by [Web3Forms](https://web3forms.com/). When a user submits the form, the data is sent to the Web3Forms API endpoint specified in the `action` attribute of the form tag in `index.html`.
+
+## Acknowledgements
+
+- The track animation feature utilizes racetrack coordinate data from the [TUMFTM Racetrack Database](https://github.com/TUMFTM/racetrack-database?tab=LGPL-3.0-1-ov-file), which is available under the LGPL-3.0-1 license.
