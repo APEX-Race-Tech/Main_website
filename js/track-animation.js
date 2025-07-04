@@ -23,18 +23,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const ctx = canvas.getContext('2d');
 
     // --- Configuration ---
-    const GRID_CELL_SIZE = 250; // The size of each cell in the grid
-    const TRACK_PADDING = 40;   // Padding within each cell to prevent tracks from touching cell edges
+    const GRID_CELL_SIZE = 275; // The size of each cell in the grid
+    const TRACK_PADDING = 35;   // Padding within each cell to prevent tracks from touching cell edges
 
     const trackFiles = [
-        'assets/bg animation/Austin.csv', 'assets/bg animation/BrandsHatch.csv', 'assets/bg animation/Budapest.csv',
-        'assets/bg animation/Catalunya.csv', 'assets/bg animation/Hockenheim.csv', 'assets/bg animation/IMS.csv',
-        'assets/bg animation/Melbourne.csv', 'assets/bg animation/MexicoCity.csv', 'assets/bg animation/Montreal.csv',
-        'assets/bg animation/Monza.csv', 'assets/bg animation/MoscowRaceway.csv', 'assets/bg animation/Norisring.csv',
-        'assets/bg animation/Nuerburgring.csv', 'assets/bg animation/Oschersleben.csv', 'assets/bg animation/Sakhir.csv',
-        'assets/bg animation/SaoPaulo.csv', 'assets/bg animation/Sepang.csv', 'assets/bg animation/Shanghai.csv',
-        'assets/bg animation/Silverstone.csv', 'assets/bg animation/Sochi.csv', 'assets/bg animation/Spa.csv',
-        'assets/bg animation/Spielberg.csv', 'assets/bg animation/Suzuka.csv', 'assets/bg animation/YasMarina.csv',
+        'assets/bg animation/Austin.csv', 
+        // , 'assets/bg animation/Budapest.csv',
+        // 'assets/bg animation/Catalunya.csv', 'assets/bg animation/Hockenheim.csv', 
+        'assets/bg animation/IMS.csv',
+        'assets/bg animation/Melbourne.csv', 'assets/bg animation/MexicoCity.csv',
+        //  'assets/bg animation/Montreal.csv',
+        'assets/bg animation/Monza.csv', 'assets/bg animation/MoscowRaceway.csv', 
+        // 'assets/bg animation/Norisring.csv',
+        'assets/bg animation/Nuerburgring.csv',
+        // 'assets/bg animation/Oschersleben.csv', 'assets/bg animation/Sakhir.csv',
+        'assets/bg animation/SaoPaulo.csv', 'assets/bg animation/Sepang.csv', 
+        // 'assets/bg animation/Shanghai.csv',
+        'assets/bg animation/Silverstone.csv', 
+        // 'assets/bg animation/Sochi.csv', 
+        'assets/bg animation/Spa.csv',
+        // 'assets/bg animation/Spielberg.csv', 
+        'assets/bg animation/Suzuka.csv', 'assets/bg animation/YasMarina.csv',
         'assets/bg animation/Zandvoort.csv'
     ];
 
