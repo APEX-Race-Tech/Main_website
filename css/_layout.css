@@ -340,7 +340,7 @@
 }
 
 h2.tagline {
-    color: var(--text-color-secondary);
+    color: var(--border-color);
 }
 
 .advantage-card h4 {
@@ -397,7 +397,7 @@ h2.tagline {
 }
 
 .product-card {
-    padding: 2.5rem;
+    padding: 1.2rem;
 }
 
 .product-content h2 {
