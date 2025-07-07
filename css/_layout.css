@@ -214,7 +214,7 @@
 
 /* --- Utility Classes --- */
 .accent-text {
-    background: linear-gradient(90deg, var(--primary-color), #ff8c42);
+    background: var(--primary-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -242,7 +242,8 @@
     font-size: 2.25rem;
     font-weight: 600;
     margin-bottom: 1.5rem;
-    background: linear-gradient(90deg, var(--primary-color), #ff8c42);
+    background: #414141;
+    color: var(--text-color-secondary);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
