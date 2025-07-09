@@ -400,6 +400,7 @@ h2.tagline {
 }
 
 .product-card {
+    height: 450px;
     padding: 1.5rem;
     flex: 1 1 45%;
     max-width: 550px;

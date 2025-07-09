@@ -10,6 +10,38 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+    /* Toast container */
+    #toast {
+        visibility: hidden;
+        min-width: 250px;
+        max-width: 80%;
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        border-radius: 8px;
+        padding: 16px;
+        position: fixed;
+        z-index: 9999;
+        left: 50%;
+        bottom: 30px;
+        font-size: 16px;
+        transform: translateX(-50%);
+        opacity: 0;
+        transition: opacity 0.5s, bottom 0.5s;
+    }
+    #toast.show {
+        visibility: visible;
+        opacity: 1;
+        bottom: 50px;
+    }
+    #toast.success {
+        background-color:linear-gradient(360deg, #ff7b00, #f83416);
+    }
+    #toast.error {
+        background-color: #dc3545;
+    }
+    </style>
 </head>
 <body>
 
@@ -201,15 +233,16 @@
                     <p>Race-Insight is our groundbreaking web-based time series analysis software, initially launching for iRacing and Assetto Corsa. This beta phase is your chance to get early access, provide valuable feedback, and help shape the future of motorsports data analysis. We're developing this tool to suit real-world applications, and your input will be crucial. Sign up now to receive updates and an invitation to join our beta program.</p>
                 </div>
                 <div class="form-section-form">
-                    <form class="waitlist-form">
+                    <div id="toast" class="btn btn-primary"></div>
+                    <form action="https://script.google.com/macros/s/AKfycbyiXk4otTCofCfcI1FNbs4ySJwszvt6EHnWtvRBCp0bhjbDZfkKwvMCfCigfp5alDMd/exec" method="post" id="waitlist-form" class="waitlist-form">
                         <div class="form-group">
-                            <input type="text" id="fullname" name="fullname" placeholder="Full Name" required>
+                            <input type="text" name="fullname" placeholder="Full Name" required>
                         </div>
                         <div class="form-group">
-                            <input type="email" id="email" name="email" placeholder="Email Address" required>
+                            <input type="email" name="email" placeholder="Email Address" required>
                         </div>
                         <div class="form-group">
-                            <select id="simulator" name="simulator" required>
+                            <select name="simulator" required>
                                 <option value="" disabled selected>Primary Simulator</option>
                                 <option value="iRacing">iRacing</option>
                                 <option value="Assetto Corsa">Assetto Corsa</option>
@@ -217,7 +250,7 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <select id="experience" name="experience" required>
+                            <select name="experience" required>
                                 <option value="" disabled selected>Experience Level</option>
                                 <option value="Beginner">Beginner</option>
                                 <option value="Amateur Sim Racer">Amateur Sim Racer</option>
@@ -226,14 +259,14 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <textarea id="analysis" name="analysis" rows="3" placeholder="What software do you currently use?"></textarea>
+                            <textarea name="analysis" rows="3" placeholder="What software do you currently use?"></textarea>
                         </div>
                         <div class="form-group">
-                            <textarea id="data-usage" name="data-usage" rows="3" placeholder="How do you use your data to improve?"></textarea>
+                            <textarea name="data-usage" rows="3" placeholder="How do you use your data to improve?"></textarea>
                         </div>
                         <div class="form-group-checkbox">
-                            <input type="checkbox" id="newsletter" name="newsletter" checked>
-                            <label for="newsletter">Subscribe to our newsletter for information on motorsport trends, Use cases, product updates and news.</label>
+                            <input type="checkbox" name="newsletter" checked value="Yes" id="newsletter">
+                            <label for="newsletter">Subscribe to our newsletter for information on motorsport trends, use cases, product updates and news.</label>
                         </div>
                         <p class="privacy-statement">Your data will be used solely for waitlist communications and product development insights. We respect your privacy.</p>
                         <button type="submit" class="btn btn-primary">Join Waitlist</button>
@@ -288,7 +321,7 @@
             </div>
         </div>
     </footer>
-
+    <script src="js/mail.js"></script>
     <script type="module" src="js/main.js"></script>
     <script type="module" src="js/track-animation.js"></script>
 </body>
