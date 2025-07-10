@@ -45,12 +45,33 @@
 #home {
     padding-top: var(--header-height);
     min-height: 100vh;
+    position: relative;
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                url('../../assets/images/DSCF8247_5000x3333-1.webp');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    color: #ffffff;
+    overflow: hidden;
+}
+
+#home::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
 }
 
 #home .section-content {
     padding-top: 0;
     padding-bottom: 0;
     justify-content: center; /* Vertically center the home content */
+    position: relative;
+    z-index: 1;
 }
 
 #products .section-content > .section-intro {
