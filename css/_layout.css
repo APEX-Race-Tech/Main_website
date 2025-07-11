@@ -263,7 +263,7 @@
     font-size: 2.25rem;
     font-weight: 600;
     margin-bottom: 1.5rem;
-    background: #414141;
+    background: white;
     color: var(--text-color-secondary);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
