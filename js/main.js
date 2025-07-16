@@ -49,13 +49,26 @@ const initSectionObserver = () => {
     const sections = document.querySelectorAll('.full-page-section');
     if (!sections.length) return;
 
+    // Use a single IntersectionObserver for both section detection and animations
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
+            // Set current section for styling
             if (entry.isIntersecting) {
                 document.body.setAttribute('data-section', entry.target.id);
+                
+                // Handle CSS animations when section comes into view
+                const animatedElements = entry.target.querySelectorAll('.animate-on-scroll');
+                if (animatedElements.length > 0) {
+                    animatedElements.forEach(el => {
+                        el.classList.add('animate-fade-in-up');
+                    });
+                }
             }
         });
-    }, { threshold: 0.1 }); // Trigger when 10% of the section is visible
+    }, { 
+        threshold: 0.1, // Trigger when 10% of the section is visible
+        rootMargin: '0px 0px -10% 0px' // Slightly before elements enter viewport
+    }); 
 
     sections.forEach(section => observer.observe(section));
 };
@@ -101,11 +114,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Ensure the loading screen is visible initially
     if (loadingScreen) {
-        // Set a timeout to hide the loading screen after 5 seconds
+        // Set a timeout to hide the loading screen after 3 seconds (reduced from 5 for better UX)
         setTimeout(() => {
             loadingScreen.classList.add('hidden');
-        }, 5000); // 5000 milliseconds = 5 seconds
+        }, 3000); // 3000 milliseconds = 3 seconds
     }
+    
+    // Initialize smooth-scroll library without auto-init
+    const scroll = new SmoothScroll(null, {
+        speed: 800,
+        speedAsDuration: true,
+        easing: 'easeInOutCubic',
+        header: '.header' // Specify the fixed header for offset calculation
+    });
+
+    // Manually handle clicks for our custom scroll container
+    document.addEventListener('click', function (event) {
+        // Find link
+        const anchor = event.target.closest('a[href*="#"]');
+        if (!anchor) return;
+
+        // Prevent default behavior and stop propagation to avoid conflicts
+        event.preventDefault();
+        event.stopPropagation();
+
+        // Get target element
+        const target = document.querySelector(anchor.hash);
+        if (!target) return;
+
+        // Animate scroll to target within the custom scroll container
+        const scrollContainer = document.querySelector('.scroll-container');
+        if (scrollContainer) {
+            scroll.animateScroll(target, anchor, { container: scrollContainer });
+        }
+    }, false);
 
     console.log('DOM fully loaded and parsed');
     initHeaderScroll();

@@ -1,19 +1,12 @@
 /* --- Mobile Responsiveness --- */
 @media (min-width: 992px) {
-    .scroll-container {
-        scroll-snap-type: y mandatory;
-    }
-
+    /* Desktop styles without scroll snapping */
     .full-page-section {
-        scroll-snap-align: start;
-        scroll-snap-stop: always;
+
         min-height: 100vh;
     }
 
-    /* Override last section height to make footer visible with scroll-snapping */
-    #contact.full-page-section {
-        min-height: auto;
-    }
+    /* The contact section will now occupy the full screen height */
     .mobile-nav {
         display: none;
     }
@@ -40,9 +33,7 @@
 }
 
 @media (max-width: 768px) {
-    .scroll-container {
-        scroll-snap-type: none; /* Disable scroll snapping on mobile */
-    }
+    /* Mobile styles without scroll snapping */
     .mobile-nav {
         display: none;
     }

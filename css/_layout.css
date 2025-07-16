@@ -4,15 +4,19 @@
     Main page structure, header, footer, and grids.
 */
 
-/* Scroll Container */
+/* Scroll container with smooth scrolling but no snapping */
 .scroll-container {
     height: 100vh;
     overflow-y: auto;
     overflow-x: hidden;
-    /* scroll-snap-type: y mandatory; -- Removed for natural scrolling */
-    scroll-padding-top: calc(var(--header-height-scrolled) + 20px); /* Header height + extra padding */
+    scroll-behavior: smooth; /* Keep smooth scrolling but no snap */
+    will-change: scroll-position;
+    position: relative;
+    z-index: 1;
+    transform: translateZ(0); /* Force GPU acceleration */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
     scrollbar-width: none; /* For Firefox */
-    -ms-overflow-style: none;  /* For Internet Explorer and Edge */
+    -ms-overflow-style: none; /* For Internet Explorer and Edge */
 }
 
 .scroll-container::-webkit-scrollbar {
@@ -89,7 +93,7 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-fill-color: transparent;
+    color: transparent;
     align-self: center;
     width: 100%;
     text-align: center;
@@ -239,7 +243,7 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-fill-color: transparent;
+    color: transparent;
     display: inline-block; /* Ensures gradient applies correctly */
 }
 
@@ -268,7 +272,7 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-fill-color: transparent;
+    color: transparent;
 }
 
 .home-content .sub-headline {
@@ -382,7 +386,7 @@ h2.tagline {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-fill-color: transparent;
+    color: transparent;
 }
 
 .about-container {
@@ -404,7 +408,7 @@ h2.tagline {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-fill-color: transparent;
+    color: transparent;
 }
 
 .tagline {
@@ -597,8 +601,37 @@ body[data-section="contact"] .site-footer {
 }
 
 /* --- Mobile Responsive Styles --- */
+/* Performance optimizations */
+img, video {
+    /* Prevent content layout shifts */
+    aspect-ratio: attr(width) / attr(height);
+    height: auto;
+}
+
+/* Force hardware acceleration for important animations */
+.header, .header__logo, .btn, .nav-links a {
+    transform: translateZ(0);
+    will-change: transform, opacity;
+}
+
+/* Reduce animation workload for mobile devices */
 @media (max-width: 768px) {
     body[data-section="home"] .social-media-bar {
         display: none;
+    }
+    
+    /* Simplify animations on mobile */
+    .animate-on-scroll {
+        animation-duration: 0.4s; /* Faster animations for mobile */
+    }
+    
+    /* Disable complex effects on mobile */
+    .racing-lines {
+        display: none;
+    }
+    
+    /* Optimize background images for mobile */
+    #home {
+        background-attachment: scroll; /* Remove fixed positioning for better performance */
     }
 }

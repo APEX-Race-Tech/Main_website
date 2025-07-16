@@ -20,6 +20,10 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Track animation canvas not found!');
         return;
     }
+    
+    // We'll keep the tracks visible for all display sizes, but disable animation
+    const shouldAnimate = false; // Set to false to disable animation but show tracks
+    
     const ctx = canvas.getContext('2d');
 
     // --- Configuration ---
@@ -55,8 +59,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Animation Control ---
     function startAnimation() {
         if (animationFrameId) return; // Animation is already running
-        console.log('Starting animation...');
-        animationFrameId = requestAnimationFrame(animate);
+        console.log('Rendering static tracks...');
+        
+        // Just render once without animation
+        if (!shouldAnimate) {
+            renderStaticTracks();
+        } else {
+            animationFrameId = requestAnimationFrame(animate);
+        }
     }
 
     function stopAnimation() {
@@ -77,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
             setupAttributeObserver();
             window.addEventListener('resize', debounce(onResize, 250));
         } else {
-            console.warn('No tracks were loaded. Animation will not run.');
+            console.warn('No tracks were loaded. Tracks will not be displayed.');
         }
     }
 
@@ -176,8 +186,37 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Canvas Drawing & Animation Loop ---
-    function animate() {
+    // --- Canvas Drawing & Static Rendering ---
+    function renderStaticTracks() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#ff3c1f';
+
+        trackInstances.forEach(instance => {
+            drawStaticTrack(instance, primaryColor);
+        });
+    }
+    
+    // --- Canvas Drawing & Animation Loop (only used if shouldAnimate is true) ---
+    // Track the last time we rendered a frame to throttle FPS on less powerful devices
+    let lastFrameTime = 0;
+    const targetFPS = 30; // Lower FPS to save resources
+    const frameInterval = 1000 / targetFPS;
+    
+    function animate(timestamp) {
+        // Throttle frame rate
+        if (timestamp - lastFrameTime < frameInterval) {
+            animationFrameId = requestAnimationFrame(animate);
+            return;
+        }
+        
+        lastFrameTime = timestamp;
+        
+        // Only render if the animation is in the viewport
+        if (!isElementInViewport(canvas)) {
+            animationFrameId = requestAnimationFrame(animate);
+            return;
+        }
+        
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#ff3c1f';
 
@@ -191,7 +230,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
         animationFrameId = requestAnimationFrame(animate);
     }
+    
+    // Helper function to check if element is in viewport
+    function isElementInViewport(el) {
+        const rect = el.getBoundingClientRect();
+        return (
+            rect.top <= (window.innerHeight || document.documentElement.clientHeight) &&
+            rect.bottom >= 0
+        );
+    }
 
+    // Function to draw static tracks without animation
+    function drawStaticTrack(instance, color) {
+        const { track, x, y, size, rotation } = instance;
+
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(rotation); // Apply random rotation
+        ctx.scale(size, size);
+
+        // Draw the track outline with a very subtle stroke (more transparent)
+        ctx.strokeStyle = 'rgba(182, 181, 181, 0.2)'; // Reduced opacity from 0.5 to 0.2
+        ctx.lineWidth = 1.8 / size; // Thinner line
+        ctx.beginPath();
+        track.points.forEach((p, i) => {
+            if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+        });
+        ctx.closePath();
+        ctx.stroke();
+        
+        // Draw the track with a more subtle highlight
+        const rgbColor = hexToRgb(color);
+        ctx.strokeStyle = `rgba(${rgbColor}, 0.25)`; // Reduced opacity from 0.4 to 0.25
+        ctx.lineWidth = 1.2 / size; // Thinner line
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        ctx.shadowBlur = 2; // Reduced blur from 4 to 2
+        ctx.shadowColor = `rgba(${rgbColor}, 0.15)`; // More transparent shadow
+        ctx.beginPath();
+        track.points.forEach((p, i) => {
+            if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+        });
+        ctx.closePath();
+        ctx.stroke();
+        
+        ctx.restore();
+    }
+
+    // Keep the original drawAnimatedTrack function for when animation is enabled
     function drawAnimatedTrack(instance, color) {
         const { track, x, y, size, progress, rotation } = instance;
 
