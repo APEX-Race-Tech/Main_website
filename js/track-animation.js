@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // We'll keep the tracks visible for all display sizes, but disable animation
-    const shouldAnimate = false; // Set to false to disable animation but show tracks
+    const shouldAnimate = true; // Set to false to disable animation but show tracks
     
     const ctx = canvas.getContext('2d');
 
@@ -195,11 +195,11 @@ document.addEventListener('DOMContentLoaded', () => {
             drawStaticTrack(instance, primaryColor);
         });
     }
-    
+
     // --- Canvas Drawing & Animation Loop (only used if shouldAnimate is true) ---
     // Track the last time we rendered a frame to throttle FPS on less powerful devices
     let lastFrameTime = 0;
-    const targetFPS = 30; // Lower FPS to save resources
+    const targetFPS = 15; // Lower FPS to save resources
     const frameInterval = 1000 / targetFPS;
     
     function animate(timestamp) {
@@ -250,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.scale(size, size);
 
         // Draw the track outline with a very subtle stroke (more transparent)
-        ctx.strokeStyle = 'rgba(182, 181, 181, 0.2)'; // Reduced opacity from 0.5 to 0.2
+        ctx.strokeStyle = 'rgba(182, 181, 181, 0.3)'; // Brighter base track
         ctx.lineWidth = 1.8 / size; // Thinner line
         ctx.beginPath();
         track.points.forEach((p, i) => {
@@ -261,12 +261,12 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Draw the track with a more subtle highlight
         const rgbColor = hexToRgb(color);
-        ctx.strokeStyle = `rgba(${rgbColor}, 0.25)`; // Reduced opacity from 0.4 to 0.25
+        ctx.strokeStyle = `rgba(${rgbColor}, 0.1)`; // Low opacity base track
         ctx.lineWidth = 1.2 / size; // Thinner line
         ctx.lineJoin = 'round';
         ctx.lineCap = 'round';
         ctx.shadowBlur = 2; // Reduced blur from 4 to 2
-        ctx.shadowColor = `rgba(${rgbColor}, 0.15)`; // More transparent shadow
+        ctx.shadowColor = `rgba(${rgbColor}, 0.22)`; // More transparent shadow
         ctx.beginPath();
         track.points.forEach((p, i) => {
             if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);

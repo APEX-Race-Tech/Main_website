@@ -46,6 +46,7 @@ const initFollowPrompt = () => {
 };
 
 const initSectionObserver = () => {
+    document.body.setAttribute('data-section', 'home'); // Set initial state
     const sections = document.querySelectorAll('.full-page-section');
     if (!sections.length) return;
 
