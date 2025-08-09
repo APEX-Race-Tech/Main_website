@@ -2,6 +2,11 @@
     /* Colors */
     --primary-color: #f53518;
     --primary-gradient: linear-gradient(360deg, #ff7b00, #f83416);
+    /* Unified accent tokens */
+    --accent-color: var(--primary-color);
+    --accent-gradient: var(--primary-gradient);
+    --accent-contrast: #ffffff;
+    --danger-color: #dc3545;
     --text-darker-color-secondary:#ac9b9b;
     --dark-bg: #000000;
     --card-bg: #111111;

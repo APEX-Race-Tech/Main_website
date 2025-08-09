@@ -157,6 +157,13 @@ app.post('/api/waitlist', async (req, res) => {
         await fs.writeFile(WAITLIST_PATH, JSON.stringify(waitlist, null, 2));
         
         // Send confirmation email to user
+        // Email brand color constants
+        const BRAND = '#f53518';
+        const TEXT = '#333333';
+        const PANEL = '#f9f9f9';
+        const BORDER = '#eeeeee';
+        const MUTED = '#777777';
+
         await sendEmail({
             from: `"APEX Race Technologies" <${process.env.EMAIL_USER}>`,
             to: email,
@@ -177,12 +184,12 @@ We\'ll notify you as soon as we launch our products. In the meantime, feel free 
 Best regards,
 The APEX Race Technologies Team`,
             html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333; line-height: 1.6;">
-                    <h2 style="color: #fc210d;">Welcome to APEX Race Technologies!</h2>
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: ${TEXT}; line-height: 1.6;">
+                    <h2 style="color: ${BRAND};">Welcome to APEX Race Technologies!</h2>
                     <p>Hi ${name},</p>
                     <p>Thank you for joining our waitlist! We\'re excited to have you on board.</p>
                     
-                    <div style="background: #f9f9f9; padding: 15px; border-left: 4px solid #fc210d; margin: 20px 0;">
+                    <div style="background: ${PANEL}; padding: 15px; border-left: 4px solid ${BRAND}; margin: 20px 0;">
                         <p><strong>Your Details:</strong></p>
                         <ul style="margin: 10px 0 0 20px; padding: 0;">
                             <li><strong>Name:</strong> ${name}</li>
@@ -197,7 +204,7 @@ The APEX Race Technologies Team`,
                     
                     <p>Best regards,<br><strong>The APEX Race Technologies Team</strong></p>
                     
-                    <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #eee; font-size: 12px; color: #777;">
+                    <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid ${BORDER}; font-size: 12px; color: ${MUTED};">
                         <p>${subscribeToNewsletter ? 'You are subscribed to our newsletter. You can unsubscribe anytime by clicking the link in the email.' : ''}</p>
                         <p>APEX Race Technologies<br>${new Date().getFullYear()}</p>
                     </div>

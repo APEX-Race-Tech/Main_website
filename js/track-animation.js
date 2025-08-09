@@ -27,8 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const ctx = canvas.getContext('2d');
 
     // --- Configuration ---
-    const GRID_CELL_SIZE = 275; // The size of each cell in the grid
-    const TRACK_PADDING = 35;   // Padding within each cell to prevent tracks from touching cell edges
+    const GRID_CELL_SIZE = 450; // The size of each cell in the grid
+    const TRACK_PADDING = 125;   // Padding within each cell to prevent tracks from touching cell edges
 
     const trackFiles = [
         'assets/bg animation/Austin.csv', 
@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Canvas Drawing & Static Rendering ---
     function renderStaticTracks() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#ff3c1f';
+        const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#f53518';
 
         trackInstances.forEach(instance => {
             drawStaticTrack(instance, primaryColor);
@@ -218,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#ff3c1f';
+        const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#f53518';
 
         trackInstances.forEach(instance => {
             instance.progress += instance.animationSpeed;

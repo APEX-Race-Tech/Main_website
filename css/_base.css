@@ -25,9 +25,12 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 
-    /* Critical for scroll container layout */
-    height: 100vh;
-    overflow: hidden;
+    /* Hide scrollbar but keep scrolling */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+body::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
 }
 
 a {

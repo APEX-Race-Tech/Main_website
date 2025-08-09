@@ -4,15 +4,26 @@ const initHeaderScroll = () => {
     const header = document.querySelector('.header');
     const scrollContainer = document.querySelector('.scroll-container');
 
-    if (!header || !scrollContainer) return;
+    if (!header) return;
 
-    scrollContainer.addEventListener('scroll', () => {
-        if (scrollContainer.scrollTop > 50) {
+    // If a custom scroll container exists and is used for scrolling, listen to it; otherwise fall back to window scrolling
+    const useWindowScroll = !scrollContainer || getComputedStyle(document.body).overflowY !== 'hidden';
+    const onScroll = () => {
+        const scrollY = useWindowScroll ? window.scrollY : (scrollContainer?.scrollTop || 0);
+        if (scrollY > 50) {
             header.classList.add('scrolled');
         } else {
             header.classList.remove('scrolled');
         }
-    });
+    };
+
+    if (useWindowScroll) {
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll(); // set initial state
+    } else if (scrollContainer) {
+        scrollContainer.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+    }
 };
 
 const initFollowPrompt = () => {
@@ -109,6 +120,29 @@ const initMobileNav = () => {
     }
 };
 
+// Hide sticky CTA when footer is visible to prevent overlap
+const initFooterObserver = () => {
+    const footer = document.querySelector('.site-footer');
+    const stickyCta = document.querySelector('.sticky-cta');
+    if (!footer || !stickyCta) return;
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                stickyCta.classList.add('is-hidden');
+            } else {
+                stickyCta.classList.remove('is-hidden');
+            }
+        });
+    }, {
+        threshold: 0,
+        // Start hiding CTA a bit before the footer fully enters the viewport
+        rootMargin: '0px 0px -10% 0px'
+    });
+
+    observer.observe(footer);
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     // --- Loading Screen Logic ---
     const loadingScreen = document.getElementById('loading-screen');
@@ -129,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
         header: '.header' // Specify the fixed header for offset calculation
     });
 
-    // Manually handle clicks for our custom scroll container
+    // Manually handle clicks for smooth scrolling (works with custom container or window)
     document.addEventListener('click', function (event) {
         // Find link
         const anchor = event.target.closest('a[href*="#"]');
@@ -143,10 +177,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const target = document.querySelector(anchor.hash);
         if (!target) return;
 
-        // Animate scroll to target within the custom scroll container
+        // Animate scroll to target within the custom scroll container if present, otherwise use window
         const scrollContainer = document.querySelector('.scroll-container');
         if (scrollContainer) {
             scroll.animateScroll(target, anchor, { container: scrollContainer });
+        } else {
+            scroll.animateScroll(target, anchor);
         }
     }, false);
 
@@ -156,4 +192,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initFollowPrompt();
     initMobileNav();
     initSocialMediaVisibility();
+    initFooterObserver();
 });
