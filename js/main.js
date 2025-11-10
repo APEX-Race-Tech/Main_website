@@ -105,19 +105,35 @@ const initMobileNav = () => {
     const mobileNav = document.querySelector('.mobile-nav');
     const mobileNavLinks = document.querySelectorAll('.mobile-nav .nav-links a');
 
-    if (hamburgerBtn && mobileNav) {
-        hamburgerBtn.addEventListener('click', () => {
-            hamburgerBtn.classList.toggle('open');
-            mobileNav.classList.toggle('open');
-        });
+    if (!hamburgerBtn || !mobileNav) return;
 
-        mobileNavLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                hamburgerBtn.classList.remove('open');
-                mobileNav.classList.remove('open');
-            });
-        });
-    }
+    const setNavState = (open) => {
+        const isOpen = Boolean(open);
+        hamburgerBtn.classList.toggle('open', isOpen);
+        mobileNav.classList.toggle('open', isOpen);
+        hamburgerBtn.setAttribute('aria-expanded', String(isOpen));
+        mobileNav.setAttribute('aria-hidden', String(!isOpen));
+        mobileNav.style.display = isOpen ? 'flex' : 'none';
+        document.body.classList.toggle('nav-open', isOpen);
+    };
+
+    // Ensure initial state
+    setNavState(false);
+
+    hamburgerBtn.addEventListener('click', () => {
+        const willOpen = !hamburgerBtn.classList.contains('open');
+        setNavState(willOpen);
+    });
+
+    mobileNavLinks.forEach(link => {
+        link.addEventListener('click', () => setNavState(false));
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            setNavState(false);
+        }
+    });
 };
 
 // Hide sticky CTA when footer is visible to prevent overlap
@@ -154,35 +170,38 @@ document.addEventListener('DOMContentLoaded', () => {
             loadingScreen.classList.add('hidden');
         }, 3000); // 3000 milliseconds = 3 seconds
     }
-    
-    // Initialize smooth-scroll library without auto-init
-    const scroll = new SmoothScroll(null, {
+    const hasSmoothScroll = typeof SmoothScroll === 'function';
+    const scrollInstance = hasSmoothScroll ? new SmoothScroll(null, {
         speed: 800,
         speedAsDuration: true,
         easing: 'easeInOutCubic',
-        header: '.header' // Specify the fixed header for offset calculation
-    });
+        header: '.header'
+    }) : null;
 
-    // Manually handle clicks for smooth scrolling (works with custom container or window)
-    document.addEventListener('click', function (event) {
-        // Find link
+    document.addEventListener('click', (event) => {
         const anchor = event.target.closest('a[href*="#"]');
         if (!anchor) return;
 
-        // Prevent default behavior and stop propagation to avoid conflicts
         event.preventDefault();
         event.stopPropagation();
 
-        // Get target element
         const target = document.querySelector(anchor.hash);
         if (!target) return;
 
-        // Animate scroll to target within the custom scroll container if present, otherwise use window
         const scrollContainer = document.querySelector('.scroll-container');
-        if (scrollContainer) {
-            scroll.animateScroll(target, anchor, { container: scrollContainer });
+        if (hasSmoothScroll && scrollInstance) {
+            if (scrollContainer) {
+                scrollInstance.animateScroll(target, anchor, { container: scrollContainer });
+            } else {
+                scrollInstance.animateScroll(target, anchor);
+            }
+        } else if (scrollContainer) {
+            scrollContainer.scrollTo({
+                top: target.offsetTop,
+                behavior: 'smooth'
+            });
         } else {
-            scroll.animateScroll(target, anchor);
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     }, false);
 
