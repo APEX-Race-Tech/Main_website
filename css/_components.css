@@ -526,6 +526,21 @@ select:required:invalid {
     padding: clamp(4rem, 8vh, 8rem) 1.25rem 2.5rem;
 }
 
+.hero-logo {
+    display: block;
+    width: clamp(120px, 15vw, 180px);
+    height: auto;
+    margin: 0 auto 2rem;
+    opacity: 0.95;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.hero-logo:hover {
+    transform: scale(1.05);
+    opacity: 1;
+}
+
 .home-content h1 {
     font-weight: 800;
     line-height: 1.06;

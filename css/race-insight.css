@@ -822,14 +822,33 @@
 }
 
 #race-insight-hero .section-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
+    display: grid;
+    grid-template-columns: 151px 1fr;
+    gap: 0;
+    align-items: start;
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
+}
+
+#race-insight-hero .section-content > *:not(.hero-logo) {
+    grid-column: 2;
+    text-align: center;
+}
+
+#race-insight-hero .hero-logo {
+    grid-column: 1;
+    grid-row: 1 / -1;
+    align-self: start;
+    width: 151px !important;
+    height: auto;
+    margin: 0 !important;
+    display: block;
+}
+
+#race-insight-hero .section-content .hero-badge {
+    justify-self: center;
+    margin-bottom: 0;
 }
 
 #race-insight-hero .hero-title {

@@ -50,3 +50,4 @@ if (document.readyState === 'loading') {
 // Export for use in modules (if using ES6 modules)
 // export { initProductCardAnimations };
 
+
