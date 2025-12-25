@@ -7,7 +7,7 @@
     --accent-gradient: var(--primary-gradient);
     --accent-contrast: #ffffff;
     --danger-color: #dc3545;
-    --text-darker-color-secondary:#ac9b9b;
+    --text-darker-color-secondary: #ac9b9b;
     --dark-bg: #000000;
     --card-bg: #111111;
     --border-color: #2c2c2c;
@@ -16,7 +16,8 @@
 
     /* Animation Colors */
     --track-animation-trail-color: var(--primary-color);
-    --track-animation-static-color: 128, 128, 128; /* Used as an RGB value for rgba() */
+    --track-animation-static-color: 128, 128, 128;
+    /* Used as an RGB value for rgba() */
 
     /* Fonts */
     --font-family: 'Inter', sans-serif;
@@ -24,7 +25,8 @@
     /* Spacing */
     --header-height: 80px;
     --header-height-scrolled: 60px;
-    --spacing-unit: 1rem; /* 16px */
+    --spacing-unit: 1rem;
+    /* 16px */
 
     /* Transitions */
     --transition-speed: 0.3s;

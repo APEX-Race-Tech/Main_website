@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Race Insight | APEX Race Technologies</title>
+    <meta name="description" content="Download Race Insight - The advanced telemetry analysis tool for sim racers.">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/race-insight.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDKs (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <!-- Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TQNN66RBKN"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-TQNN66RBKN');
+    </script>
+</head>
+
+<body>
+    <header class="header">
+        <nav class="nav-container">
+            <a href="index.html" class="header__logo">
+                <img src="assets/images/apex_orange_Horizontal.svg" alt="APEX Race Technologies Logo" class="logo--full"
+                    style="filter: hue-rotate(190deg) brightness(1.2);">
+                <img src="assets/images/apex_orange_ONLY LOGO.svg" alt="APEX Race Technologies Icon" class="logo--icon"
+                    style="filter: hue-rotate(190deg) brightness(1.2);">
+            </a>
+            <div class="nav-right">
+                <ul class="nav-links"></ul>
+                <div class="header-action-item">
+                    <a href="#download" class="btn btn-primary">Download</a>
+                </div>
+            </div>
+            <button class="hamburger-btn" aria-label="Toggle menu">
+                <span class="hamburger-btn__bar"></span>
+                <span class="hamburger-btn__bar"></span>
+                <span class="hamburger-btn__bar"></span>
+            </button>
+        </nav>
+    </header>
+
+    <div class="mobile-nav">
+        <ul class="nav-links"></ul>
+        <div class="header-action-item">
+            <a href="#download" class="btn btn-primary">Download</a>
+        </div>
+    </div>
+
+    <section id="race-insight-hero" class="full-page-section">
+        <div class="section-content">
+            <div class="hero-badge">Now Available in Beta</div>
+            <h1 class="hero-title">Race Insight</h1>
+            <p class="tagline">The Ultimate Sim Racing Telemetry Tool</p>
+            <p class="hero-description">Analyze your laps, compare telemetry, and improve your lap times with
+                professional-grade data analysis.</p>
+            <div class="hero-actions">
+                <a href="#download" class="btn btn-primary">Get Started</a>
+                <a href="#features" class="btn btn-secondary">Learn More</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="full-page-section">
+        <div class="section-content">
+            <div class="advantage-cards">
+                <div class="advantage-card feature-card">
+                    <img src="assets/images/lap_comparison_ui.png" alt="Lap Comparison" class="feature-img">
+                    <h4>Lap Comparison</h4>
+                    <p>Compare multiple laps side-by-side to identify time gains and losses.</p>
+                </div>
+                <div class="advantage-card feature-card">
+                    <img src="assets/images/telemetry_graphs_ui.png" alt="Telemetry Analysis" class="feature-img">
+                    <h4>Advanced Telemetry</h4>
+                    <p>Dive deep into speed, throttle, brake, and steering data with precise graphs.</p>
+                </div>
+                <div class="advantage-card feature-card">
+                    <img src="assets/images/track_map_ui.png" alt="Track Mapping" class="feature-img">
+                    <h4>Interactive Track Map</h4>
+                    <p>Visualize your racing line and position on the track in real-time.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="upcoming-updates" class="full-page-section">
+        <div class="section-content">
+            <h2 class="section-title">Coming Soon</h2>
+            <p class="section-subtitle">We are constantly working to improve Race Insight. Here is what's next:</p>
+            <div class="updates-grid">
+                <div class="update-card">
+                    <div class="update-icon"><i class="fas fa-video"></i></div>
+                    <h4>Video Support</h4>
+                    <p>Sync your onboard video with telemetry data for visual analysis.</p>
+                </div>
+                <div class="update-card">
+                    <div class="update-icon"><i class="fas fa-globe"></i></div>
+                    <h4>Full Web App</h4>
+                    <p>Access your data from any device with our upcoming cloud-based web application.</p>
+                </div>
+                <div class="update-card">
+                    <div class="update-icon"><i class="fas fa-stopwatch-20"></i></div>
+                    <h4>Predictive Laps</h4>
+                    <p>Real-time predictive lap timing to help you push your limits.</p>
+                </div>
+                <div class="update-card">
+                    <div class="update-icon"><i class="fas fa-chart-line"></i></div>
+                    <h4>Advanced Data Analysis</h4>
+                    <p>AI-powered insights to suggest setup changes and driving improvements.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="download" class="full-page-section">
+        <div class="section-content">
+            <div class="download-section">
+                <h3>Support the Development</h3>
+                <p>Race Insight is free to use, but your donations help us keep the servers running and develop new
+                    features.</p>
+
+                <div id="currency-container">
+                    <!-- Dynamic Currency Buttons will be injected here -->
+                </div>
+
+                <div class="platform-options">
+                    <button class="platform-btn" data-platform="windows"><i class="fab fa-windows"></i> Windows</button>
+                    <button class="platform-btn" data-platform="linux"><i class="fab fa-linux"></i> Linux</button>
+                    <button class="platform-btn" data-platform="apple"><i class="fab fa-apple"></i> Mac</button>
+                    <button class="platform-btn" data-platform="android"><i class="fab fa-android"></i> Android</button>
+                </div>
+
+                <div class="action-buttons">
+                    <button id="donate-btn" class="btn btn-primary">Donate & Download</button>
+                    <button id="download-only-btn" class="btn-download-only">Skip & Just Download</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="feedback" class="full-page-section">
+        <div class="section-content">
+            <h2 class="section-title">Feedback</h2>
+            <form action="https://api.web3forms.com/submit" method="POST" class="contact-form"
+                enctype="multipart/form-data">
+                <input type="hidden" name="access_key" value="YOUR_ACCESS_KEY_HERE">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="message">Message</label>
+                    <textarea id="message" name="message" rows="5" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="attachment">Screenshot (Optional)</label>
+                    <input type="file" name="attachment" id="attachment" accept="image/png, image/jpeg"
+                        class="file-input">
+                </div>
+                <button type="submit" class="btn btn-primary">Send Feedback</button>
+            </form>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2024 APEX Race Technologies. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Auth Modal -->
+    <div id="auth-modal" class="modal-backdrop">
+        <div class="modal-content">
+            <button id="close-auth-modal" class="modal-close">&times;</button>
+            <h3 id="auth-title">Sign In to Download</h3>
+            <p id="auth-subtitle">Create an account to access downloads and save your preferences.</p>
+
+            <div class="auth-buttons">
+                <button id="google-signin-btn" class="btn-google">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"
+                        width="18">
+                    Sign in with Google
+                </button>
+            </div>
+
+            <div class="divider"><span>OR</span></div>
+
+            <form id="email-auth-form">
+                <div class="form-group">
+                    <input type="email" id="auth-email" placeholder="Email Address" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="auth-password" placeholder="Password" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Sign In</button>
+            </form>
+
+            <div class="auth-switch">
+                <p>Don't have an account? <a href="#" id="toggle-auth-mode">Sign Up</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="background-animations">
+        <canvas id="track-animation"></canvas>
+    </div>
+
+    <script>
+        // Force data-section to avoid 'home' logic from stopping animation initially
+        document.body.setAttribute('data-section', 'race-insight-hero');
+
+        // Safety: Force content visibility if animation fails
+        setTimeout(() => {
+            document.querySelectorAll('.animate-on-scroll').forEach(el => {
+                if (getComputedStyle(el).opacity === '0') {
+                    el.style.opacity = '1';
+                    el.style.transform = 'none';
+                }
+            });
+        }, 1000);
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js"></script>
+    <script src="js/main.js"></script>
+    <script type="module" src="js/track-animation.js"></script>
+
+    <script>
+        // --- Firebase Configuration ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyB6pcGMJixpwxz4Zls_ghpCPX8RwKd4F5g",
+            authDomain: "apex-race-insight-auth.firebaseapp.com",
+            projectId: "apex-race-insight-auth",
+            storageBucket: "apex-race-insight-auth.firebasestorage.app",
+            messagingSenderId: "828112911630",
+            appId: "1:828112911630:web:f8364b252c410f21a5eb5f",
+            measurementId: "G-4632V21RSD"
+        };
+
+        // Initialize Firebase (Compat Syntax)
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        // --- Auth Logic ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            const authModal = document.getElementById('auth-modal');
+            const closeAuthModal = document.getElementById('close-auth-modal');
+            const googleBtn = document.getElementById('google-signin-btn');
+            const emailForm = document.getElementById('email-auth-form');
+            const toggleAuthMode = document.getElementById('toggle-auth-mode');
+            const authTitle = document.getElementById('auth-title');
+            const authSubtitle = document.getElementById('auth-subtitle');
+            const emailBtn = emailForm.querySelector('button');
+            const emailInput = document.getElementById('auth-email');
+            const passwordInput = document.getElementById('auth-password');
+
+            let isSignUp = false;
+            let pendingDownloadAction = null;
+
+            // Monitor Auth State
+            firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    console.log("User is signed in:", user.email);
+                    if (authModal.classList.contains('active') || authModal.style.display !== 'none') {
+                        authModal.classList.remove('active');
+                        setTimeout(() => {
+                            authModal.style.display = 'none';
+                            if (pendingDownloadAction) {
+                                pendingDownloadAction();
+                                pendingDownloadAction = null;
+                            }
+                        }, 300);
+                    }
+                    const downloadBtn = document.querySelector('a[href="#download"]');
+                    if (downloadBtn) downloadBtn.textContent = "Download (Signed In)";
+                }
+            });
+
+            // Close Modal
+            closeAuthModal.addEventListener('click', () => {
+                authModal.classList.remove('active');
+                setTimeout(() => authModal.style.display = 'none', 300);
+            });
+
+            // Toggle Sign In / Sign Up
+            toggleAuthMode.addEventListener('click', (e) => {
+                e.preventDefault();
+                isSignUp = !isSignUp;
+                if (isSignUp) {
+                    authTitle.textContent = "Create Account";
+                    authSubtitle.textContent = "Join Race Insight to start downloading.";
+                    emailBtn.textContent = "Sign Up";
+                    toggleAuthMode.textContent = "Sign In";
+                } else {
+                    authTitle.textContent = "Sign In to Download";
+                    authSubtitle.textContent = "Create an account to access downloads and save your preferences.";
+                    emailBtn.textContent = "Sign In";
+                    toggleAuthMode.textContent = "Sign Up";
+                }
+            });
+
+            // Google Sign In
+            googleBtn.addEventListener('click', () => {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                firebase.auth().signInWithPopup(provider)
+                    .catch((error) => {
+                        console.error("Google Sign In Error:", error);
+                        alert("Google Sign In failed: " + error.message);
+                    });
+            });
+
+            // Email Sign In / Sign Up
+            emailForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = emailInput.value;
+                const password = passwordInput.value;
+
+                if (isSignUp) {
+                    firebase.auth().createUserWithEmailAndPassword(email, password)
+                        .catch((error) => {
+                            console.error("Sign Up Error:", error);
+                            alert("Sign Up failed: " + error.message);
+                        });
+                } else {
+                    firebase.auth().signInWithEmailAndPassword(email, password)
+                        .catch((error) => {
+                            console.error("Sign In Error:", error);
+                            alert("Sign In failed: " + error.message);
+                        });
+                }
+            });
+
+            // --- Download & Donation Logic ---
+            const container = document.getElementById('currency-container');
+            const donateBtn = document.getElementById('donate-btn');
+            const downloadOnlyBtn = document.getElementById('download-only-btn');
+
+            let currency = 'USD';
+            let symbol = '$';
+            let amounts = [3, 5, 10];
+
+            try {
+                const response = await fetch('https://ipapi.co/json/');
+                const data = await response.json();
+                if (data.country_code === 'IN') {
+                    currency = 'INR';
+                    symbol = '₹';
+                    amounts = [100, 500, 1000];
+                }
+            } catch (e) {
+                console.warn('Could not detect location, defaulting to USD');
+            }
+
+            let html = '<div class="donation-options">';
+            amounts.forEach(amt => {
+                html += `<button class="donation-btn" data-amount="${amt}">${symbol}${amt}</button>`;
+            });
+            html += `<input type="number" class="custom-amount-input" placeholder="Custom" min="1">`;
+            html += '</div>';
+            container.innerHTML = html;
+
+            const btns = container.querySelectorAll('.donation-btn');
+            const input = container.querySelector('.custom-amount-input');
+            let selectedAmount = 0;
+
+            btns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    btns.forEach(b => b.classList.remove('selected'));
+                    input.value = '';
+                    btn.classList.add('selected');
+                    selectedAmount = btn.dataset.amount;
+                    updateDonateButton(selectedAmount);
+                });
+            });
+
+            input.addEventListener('input', (e) => {
+                btns.forEach(b => b.classList.remove('selected'));
+                selectedAmount = e.target.value;
+                updateDonateButton(selectedAmount);
+            });
+
+            function updateDonateButton(amount) {
+                if (amount > 0) {
+                    donateBtn.textContent = `Donate ${symbol}${amount} & Download`;
+                } else {
+                    donateBtn.textContent = 'Donate & Download';
+                }
+            }
+
+            const platformBtns = document.querySelectorAll('.platform-btn');
+            let selectedPlatform = null;
+
+            platformBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    platformBtns.forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    selectedPlatform = btn.dataset.platform;
+                });
+            });
+
+            donateBtn.addEventListener('click', () => {
+                if (!selectedPlatform) {
+                    alert('Please select your platform (Windows, Linux, Mac, or Android) first.');
+                    return;
+                }
+                const user = firebase.auth().currentUser;
+                if (!user) {
+                    pendingDownloadAction = () => processDonation();
+                    authModal.style.display = 'flex';
+                    setTimeout(() => authModal.classList.add('active'), 10);
+                    return;
+                }
+                processDonation();
+            });
+
+            function processDonation() {
+                if (selectedAmount > 0) {
+                    const razorpayUrl = `https://razorpay.com/payment-link/placeholder?amount=${selectedAmount}&currency=${currency}`;
+                    alert(`Redirecting to Razorpay to pay ${symbol}${selectedAmount}...\n(This is a placeholder link)`);
+                    setTimeout(() => {
+                        triggerDownload();
+                    }, 2000);
+                } else {
+                    alert('Please select an amount to donate, or use the "Skip & Just Download" button.');
+                }
+            }
+
+            downloadOnlyBtn.addEventListener('click', () => {
+                if (!selectedPlatform) {
+                    alert('Please select your platform (Windows, Linux, Mac, or Android) first.');
+                    return;
+                }
+                const user = firebase.auth().currentUser;
+                if (!user) {
+                    pendingDownloadAction = () => triggerDownload();
+                    authModal.style.display = 'flex';
+                    setTimeout(() => authModal.classList.add('active'), 10);
+                    return;
+                }
+                triggerDownload();
+            });
+
+            function triggerDownload() {
+                let fileName = 'RaceInsight_Setup.exe';
+                switch (selectedPlatform) {
+                    case 'windows': fileName = 'RaceInsight_Setup_Windows.exe'; break;
+                    case 'linux': fileName = 'RaceInsight_Setup_Linux.AppImage'; break;
+                    case 'apple': fileName = 'RaceInsight_Setup_Mac.dmg'; break;
+                    case 'android': fileName = 'RaceInsight_Setup_Android.apk'; break;
+                }
+                alert(`Starting download for ${selectedPlatform}: ${fileName} (Placeholder)`);
+            }
+        });
+    </script>
+</body>
+
+</html>

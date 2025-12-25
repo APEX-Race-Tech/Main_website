@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery | APEX Race Technologies</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Explore our gallery featuring products, testing sessions, team events, and behind-the-scenes at APEX Race Technologies.">
+    <meta name="keywords" content="APEX Race Technologies, gallery, motorsport, data acquisition, telemetry, racing photos">
+    <meta name="author" content="APEX Race Technologies">
+    <link rel="canonical" href="https://www.apexracetech.in/gallery.html">
+
+    <link rel="icon" href="assets/images/apex_orange_ONLY LOGO.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TQNN66RBKN"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);} 
+      gtag('js', new Date());
+      gtag('config', 'G-TQNN66RBKN');
+    </script>
+
+    <style>
+        /* Gallery-specific styles */
+        body {
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .gallery-hero {
+            min-height: 40vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,0,0,0.6)), url('assets/images/DSCF8247_5000x3333-1.webp');
+            background-size: cover;
+            background-position: center;
+            padding: 8rem 2rem 4rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .gallery-hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .gallery-hero p {
+            text-align: center;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .gallery-filters {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            padding: 3rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .filter-btn {
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: var(--primary-gradient);
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .gallery-item {
+            position: relative;
+            aspect-ratio: 4/3;
+            overflow: hidden;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            background: var(--card-bg);
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.03);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.1);
+        }
+
+        .gallery-item-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1.5rem;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .gallery-item:hover .gallery-item-overlay {
+            opacity: 1;
+        }
+
+        .gallery-item-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .gallery-item-category {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Lightbox */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .lightbox.active {
+            display: flex;
+        }
+
+        .lightbox-content {
+            max-width: 90vw;
+            max-height: 90vh;
+            position: relative;
+        }
+
+        .lightbox-content img {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 50px;
+            height: 50px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .lightbox-close:hover {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .lightbox-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .lightbox-nav:hover {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .lightbox-prev {
+            left: 2rem;
+        }
+
+        .lightbox-next {
+            right: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .gallery-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .gallery-filters {
+                padding: 2rem 1rem;
+            }
+
+            .lightbox-nav {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body data-section="gallery">
+
+    <!-- Social Media Bar -->
+    <div class="social-media-bar">
+        <div class="follow-prompt">
+            <img src="assets/arrow.png" alt="Follow us on social media" class="follow-arrow-img">
+        </div>
+        <div class="social-icons-container">
+            <a href="https://www.instagram.com/apex.race.tech/" class="social-icon" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i></a>
+            <a href="https://twitter.com/apexracetech" class="social-icon" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-x-twitter"></i></a>
+            <a href="#" class="social-icon" target="_blank" rel="noopener noreferrer"><i class="fab fa-linkedin-in"></i></a>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav-container">
+            <a href="index.html" class="header__logo">
+                <img src="assets/images/apex_orange_Horizontal.svg" alt="APEX Race Technologies Logo" class="logo--full" decoding="async">
+                <img src="assets/images/apex_orange_ONLY LOGO.svg" alt="APEX Race Technologies Icon" class="logo--icon" decoding="async">
+            </a>
+            <div class="nav-right">
+                <ul class="nav-links">
+                    <li><a href="index.html#about">About Us</a></li>
+                    <li><a href="index.html#team">Team</a></li>
+                    <li><a href="index.html#products">Products</a></li>
+                    <li><a href="gallery.html" class="active">Gallery</a></li>
+                    <li><a href="index.html#waitlist">Waitlist</a></li>
+                    <li><a href="index.html#contact">Contact</a></li>
+                </ul>
+                <div class="header-action-item">
+                    <a href="index.html#waitlist" class="btn btn-primary">Join Now</a>
+                </div>
+            </div>
+            <button class="hamburger-btn" aria-label="Toggle menu">
+                <span class="hamburger-btn__bar"></span>
+                <span class="hamburger-btn__bar"></span>
+                <span class="hamburger-btn__bar"></span>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Mobile Navigation -->
+    <div class="mobile-nav">
+        <ul class="nav-links">
+            <li><a href="index.html#about">About Us</a></li>
+            <li><a href="index.html#team">Team</a></li>
+            <li><a href="index.html#products">Products</a></li>
+            <li><a href="gallery.html">Gallery</a></li>
+            <li><a href="index.html#waitlist">Waitlist</a></li>
+            <li><a href="index.html#contact">Contact</a></li>
+        </ul>
+        <div class="header-action-item">
+            <a href="index.html#waitlist" class="btn btn-primary">Join Now</a>
+        </div>
+    </div>
+
+    <!-- Background Animations -->
+    <div class="background-animations">
+        <canvas id="track-animation"></canvas>
+        <div class="racing-lines"></div>
+    </div>
+
+    <!-- Gallery Hero -->
+    <section class="gallery-hero">
+        <div>
+            <h1>Gallery</h1>
+            <p>Explore our products, testing sessions, team moments, and the technology behind APEX Race Technologies.</p>
+        </div>
+    </section>
+
+    <!-- Gallery Filters -->
+    <div class="gallery-filters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="products">Products</button>
+        <button class="filter-btn" data-filter="testing">Testing</button>
+        <button class="filter-btn" data-filter="team">Team</button>
+        <button class="filter-btn" data-filter="events">Events</button>
+    </div>
+
+    <!-- Gallery Grid -->
+    <div class="gallery-grid" id="galleryGrid">
+        <!-- Gallery items will be dynamically loaded here -->
+        <!-- Placeholder items for now -->
+        <div class="gallery-item" data-category="products">
+            <img src="assets/images/DSCF8247_5000x3333-1.webp" alt="Moto-Insight Device" loading="lazy">
+            <div class="gallery-item-overlay">
+                <div class="gallery-item-title">Moto-Insight Hardware</div>
+                <div class="gallery-item-category">Products</div>
+            </div>
+        </div>
+
+        <div class="gallery-item" data-category="testing">
+            <img src="assets/images/DSCF8247_5000x3333-1.webp" alt="Track Testing" loading="lazy">
+            <div class="gallery-item-overlay">
+                <div class="gallery-item-title">Track Testing Session</div>
+                <div class="gallery-item-category">Testing</div>
+            </div>
+        </div>
+
+        <div class="gallery-item" data-category="team">
+            <img src="assets/images/DSCF8247_5000x3333-1.webp" alt="Team Photo" loading="lazy">
+            <div class="gallery-item-overlay">
+                <div class="gallery-item-title">Team Meeting</div>
+                <div class="gallery-item-category">Team</div>
+            </div>
+        </div>
+
+        <div class="gallery-item" data-category="products">
+            <img src="assets/images/DSCF8247_5000x3333-1.webp" alt="Race-Insight Dashboard" loading="lazy">
+            <div class="gallery-item-overlay">
+                <div class="gallery-item-title">Race-Insight Interface</div>
+                <div class="gallery-item-category">Products</div>
+            </div>
+        </div>
+
+        <div class="gallery-item" data-category="events">
+            <img src="assets/images/DSCF8247_5000x3333-1.webp" alt="Event Photo" loading="lazy">
+            <div class="gallery-item-overlay">
+                <div class="gallery-item-title">Industry Conference</div>
+                <div class="gallery-item-category">Events</div>
+            </div>
+        </div>
+
+        <div class="gallery-item" data-category="testing">
+            <img src="assets/images/DSCF8247_5000x3333-1.webp" alt="Data Analysis" loading="lazy">
+            <div class="gallery-item-overlay">
+                <div class="gallery-item-title">Real-Time Data Analysis</div>
+                <div class="gallery-item-category">Testing</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-close" id="lightboxClose">
+            <i class="fas fa-times"></i>
+        </button>
+        <button class="lightbox-nav lightbox-prev" id="lightboxPrev">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <div class="lightbox-content">
+            <img src="" alt="" id="lightboxImage">
+        </div>
+        <button class="lightbox-nav lightbox-next" id="lightboxNext">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-grid">
+            <nav class="footer-nav">
+                <a href="index.html#home">Home</a>
+                <a href="index.html#about">About Us</a>
+                <a href="index.html#team">Team</a>
+                <a href="index.html#products">Products</a>
+                <a href="gallery.html">Gallery</a>
+                <a href="index.html#waitlist">Waitlist</a>
+                <a href="index.html#contact">Contact</a>
+            </nav>
+            <div class="footer-center">
+                <img src="assets/images/apex_orange_ONLY LOGO.svg" alt="APEX Logo" class="footer-logo" loading="lazy" decoding="async">
+                <p class="footer-tagline">Engineering performance through insight.</p>
+            </div>
+            <div class="footer-social">
+                <a href="https://www.instagram.com/apex.race.tech/" aria-label="Instagram" class="social-icon" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i></a>
+                <a href="https://twitter.com/apexracetech" aria-label="X" class="social-icon" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-x-twitter"></i></a>
+                <a href="#" aria-label="LinkedIn" class="social-icon" target="_blank" rel="noopener noreferrer"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+        </div>
+        
+        <div class="footer-legal">
+            <div class="footer-legal__column">
+                <h4>Find Us</h4>
+                <div class="map-embed">
+                    <iframe
+                        src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d972.0410684595366!2d80.057407!3d12.961338!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a52f53e694f0465%3A0x9fe2a8ace29ebc1c!2sSri%20Sairam%20Techno%20Incubator%20Foundation!5e0!3m2!1sen!2sin!4v1756558258219!5m2!1sen!2sin"
+                        width="100%" height="220" style="border:0; border-radius: 8px;" allowfullscreen=""
+                        loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Our Location">
+                    </iframe>
+                </div>
+            </div>
+            <div class="footer-legal__column">
+                <h4>Entity Details</h4>
+                <ul class="entity-list">
+                    <li><strong>Legal Entity Name:</strong> APEX Race Technologies</li>
+                    <li><strong>Support:</strong> <a href="mailto:info@apexracetech.in" class="email-link">info@apexracetech.in</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2025 APEX Race Technologies. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/track-animation.js"></script>
+    <script>
+        // Gallery Filter Functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            const galleryItems = document.querySelectorAll('.gallery-item');
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImage = document.getElementById('lightboxImage');
+            const lightboxClose = document.getElementById('lightboxClose');
+            const lightboxPrev = document.getElementById('lightboxPrev');
+            const lightboxNext = document.getElementById('lightboxNext');
+            let currentImageIndex = 0;
+            let filteredImages = [];
+
+            // Filter functionality
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Update active button
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    const filter = btn.getAttribute('data-filter');
+
+                    // Filter gallery items
+                    galleryItems.forEach(item => {
+                        if (filter === 'all' || item.getAttribute('data-category') === filter) {
+                            item.style.display = 'block';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            });
+
+            // Lightbox functionality
+            galleryItems.forEach((item, index) => {
+                item.addEventListener('click', () => {
+                    filteredImages = Array.from(galleryItems).filter(i => i.style.display !== 'none');
+                    currentImageIndex = filteredImages.indexOf(item);
+                    const img = item.querySelector('img');
+                    lightboxImage.src = img.src;
+                    lightboxImage.alt = img.alt;
+                    lightbox.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                });
+            });
+
+            lightboxClose.addEventListener('click', () => {
+                lightbox.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+
+            lightboxPrev.addEventListener('click', () => {
+                currentImageIndex = (currentImageIndex - 1 + filteredImages.length) % filteredImages.length;
+                const img = filteredImages[currentImageIndex].querySelector('img');
+                lightboxImage.src = img.src;
+                lightboxImage.alt = img.alt;
+            });
+
+            lightboxNext.addEventListener('click', () => {
+                currentImageIndex = (currentImageIndex + 1) % filteredImages.length;
+                const img = filteredImages[currentImageIndex].querySelector('img');
+                lightboxImage.src = img.src;
+                lightboxImage.alt = img.alt;
+            });
+
+            // Close lightbox on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) {
+                    lightbox.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+                if (e.key === 'ArrowLeft' && lightbox.classList.contains('active')) {
+                    lightboxPrev.click();
+                }
+                if (e.key === 'ArrowRight' && lightbox.classList.contains('active')) {
+                    lightboxNext.click();
+                }
+            });
+
+            // Close lightbox on background click
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) {
+                    lightbox.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
