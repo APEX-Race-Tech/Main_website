@@ -952,6 +952,35 @@
   }
 }
 
+/* Feedback Section Styling */
+#feedback {
+  justify-content: center;
+  align-items: flex-end;
+  height: 849px;
+}
+
+#feedback .section-content {
+  padding-top: 0px;
+  padding-bottom: 0px;
+  height: 600px;
+  position: static;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(1, 1fr);
+}
+
+#feedback h2.section-title {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 600px;
+}
+
+#feedback form.contact-form {
+  height: 600px;
+}
+
 /* Feedback Form Styling */
 .contact-form .form-group {
   margin-bottom: 1.5rem;

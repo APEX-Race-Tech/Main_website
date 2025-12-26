@@ -256,10 +256,15 @@
 
     <section id="feedback" class="full-page-section">
         <div class="section-content">
-            <h2 class="section-title">Feedback</h2>
+            <h2 class="section-title">
+                <span style="font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem;">Share Your Feedback</span>
+                <span style="font-size: 1.1rem; color: var(--text-color-secondary); text-align: center; line-height: 1.6; max-width: 500px;">
+                    We value your input and suggestions. Help us improve Race Insight by sharing your thoughts, reporting issues, or suggesting new features.
+                </span>
+            </h2>
             <form action="https://api.web3forms.com/submit" method="POST" class="contact-form"
                 enctype="multipart/form-data">
-                <input type="hidden" name="access_key" value="YOUR_ACCESS_KEY_HERE">
+                <input type="hidden" name="access_key" value="bfe30952-0ac8-4ece-b115-8965465d4035">
                 <div class="form-group">
                     <label for="name">Name</label>
                     <input type="text" id="name" name="name" required>
@@ -385,7 +390,6 @@
             const toggleAuthMode = document.getElementById('toggle-auth-mode');
             const authTitle = document.getElementById('auth-title');
             const authSubtitle = document.getElementById('auth-subtitle');
-            const emailBtn = emailForm.querySelector('button');
             const emailInput = document.getElementById('auth-email');
             const passwordInput = document.getElementById('auth-password');
             const authError = document.getElementById('auth-error');
@@ -589,13 +593,13 @@
                 if (isSignUp) {
                     authTitle.textContent = "Create Account";
                     authSubtitle.textContent = "Join Race Insight to start downloading.";
-                    emailBtn.textContent = "Sign Up";
+                    authSubmitBtn.textContent = "Sign Up";
                     toggleAuthMode.textContent = "Sign In";
                     forgotPasswordLink.style.display = 'none';
                 } else {
                     authTitle.textContent = "Sign In to Download";
                     authSubtitle.textContent = "Create an account to access downloads and save your preferences.";
-                    emailBtn.textContent = "Sign In";
+                    authSubmitBtn.textContent = "Sign In";
                     toggleAuthMode.textContent = "Sign Up";
                     forgotPasswordLink.style.display = 'block';
                 }
@@ -736,7 +740,7 @@
                         isSignUp = false;
                         authTitle.textContent = "Sign In to Download";
                         authSubtitle.textContent = "Create an account to access downloads and save your preferences.";
-                        emailBtn.textContent = "Sign In";
+                        authSubmitBtn.textContent = "Sign In";
                         toggleAuthMode.textContent = "Sign Up";
                         forgotPasswordLink.style.display = 'block';
                         hideAuthMessages();
