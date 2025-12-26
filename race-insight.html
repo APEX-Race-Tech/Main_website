@@ -379,6 +379,10 @@
         // --- Auth Logic ---
         document.addEventListener('DOMContentLoaded', async () => {
             const authModal = document.getElementById('auth-modal');
+            // Ensure modal is hidden initially
+            if (authModal) {
+                authModal.style.display = 'none';
+            }
             const closeAuthModal = document.getElementById('close-auth-modal');
             const googleBtn = document.getElementById('google-signin-btn');
             const emailForm = document.getElementById('email-auth-form');
@@ -501,10 +505,13 @@
                     }
                     await updateUIForLoggedInUser(user);
                     
-                    if (authModal.classList.contains('active') || authModal.style.display !== 'none') {
+                    // Close modal if it's open
+                    if (authModal && authModal.classList.contains('active')) {
                         authModal.classList.remove('active');
                         setTimeout(() => {
-                            authModal.style.display = 'none';
+                            if (authModal) {
+                                authModal.style.display = 'none';
+                            }
                             if (pendingDownloadAction) {
                                 pendingDownloadAction();
                                 pendingDownloadAction = null;
@@ -512,6 +519,7 @@
                         }, 300);
                     }
                 } else {
+                    console.log("User is signed out");
                     updateUIForLoggedOutUser();
                 }
             });
@@ -519,34 +527,34 @@
             // Close Modal
             closeAuthModal.addEventListener('click', () => {
                 authModal.classList.remove('active');
-                setTimeout(() => authModal.style.display = 'none', 300);
+                setTimeout(() => {
+                    authModal.style.display = 'none';
+                }, 300);
             });
 
             // Update UI for logged in user
             async function updateUIForLoggedInUser(user) {
                 const navProfile = document.getElementById('nav-profile');
                 const mobileNavProfile = document.getElementById('mobile-nav-profile');
-                const navProfileBtn = document.getElementById('nav-profile-btn');
-                const mobileNavProfileBtn = document.getElementById('mobile-nav-profile-btn');
                 const navAuthBtn = document.getElementById('nav-auth-btn');
                 const mobileNavAuthBtn = document.getElementById('mobile-nav-auth-btn');
                 const navLogoutBtn = document.getElementById('nav-logout-btn');
                 const mobileNavLogoutBtn = document.getElementById('mobile-nav-logout-btn');
                 const downloadBtns = document.querySelectorAll('a[href="#download"]');
 
+                // Show profile links in nav
                 if (navProfile) navProfile.style.display = 'block';
                 if (mobileNavProfile) mobileNavProfile.style.display = 'block';
-                if (navProfileBtn) {
-                    navProfileBtn.style.setProperty('display', 'flex', 'important');
-                }
-                if (mobileNavProfileBtn) {
-                    mobileNavProfileBtn.style.setProperty('display', 'flex', 'important');
-                }
+                
+                // Hide auth buttons
                 if (navAuthBtn) navAuthBtn.style.display = 'none';
                 if (mobileNavAuthBtn) mobileNavAuthBtn.style.display = 'none';
+                
+                // Show logout buttons
                 if (navLogoutBtn) navLogoutBtn.style.display = 'inline-flex';
                 if (mobileNavLogoutBtn) mobileNavLogoutBtn.style.display = 'block';
 
+                // Update download button text
                 downloadBtns.forEach(btn => {
                     btn.textContent = "Download";
                 });
@@ -741,6 +749,8 @@
                         hideAuthMessages();
                         
                         authModal.style.display = 'flex';
+                        // Force reflow to ensure display: flex is applied before adding active class
+                        authModal.offsetHeight;
                         setTimeout(() => authModal.classList.add('active'), 10);
                     });
                 }
@@ -867,6 +877,7 @@
                 if (!user) {
                     pendingDownloadAction = () => triggerDownload();
                     authModal.style.display = 'flex';
+                    authModal.offsetHeight;
                     setTimeout(() => authModal.classList.add('active'), 10);
                     return;
                 }
@@ -922,6 +933,7 @@
                         loadProfileData(user);
                     } else {
                         authModal.style.display = 'flex';
+                        authModal.offsetHeight;
                         setTimeout(() => authModal.classList.add('active'), 10);
                     }
                 });
@@ -940,6 +952,7 @@
                         loadProfileData(user);
                     } else {
                         authModal.style.display = 'flex';
+                        authModal.offsetHeight;
                         setTimeout(() => authModal.classList.add('active'), 10);
                     }
                 });
@@ -954,6 +967,7 @@
                         loadProfileData(user);
                     } else {
                         authModal.style.display = 'flex';
+                        authModal.offsetHeight;
                         setTimeout(() => authModal.classList.add('active'), 10);
                     }
                 });
