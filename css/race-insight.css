@@ -766,12 +766,18 @@
   justify-content: center;
   gap: 0.5rem;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background 0.2s ease, opacity 0.2s ease;
   width: 100%;
 }
 
-.btn-google:hover {
+.btn-google:hover:not(:disabled) {
   background: #f0f0f0;
+}
+
+.btn-google:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #e0e0e0;
 }
 
 .divider {

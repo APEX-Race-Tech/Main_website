@@ -185,6 +185,9 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault();
         event.stopPropagation();
 
+        // Check if hash exists and is not empty
+        if (!anchor.hash || anchor.hash === '#') return;
+        
         const target = document.querySelector(anchor.hash);
         if (!target) return;
 

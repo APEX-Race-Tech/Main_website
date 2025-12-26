@@ -670,10 +670,16 @@
             // Google Sign In
             googleBtn.addEventListener('click', () => {
                 hideAuthMessages();
+                
+                // Disable the Google button to prevent multiple clicks
+                googleBtn.disabled = true;
+                const originalText = googleBtn.innerHTML;
+                googleBtn.innerHTML = '<span style="opacity: 0.7;">Signing in...</span>';
+                
                 const provider = new firebase.auth.GoogleAuthProvider();
-                authSubmitBtn.disabled = true;
                 firebase.auth().signInWithPopup(provider)
                     .then(async (result) => {
+                        console.log("Google sign-in successful:", result.user.email);
                         // createUserProfile always resolves, so this won't cause sign-in to fail
                         await createUserProfile(result.user).catch(() => {
                             // Extra safety - should never reach here, but just in case
@@ -683,13 +689,29 @@
                     })
                     .catch((error) => {
                         console.error("Google Sign In Error:", error);
-                        // Only show error for actual authentication failures, not Firestore errors
-                        if (error.code && error.code.startsWith('auth/')) {
-                            showAuthError("Google Sign In failed: " + error.message);
-                        } else {
-                            showAuthError("Sign in error: " + error.message);
+                        
+                        // Re-enable the button
+                        googleBtn.disabled = false;
+                        googleBtn.innerHTML = originalText;
+                        
+                        // Handle different error types
+                        let errorMessage = "Sign in failed. Please try again.";
+                        
+                        if (error.code) {
+                            if (error.code === 'auth/popup-closed-by-user') {
+                                errorMessage = "Sign in was cancelled. Please try again.";
+                            } else if (error.code === 'auth/popup-blocked') {
+                                errorMessage = "Popup was blocked. Please allow popups for this site and try again.";
+                            } else if (error.code === 'auth/cancelled-popup-request') {
+                                errorMessage = "Only one popup request is allowed at a time. Please try again.";
+                            } else if (error.code.startsWith('auth/')) {
+                                errorMessage = "Authentication error: " + error.message;
+                            } else {
+                                errorMessage = "Sign in error: " + error.message;
+                            }
                         }
-                        authSubmitBtn.disabled = false;
+                        
+                        showAuthError(errorMessage);
                     });
             });
 
