@@ -128,10 +128,17 @@
 .nav-links {
     display: flex;
     gap: 1.5rem;
+    align-items: center;
 }
 
 .nav-links a {
     color: var(--text-color);
+}
+
+.header-action-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .hamburger-btn {

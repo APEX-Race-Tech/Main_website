@@ -1,0 +1,464 @@
+# END USER LICENSE AGREEMENT
+
+RACE Insight – Software License
+
+Effective Date: December 26, 2025
+
+---
+
+## 1. AGREEMENT OVERVIEW
+
+This End User License Agreement ("Agreement") is entered into between APEX Race Technologies ("Developer") and you ("User") regarding your use of the RACE Insight software application ("Software").
+
+By downloading, installing, or using RACE Insight, you agree to be bound by all terms of this Agreement. If you do not agree, do not use the Software.
+
+### 1.1 About RACE Insight
+
+RACE Insight is a professional-grade motorsports telemetry analysis application that allows users to:
+
+- Import and visualize race car telemetry data from multiple file formats
+- Analyze lap times, sector performance, and vehicle parameters
+- Compare data across multiple sessions and runs
+- Export reports and analyzed data in multiple formats (CSV, JSON, PDF)
+
+### 1.2 Current Status: Beta
+
+The Software is currently in BETA (free) phase. This means:
+
+- The Software is fully functional for data analysis
+- Some features (AI Insights, cloud sync) may be in development or disabled
+- There may be bugs or performance issues
+- Beta phase expires June 30, 2026
+- Beta is completely free with no payment required
+
+---
+
+## 2. LICENSE GRANT AND RESTRICTIONS
+
+### 2.1 Limited License
+
+Subject to your compliance with this Agreement, Developer grants you a non-exclusive, non-transferable, revocable license to:
+
+- Download and install RACE Insight on your personal computer(s)
+- Use the Software for your personal, non-commercial motorsports data analysis
+- Store and analyze your own telemetry data locally on your device
+
+### 2.2 What You Cannot Do
+
+You may not:
+
+- Distribute, sell, rent, lease, or share the Software with others
+- Reverse engineer, decompile, or disassemble the Software
+- Modify, adapt, or create derivative works of the Software
+- Remove or alter copyright, trademark, or license notices
+- Use the Software for commercial purposes without written permission
+- Sub-license or authorize third parties to use the Software
+- Use the Software to develop competing products
+
+### 2.3 Permitted Use
+
+You may:
+
+- Use RACE Insight for personal motorsports data analysis
+- Import and analyze telemetry data from your own vehicles
+- Share exported reports and data files with your team or collaborators
+- Use exported data for any purpose (exported data is yours)
+
+---
+
+## 3. AUTHENTICATION AND ACCOUNT REQUIREMENTS
+
+### 3.1 Google Sign-In Required
+
+To use RACE Insight in the production version, you must:
+
+- Have a Google account
+- Sign in with your Google credentials (Google Sign-In)
+- Accept Google's privacy and terms of service
+
+Skip login is not available in production builds. Google Sign-In is required to access the Software.
+
+### 3.2 What Happens During Sign-In
+
+When you sign in with Google, we collect your Firebase UID, email address, and display name. This data is stored only by Google/Firebase, not on our servers. See Privacy Policy Section 2 for details.
+
+### 3.3 Your Account Responsibility
+
+You are responsible for:
+
+- Keeping your Google account credentials secure
+- Protecting your email and account information
+- Notifying us if your account is compromised
+- All activity under your account
+
+---
+
+## 4. DATA STORAGE AND PRIVACY
+
+### 4.1 Local-Only Storage
+
+RACE Insight stores all your data locally on your device:
+
+- Your project files and analysis remain on your computer
+- We do not upload your telemetry data to our servers
+- We do not back up your files to the cloud
+- You maintain complete control of your files
+
+File metadata (file type, file size) is tracked via PostHog analytics. Your actual file data is never sent to us.
+
+### 4.2 Supported File Formats
+
+RACE Insight can import and analyze telemetry data in these formats:
+
+- iRacing (.ibt)
+- AiM (.xrk, .drk)
+- MoTeC (.ld, .ldx)
+- CSV (Generic)
+- Autosport Labs (.log)
+- RaceLogic VBOX (.vbo)
+- Under Development: ECUMaster (.adulog), Race Technology (.run), MegaLogViewer (.mlg)
+
+File Size Limit: Maximum 250MB per file. The Software may warn for files larger than 1GB but will attempt processing.
+
+### 4.3 Data Processing
+
+When you import a telemetry file, the Software parses the file locally (backend processes on your machine), analyzes the data (lap detection, sector times, calculations), displays results in the user interface, and never sends the file contents to our servers.
+
+### 4.4 Exported Data
+
+When you export data (CSV, JSON, PDF), exported files are yours to keep and use. You own all exported data and reports, you can share and use exported data however you want, and you may use exported data for commercial purposes.
+
+---
+
+## 5. ANALYTICS AND DATA COLLECTION
+
+### 5.1 Automatic Event Tracking
+
+The Software collects anonymous usage data via PostHog to improve the application. Tracked events include: when you launch the app, when you sign in/out, when you import files, when you use features, and when errors occur.
+
+What is not tracked: your telemetry data files, your analysis results, your personal information (unless you sign in), session recordings (disabled), and automatic click tracking (disabled).
+
+### 5.2 Opting Out of Analytics
+
+You can disable all analytics at any time:
+
+1. Open RACE Insight
+2. Go to Settings > Analytics & Privacy
+3. Toggle "Disable Analytics & Telemetry"
+
+Disabling analytics will stop PostHog event tracking, but Firebase may still log authentication events separately.
+
+### 5.3 PostHog Configuration
+
+PostHog is configured with session recording disabled, autocapture disabled (manual event tracking only), and default retention of 30 days.
+
+See Privacy Policy Section 5.1 for details about PostHog.
+
+---
+
+## 6. FEATURES AND LIMITATIONS
+
+### 6.1 Current Features (Beta)
+
+The following features are fully functional:
+
+- Import telemetry files (drag & drop or file browser)
+- Visualize data on interactive charts and graphs
+- Compare lap times and sector performance
+- View circuit maps with GPS racing lines
+- Export reports and data (CSV, JSON, PDF)
+- Professional widgets (speed, RPM, tyre monitoring, G-forces)
+- Session management and filtering
+
+### 6.2 In-Development Features
+
+The following features are planned or in development:
+
+- AI Insights (AI-powered performance analysis) - status: under development
+- Cloud Sync (cross-device synchronization) - status: not implemented
+- Collaboration (team features and sharing) - status: not implemented
+
+### 6.3 Known Limitations
+
+- Data downsampling may affect accuracy for very large datasets
+- File parsers for ECUMaster, Race Technology, and MegaLogViewer are placeholders
+- WiFi/Logger integration is simulated (not yet functional)
+- Some file formats may have parsing limitations
+- Performance may degrade with files larger than 1GB
+
+### 6.4 Offline Capability
+
+RACE Insight works mostly offline:
+
+- File import and analysis work offline (after initial sign-in)
+- Telemetry visualization works offline
+- First-time sign-in requires internet (Google authentication)
+- Map tiles (Mapbox/OpenStreetMap) require internet
+- PostHog events are queued locally if offline, sent when online
+
+---
+
+## 7. ACCURACY DISCLAIMER AND WARRANTIES
+
+### 7.1 Analysis Accuracy Disclaimer
+
+RACE Insight is an analysis tool for reviewing historical telemetry data. It is not a predictive system and should not be relied upon for making critical decisions for competition, safety-critical analysis, or warranty or performance claims.
+
+The Software performs analysis of your data but does not predict race outcomes. Always verify analysis results manually before making decisions based on the Software's output.
+
+### 7.2 No Warranties
+
+THE SOFTWARE IS PROVIDED "AS-IS" WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED.
+
+Developer disclaims all warranties including merchantability (fitness for a particular purpose), non-infringement, accuracy or reliability of analysis, and availability or uptime.
+
+The Software may contain bugs, errors, or inaccuracies. Use at your own risk.
+
+### 7.3 Beta Disclaimer
+
+Because RACE Insight is in BETA, you acknowledge that:
+
+- The Software may have bugs or stability issues
+- Features may change without notice
+- Data formats may change between versions
+- Performance may be unpredictable with large datasets
+- The Software is free during beta with no support guarantees
+
+---
+
+## 8. LIMITATION OF LIABILITY
+
+### 8.1 No Liability for Damages
+
+IN NO EVENT SHALL APEX RACE TECHNOLOGIES BE LIABLE FOR:
+
+- Loss of data, files, or projects
+- Lost profits or revenue
+- Indirect, incidental, or consequential damages
+- Damages from incorrect analysis or decisions made based on the Software
+- Damages from third-party software or services (Firebase, PostHog, Mapbox)
+- Damages from internet outages or server issues
+
+### 8.2 Liability Cap
+
+Even if Developer has been advised of the possibility of such damages, Developer's total liability shall not exceed the amount you paid for the Software (which is zero dollars during beta).
+
+### 8.3 Your Responsibility
+
+You accept full responsibility for how you use the Software, how you interpret the analysis results, any decisions you make based on the Software's output, and backup and protection of your local data.
+
+---
+
+## 9. INTELLECTUAL PROPERTY RIGHTS
+
+### 9.1 Developer's IP
+
+The Software and all materials (code, designs, documentation) are the exclusive property of APEX Race Technologies. All copyrights, patents, and trademarks are reserved. You receive only a limited license to use, not to own. No intellectual property rights transfer to you.
+
+### 9.2 Your IP
+
+You own your telemetry data files, you own any exported reports or analysis, you may use, modify, and redistribute exported data freely, and you do not own the Software code or analysis algorithms.
+
+### 9.3 Feedback
+
+If you provide feedback, bug reports, or suggestions about RACE Insight, you grant Developer a non-exclusive, royalty-free license to use that feedback to improve the Software.
+
+---
+
+## 10. BETA TERMS AND EXPIRATION
+
+### 10.1 Beta Phase
+
+RACE Insight is currently in FREE BETA:
+
+- Beta Start: December 2025
+- Beta End: June 30, 2026
+
+### 10.2 What Happens After Beta
+
+When the beta phase ends on June 30, 2026:
+
+- The Software may transition to a paid model (pricing not yet finalized)
+- Features may be locked behind a paid license or subscription
+- Beta users may receive special pricing (details TBA)
+- Your local data will remain on your device (not deleted)
+
+### 10.3 No Hard Cutoff Date
+
+The app will not automatically stop working on June 30, 2026. We will announce transition details well in advance.
+
+### 10.4 Beta Data Handling
+
+Your local project files will transfer to the paid version, your analytics data may be retained (per PostHog policy), and your Google account will still work.
+
+---
+
+## 11. THIRD-PARTY SERVICES
+
+### 11.1 Services RACE Insight Uses
+
+The Software relies on these third-party services:
+
+Google Firebase (Authentication): Handles Google Sign-In, stores your Firebase UID, email, display name. Privacy: https://policies.google.com/privacy
+
+PostHog (Analytics): Collects anonymous usage data, does not collect your telemetry data. Privacy: https://posthog.com/privacy
+
+Mapbox & OpenStreetMap (Maps): Provides map tiles for circuit visualization, requires internet connection. Privacy: https://www.mapbox.com/legal/privacy and https://www.openstreetmap.org/copyright
+
+ECharts, uPlot, Recharts (Charting): Visualization libraries (run locally), no data sent externally.
+
+### 11.2 Third-Party Terms
+
+You agree to comply with the terms of service of Google (Firebase), PostHog, Mapbox, and OpenStreetMap.
+
+Developer is not responsible for third-party services. If they change their terms or policies, this Agreement will be updated accordingly.
+
+### 11.3 No Endorsement
+
+Developer does not endorse or control third-party services. Use of these services is at your own risk.
+
+---
+
+## 12. TERMINATION AND ACCOUNT DELETION
+
+### 12.1 Termination by Developer
+
+Developer may terminate your license if you violate any term of this Agreement, reverse engineer or hack the Software, share the Software with others, or use the Software for illegal purposes.
+
+Developer will attempt to notify you of termination via email.
+
+### 12.2 Termination by You
+
+You may stop using RACE Insight at any time. Simply delete the application.
+
+### 12.3 Account Deletion
+
+To delete your account, contact Developer at info.apexracetech@gmail.com with subject "Account Deletion Request". Your Google Firebase account will be deleted (handled by Google). Your local data remains on your device until you manually delete it.
+
+Developer does not automatically delete your local project files when you delete your account.
+
+### 12.4 After Termination
+
+Your license to use the Software is immediately revoked, you must delete all copies of the Software, your right to your local data remains (since data is yours), and Developer retains a copy of analytics events (per PostHog policy).
+
+---
+
+## 13. COMPLIANCE WITH LAWS
+
+### 13.1 Jurisdiction and Governing Law
+
+This Agreement is governed by the laws of India and the specific jurisdiction of Chennai, Tamil Nadu. Any disputes will be resolved in the Chennai courts.
+
+This Agreement applies to users worldwide, but Indian law will govern interpretation and enforcement.
+
+### 13.2 Regulatory Compliance
+
+The Software complies with India's Digital Personal Data Protection Act (DPDP), 2023, GDPR (for EU users), and other applicable data protection laws.
+
+See Privacy Policy for details.
+
+### 13.3 Export Restrictions
+
+The Software may be subject to export control regulations. You agree not to export the Software to prohibited countries, use the Software in violation of export laws, or share the Software with sanctioned entities.
+
+---
+
+## 14. MODIFICATIONS TO THIS AGREEMENT
+
+### 14.1 Updates to Terms
+
+Developer may update this Agreement at any time. Changes will be posted at https://www.apexracetech.com/eula
+
+### 14.2 Notification
+
+For major changes, Developer will notify you via email. For minor changes, we will post a notice in-app. Your continued use of the Software after changes constitutes acceptance.
+
+### 14.3 Version Control
+
+Current Version: 2.0
+Last Updated: December 26, 2025
+
+---
+
+## 15. SUPPORT AND CONTACT
+
+### 15.1 Customer Support
+
+During BETA, support is limited and on a best-effort basis:
+
+Email: info.apexracetech@gmail.com
+Response time: Within 7 business days (no guarantee)
+
+Note: During beta, support is not guaranteed. Paid support will be available after beta ends.
+
+### 15.2 Bug Reports and Feedback
+
+To report bugs or provide feedback:
+
+1. Use in-app feedback (Settings > Send Feedback)
+2. Or email info.apexracetech@gmail.com
+
+Include description of the issue, steps to reproduce, screenshots/crash dumps (if applicable), and your system info (OS, app version).
+
+---
+
+## 16. MISCELLANEOUS
+
+### 16.1 Entire Agreement
+
+This Agreement constitutes the entire agreement between you and Developer regarding the Software and supersedes all prior negotiations and agreements.
+
+### 16.2 Severability
+
+If any provision of this Agreement is found invalid or unenforceable, the remaining provisions will continue in full force.
+
+### 16.3 No Waiver
+
+Failure by Developer to enforce any provision of this Agreement does not constitute a waiver of that provision or any other provision.
+
+### 16.4 Assignment
+
+You may not assign this Agreement to anyone else. Any attempted assignment is void.
+
+### 16.5 Conflict with Privacy Policy
+
+In case of conflict between this EULA and the Privacy Policy, the Privacy Policy controls for data collection and use.
+
+---
+
+## 17. ACKNOWLEDGMENT
+
+BY DOWNLOADING, INSTALLING, OR USING RACE INSIGHT, YOU ACKNOWLEDGE THAT:
+
+1. You have read and understood this Agreement
+2. You agree to be bound by all terms
+3. You understand the Software is provided AS-IS
+4. You accept the limitation of liability
+5. You understand the beta status and limitations
+6. You are responsible for your own data backup
+7. You understand RACE Insight is not a predictive system
+
+---
+
+## 18. RELATED DOCUMENTS
+
+Privacy Policy: https://www.apexracetech.com/privacy
+Terms of Service: https://www.apexracetech.com/terms
+Third-Party Licenses: https://www.apexracetech.com/third-party-licenses
+Help & Documentation: https://www.apexracetech.com/help
+
+---
+
+## 19. CONTACT
+
+If you have questions about this EULA, contact:
+
+Email: info.apexracetech@gmail.com
+Address: Chennai, Tamil Nadu, India
+Website: https://www.apexracetech.com
+
+---
+
+Copyright 2025 APEX Race Technologies. All rights reserved.
+
+This EULA is effective December 26, 2025 – Version 2.0
