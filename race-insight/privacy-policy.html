@@ -33,6 +33,20 @@
             margin-bottom: 1rem;
             color: #e5e5e5;
         }
+        .policy-content h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: #e5e5e5;
+        }
+        .policy-content h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            color: #e5e5e5;
+        }
         .policy-content p {
             margin-bottom: 1rem;
             line-height: 1.6;
@@ -44,13 +58,39 @@
             margin-bottom: 1rem;
             color: #d1d5db;
         }
+        .policy-content ol {
+            list-style-type: decimal;
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+            color: #d1d5db;
+        }
+        .policy-content li {
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+        .policy-content a {
+            color: #00d2ff;
+            text-decoration: underline;
+        }
+        .policy-content a:hover {
+            color: #00a8cc;
+        }
+        .policy-content hr {
+            border: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 2rem 0;
+        }
+        .policy-content strong {
+            font-weight: 600;
+            color: #e5e5e5;
+        }
     </style>
 </head>
 
 <body style="background-color: #0f0f0f;">
     <header class="header">
         <nav class="nav-container">
-             <a href="../race-insight.html" class="header__logo">
+            <a href="../race-insight.html" class="header__logo">
                 <img src="../assets/images/apex_orange_Horizontal.svg" alt="APEX Race Technologies Logo" class="logo--full"
                     style="filter: hue-rotate(190deg) brightness(1.2);">
                 <img src="../assets/images/apex_orange_ONLY LOGO.svg" alt="APEX Race Technologies Icon" class="logo--icon"
@@ -58,7 +98,7 @@
             </a>
             <div class="nav-right">
                 <ul class="nav-links">
-                     <li><a href="../race-insight.html" class="nav-link">Home</a></li>
+                    <li><a href="../race-insight.html" class="nav-link">Home</a></li>
                 </ul>
                 <div class="header-action-item">
                     <a href="../race-insight.html#download" class="btn btn-primary">Download</a>
@@ -74,7 +114,7 @@
 
     <div class="mobile-nav">
         <ul class="nav-links">
-             <li><a href="../race-insight.html" class="nav-link">Home</a></li>
+            <li><a href="../race-insight.html" class="nav-link">Home</a></li>
         </ul>
         <div class="header-action-item">
             <a href="../race-insight.html#download" class="btn btn-primary">Download</a>
@@ -82,12 +122,568 @@
     </div>
 
     <main class="policy-content">
-        <h1>Privacy Policy</h1>
-        <p>Last updated: December 25, 2025</p>
+        <h1>PRIVACY POLICY</h1>
+        <p><strong>RACE Insight – Data Protection & Privacy Notice</strong></p>
+        <p><strong>Effective Date:</strong> December 26, 2025</p>
+        <p><strong>Last Updated:</strong> December 26, 2025</p>
 
-        <p>This Privacy Policy will be updated with the complete privacy policy for Race Insight.</p>
+        <hr>
 
-        <!-- Content will be added here -->
+        <h2>1. INTRODUCTION AND WHO WE ARE</h2>
+        <p><strong>Data Controller:</strong> APEX Race Technologies</p>
+        <p><strong>Location:</strong> Chennai, Tamil Nadu, India</p>
+        <p><strong>Contact Email:</strong> <a href="mailto:info.apexracetech@gmail.com">info.apexracetech@gmail.com</a></p>
+        <p><strong>Website:</strong> <a href="https://www.apexracetech.com" target="_blank" rel="noopener noreferrer">https://www.apexracetech.com</a></p>
+        
+        <p>This Privacy Policy explains how we collect, use, and protect your personal data and information when you use:</p>
+        <ul>
+            <li>The RACE Insight desktop application (Windows, macOS, Linux)</li>
+            <li>The RACE Insight mobile applications (iOS, Android) - when released</li>
+            <li>The RACE Insight website (<a href="https://www.apexracetech.com" target="_blank" rel="noopener noreferrer">https://www.apexracetech.com</a>)</li>
+        </ul>
+
+        <p>We are committed to transparency about data. RACE Insight is designed with privacy-first principles:</p>
+        <ul>
+            <li>Your telemetry data stays completely local on your device</li>
+            <li>We do not upload your project files to our servers</li>
+            <li>We use manual event tracking only (no automatic session recording or autocapture)</li>
+            <li>You can disable analytics completely</li>
+        </ul>
+
+        <hr>
+
+        <h2>2. DATA WE COLLECT (LOCAL-ONLY BETA)</h2>
+
+        <h3>2.1 Desktop Application - What We Collect</h3>
+        <p>RACE Insight is designed for local-only use. Most data remains on your device.</p>
+
+        <h4>2.1.1 Data That Stays Local (NOT Sent to Us)</h4>
+        <ul>
+            <li>Your telemetry project files (all imported race data, lap times, sensor readings, GPS data)</li>
+            <li>Your saved analyses and reports</li>
+            <li>Your exported data (CSV, JSON, PDF files you export)</li>
+            <li>Application cache and temporary files</li>
+            <li>Session configurations (stored locally in localStorage)</li>
+        </ul>
+        <p>We do not automatically copy, sync, backup, or send this data to our servers or cloud storage.</p>
+
+        <h4>2.1.2 Data We Collect (Sent From the App)</h4>
+        <p>To improve the Software, we collect anonymous usage events via PostHog.</p>
+
+        <h4>A. AUTHENTICATION EVENTS</h4>
+        <p>If you sign in with Google, when you sign in or out, we track:</p>
+        <ul>
+            <li>user_signed_in - Recorded when you successfully log in with Google (includes: Firebase UID, email, display name)</li>
+            <li>user_signed_out - Recorded when you log out</li>
+            <li>sign_in_attempted - When you attempt to sign in (with method: "firebase")</li>
+            <li>sign_in_succeeded - When sign-in succeeds</li>
+            <li>sign_in_failed - When sign-in fails (with error message)</li>
+            <li>sign_out_attempted - When you attempt to log out</li>
+            <li>sign_out_succeeded - When logout succeeds</li>
+            <li>sign_out_failed - When logout fails (with error message)</li>
+        </ul>
+        <p><strong>What we do not collect:</strong> Your Google password (never sent to us), your password (only Google handles authentication), your profile picture or other Google profile data, your Google calendar, contacts, or email (we do not access these).</p>
+        <p><strong>Storage:</strong> Firebase UID, email, and display name are stored by Google/Firebase and associated with PostHog analytics.</p>
+        <p><strong>Why:</strong> To ensure authentication works correctly and troubleshoot sign-in issues.</p>
+
+        <h4>B. APPLICATION LIFECYCLE EVENTS</h4>
+        <p>We track when you use the application:</p>
+        <ul>
+            <li>app_launched - Recorded each time you open RACE Insight (includes: app version, provider name)</li>
+        </ul>
+        <p><strong>What we do not collect:</strong> Your project data, file contents, or personal information.</p>
+        <p><strong>Why:</strong> To understand app adoption, version distribution, and usage patterns.</p>
+
+        <h4>C. FILE IMPORT EVENTS</h4>
+        <p>When you import telemetry data files into RACE Insight, we track:</p>
+        <ul>
+            <li>file_imported - Recorded when you successfully import a file</li>
+            <li>file_type - The file extension (e.g., ".ibt", ".xrk", ".csv", ".log", ".vbo")</li>
+            <li>file_size - The file size in bytes and megabytes (MB)</li>
+        </ul>
+        <p><strong>Supported File Formats:</strong></p>
+        <ul>
+            <li>iRacing (.ibt)</li>
+            <li>AiM Racing (.xrk, .drk)</li>
+            <li>MoTeC (.ld)</li>
+            <li>Generic CSV (.csv)</li>
+            <li>Autosport Labs (.log)</li>
+            <li>RaceLogic VBOX (.vbo)</li>
+            <li>Under development: ECUMaster (.adulog), Race Technology (.run), MegaLogViewer (.mlg)</li>
+        </ul>
+        <p><strong>Maximum file size:</strong> 250MB backend limit. Files up to 1GB may trigger a performance warning but will still be processed.</p>
+        <p><strong>What we do not collect:</strong> The actual file contents or data inside the file, file names or metadata beyond type and size, your telemetry readings (lap times, speeds, G-forces, sensor data), circuit information or driver data from the file, or any personal information in the file.</p>
+        <p><strong>Why:</strong> To understand which file formats users work with and to prioritize format support.</p>
+
+        <h4>D. FEATURE USAGE EVENTS</h4>
+        <p>When you use features in the application, we track:</p>
+        <ul>
+            <li>feature_used - Recorded when you use a feature (with feature name and custom properties)</li>
+            <li>screen_viewed - When you navigate to a different screen or section (with screen name)</li>
+        </ul>
+        <p><strong>Features tracked:</strong> Visualization features (charts, graphs, map view), analysis features (lap comparison, sector analysis, delta calculations), export features (CSV, JSON, PDF export), and settings and preferences changes.</p>
+        <p><strong>What we do not collect:</strong> Your actual analysis results or calculations, the data displayed on your screen, file names or project names, your telemetry data values or insights you generated, or screenshots or screen content.</p>
+        <p><strong>Why:</strong> To understand which features are popular and which need improvement.</p>
+        <p><strong>How long we keep it:</strong> Feature usage events are retained for 30 days, then deleted or aggregated into anonymous patterns.</p>
+        <p><strong>Opt-out:</strong> You can disable feature tracking in the app: Settings > Analytics & Privacy > Disable Analytics & Telemetry</p>
+
+        <h4>E. USER SETTINGS AND PREFERENCES</h4>
+        <p>We collect data about how you configure the application:</p>
+        <ul>
+            <li>UI preferences - Theme, layout, window size, sidebar preferences (light/dark mode, panel arrangement)</li>
+            <li>Display settings - Font size, color schemes, zoom levels</li>
+            <li>Feature toggles - Which optional features you enable or disable</li>
+            <li>Analysis preferences - Your preferred chart types, default units, default views</li>
+            <li>Workspace configuration - Dashboard layouts, widget arrangements, custom filters</li>
+        </ul>
+        <p><strong>What we do not collect:</strong> Your actual project data or analysis results, file contents or file names, your real name or email (unless you signed in with Google), or data about which files you opened.</p>
+        <p><strong>Why:</strong> To understand user preferences and optimize default settings for better UX.</p>
+
+        <h4>F. ERROR AND CRASH EVENTS</h4>
+        <p>When the application crashes or encounters an error, we automatically collect:</p>
+        <ul>
+            <li>error_occurred - Recorded when an error happens</li>
+            <li>error_message - Human-readable description of what went wrong</li>
+            <li>error_name - Technical error type</li>
+            <li>error_stack - First 500 characters of the stack trace (for debugging)</li>
+            <li>Timestamp - When the error occurred</li>
+            <li>App version - Which version you were using</li>
+            <li>Operating system - Windows 10/11, macOS version, Linux distribution</li>
+            <li>Device type - Desktop, laptop</li>
+        </ul>
+        <p><strong>What we do not collect:</strong> Your project files or data, file contents, your name, email, or identity (unless you explicitly provided it in a support email), keystroke logs or screen content, or passwords or sensitive data.</p>
+        <p><strong>Why:</strong> To identify and fix bugs, improve stability, and prioritize crash fixes.</p>
+
+        <h4>G. MANUAL EVENT TRACKING ONLY (Privacy-First Design)</h4>
+        <p>We use manual event tracking only. This means:</p>
+        <ul>
+            <li>We explicitly code which events to track</li>
+            <li>We do not use automatic click/button tracking (autocapture disabled)</li>
+            <li>We do not record all interactions automatically</li>
+            <li>We do not use session recording</li>
+            <li>We do not track mouse movements or keyboard input</li>
+            <li>We do not track how long you spend on specific UI elements</li>
+        </ul>
+        <p><strong>PostHog Configuration:</strong> session_recording disabled, autocapture disabled, tracking mode is manual events only.</p>
+        <p><strong>Why:</strong> To minimize data collection and respect your privacy.</p>
+
+        <h4>H. ANONYMOUS USER IDENTIFICATION</h4>
+        <p>For all events, we generate an anonymous User ID (UUID-style identifier) that:</p>
+        <ul>
+            <li>Is stored locally on your device (in localStorage)</li>
+            <li>Is not tied to your personal identity unless you sign in with Google</li>
+            <li>If you sign in, it is linked to your Firebase UID and email</li>
+            <li>Can be reset by clearing your browser data or disabling analytics</li>
+            <li>Does not track your real name or email unless you explicitly sign in</li>
+        </ul>
+        <p><strong>How it works:</strong></p>
+        <ol>
+            <li>When you open the app, a unique UUID is generated locally</li>
+            <li>This UUID is stored in your browser's localStorage</li>
+            <li>All events are tagged with this UUID</li>
+            <li>We can group events from the same user without knowing who you are</li>
+        </ol>
+        <p><strong>Changing your User ID:</strong> Clearing browser data/localStorage will generate a new UUID. Disabling analytics stops event collection entirely. Signing out removes the association with your Google account.</p>
+        <p><strong>Why:</strong> To group events from the same user session for analysis, without identifying you personally.</p>
+
+        <h4>I. IN-APP FEEDBACK AND SUPPORT</h4>
+        <p>If you click "Send Feedback" in the app, report a bug via in-app form, or contact support at <a href="mailto:info.apexracetech@gmail.com">info.apexracetech@gmail.com</a>, we collect:</p>
+        <ul>
+            <li>Your message (feedback, bug report, or question)</li>
+            <li>Your email address (if you provide it for a response)</li>
+            <li>App version and operating system (for context)</li>
+            <li>Any attachments (e.g., screenshots, crash dumps)</li>
+        </ul>
+        <p><strong>What we do not collect:</strong> Sensitive personal information you do not voluntarily provide, or your project files (only if you attach them).</p>
+        <p><strong>Why:</strong> To respond to your inquiry and improve the Software.</p>
+        <p><strong>How long we keep it:</strong> Support emails are kept for 12 months for record-keeping, then deleted or anonymized.</p>
+        <p><strong>Your Control:</strong> You can choose not to contact us or provide personal information. Support is optional.</p>
+
+        <h3>2.2 Website Analytics</h3>
+        <p>On <a href="https://www.apexracetech.com" target="_blank" rel="noopener noreferrer">https://www.apexracetech.com</a>, we collect via Google Analytics:</p>
+        <ul>
+            <li>Page views - Which pages you visit</li>
+            <li>Time on page - How long you spend on each page</li>
+            <li>Device type - Mobile, tablet, or desktop</li>
+            <li>Geographic region - Country and city level (approximate, not exact address)</li>
+            <li>Referral source - Where you came from (e.g., Google search, Reddit, Twitter)</li>
+            <li>IP address - Anonymized after collection</li>
+        </ul>
+        <p><strong>What we do not collect:</strong> Your name or email, search queries you type into Google, passwords or sensitive information, or which links you click (not tracked).</p>
+        <p><strong>Why:</strong> To improve the website experience and understand visitor behavior.</p>
+        <p><strong>How long we keep it:</strong> 26 months (Google Analytics default).</p>
+        <p><strong>Opt-out:</strong> You can disable cookies in your browser settings or install the Google Analytics Opt-out Browser Add-on at <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">https://tools.google.com/dlpage/gaoptout</a></p>
+
+        <h3>2.3 Summary: What We Do Not Collect (Privacy-First Design)</h3>
+        <ul>
+            <li>Your telemetry data files (lap times, speeds, sensor readings)</li>
+            <li>Cloud backup of your project files</li>
+            <li>Remote sync across devices (currently)</li>
+            <li>AI processing of your data</li>
+            <li>Session recordings (disabled in PostHog)</li>
+            <li>Automatic click tracking (autocapture disabled)</li>
+            <li>Keystroke logs or screen recording</li>
+            <li>Location tracking or GPS data (only your imported telemetry data)</li>
+            <li>Behavioral profiling or behavioral advertising</li>
+            <li>Your real name or email (unless you voluntarily sign in with Google)</li>
+            <li>File contents from your telemetry files</li>
+            <li>Financial or payment information (beta is free)</li>
+        </ul>
+
+        <hr>
+
+        <h2>3. HOW WE USE YOUR DATA</h2>
+
+        <h3>3.1 Purposes of Data Collection</h3>
+        <p>We use the data we collect for:</p>
+        <ol>
+            <li>Authentication and account management - Ensuring your sign-in works correctly and securely</li>
+            <li>Feature improvement - Understanding which features are popular and which need work</li>
+            <li>Bug fixes and stability - Identifying and fixing crashes</li>
+            <li>File format support - Understanding which telemetry formats to prioritize</li>
+            <li>Service optimization - Improving UI/UX based on user preferences</li>
+            <li>Support and communication - Responding to your feedback or issues</li>
+            <li>Compliance and legal - Retaining data required by law</li>
+        </ol>
+
+        <h3>3.2 What We Do Not Do</h3>
+        <ul>
+            <li>Sell or rent your data to third parties</li>
+            <li>Use data for marketing targeting (no behavioral advertising)</li>
+            <li>Share with competitors or other race teams</li>
+            <li>Use for purposes beyond those listed above</li>
+            <li>Train AI models on your personal data (without explicit future consent)</li>
+            <li>Automatically record sessions or interactions</li>
+            <li>Create behavioral profiles of you</li>
+            <li>Share with advertisers or marketing companies</li>
+        </ul>
+
+        <hr>
+
+        <h2>4. LEGAL BASIS FOR DATA PROCESSING</h2>
+
+        <h3>4.1 India's Digital Personal Data Protection Act (DPDP), 2023</h3>
+        <p>Under DPDP, we process your data for:</p>
+        <ul>
+            <li>Legitimate purpose (to provide the service and improve it)</li>
+            <li>Consent (for optional features like analytics; you can opt-out anytime)</li>
+        </ul>
+
+        <h3>4.2 GDPR (If You Are in the EU)</h3>
+        <p>If you are in the European Union:</p>
+        <ul>
+            <li>Legitimate interest (to improve the service, fix bugs, understand user behavior)</li>
+            <li>Consent (for analytics; you can opt-out)</li>
+            <li>Legal obligation (if required by law)</li>
+        </ul>
+        <p>You have GDPR rights including access, correction, deletion, and data portability.</p>
+
+        <hr>
+
+        <h2>5. THIRD-PARTY SERVICES AND DATA SHARING</h2>
+        <p>The Software uses the following third-party services.</p>
+
+        <h3>5.1 PostHog (Analytics and Event Tracking)</h3>
+        <ul>
+            <li><strong>Service:</strong> Collects manual events (authentication, features, errors, file imports, settings)</li>
+            <li><strong>Data shared:</strong> Anonymous user ID, event names and timestamps, error stack traces (first 500 characters), app version and operating system, file metadata (type and size only, NOT contents), email and display name (only if signed in)</li>
+            <li><strong>Configuration:</strong> Session recording disabled, autocapture disabled, manual event tracking only</li>
+            <li><strong>Privacy Policy:</strong> <a href="https://posthog.com/privacy" target="_blank" rel="noopener noreferrer">https://posthog.com/privacy</a></li>
+            <li><strong>Data location:</strong> EU or US (depending on PostHog's configuration)</li>
+            <li><strong>Data retention:</strong> 30 days by default</li>
+            <li><strong>Contact:</strong> support@posthog.com</li>
+        </ul>
+        <p><strong>Data Processing Agreement:</strong> PostHog provides a DPA for GDPR compliance.</p>
+
+        <h3>5.2 Google (Firebase Authentication and Website Analytics)</h3>
+        <p><strong>Google Firebase (Authentication):</strong></p>
+        <ul>
+            <li><strong>Service:</strong> Handles Google Sign-In authentication</li>
+            <li><strong>Data shared:</strong> Firebase UID, email, display name (only if you sign in)</li>
+            <li><strong>How it works:</strong> When you click "Sign in with Google," Firebase securely connects you to Google's authentication service</li>
+            <li><strong>Privacy Policy:</strong> <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">https://policies.google.com/privacy</a></li>
+            <li><strong>Data location:</strong> Google's servers (primarily US)</li>
+        </ul>
+        <p><strong>Google Analytics (Website Only):</strong></p>
+        <ul>
+            <li><strong>Service:</strong> Collects website visitor statistics</li>
+            <li><strong>Data shared:</strong> Page views, device type, geographic region, referral source, anonymized IP</li>
+            <li><strong>Privacy Policy:</strong> <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">https://policies.google.com/privacy</a></li>
+            <li><strong>Data location:</strong> United States (Google's servers)</li>
+            <li><strong>Opt-out:</strong> <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">https://tools.google.com/dlpage/gaoptout</a></li>
+        </ul>
+
+        <h3>5.3 Mapbox (Map Tiles)</h3>
+        <ul>
+            <li><strong>Service:</strong> Provides map tiles for circuit visualization in RACE Insight</li>
+            <li><strong>Data shared:</strong> Your location (approximately, to load map tiles)</li>
+            <li><strong>Requires:</strong> Internet connection</li>
+            <li><strong>Privacy Policy:</strong> <a href="https://www.mapbox.com/legal/privacy" target="_blank" rel="noopener noreferrer">https://www.mapbox.com/legal/privacy</a></li>
+        </ul>
+
+        <hr>
+
+        <h2>6. YOUR RIGHT TO REQUEST DELETION</h2>
+        <p>You can request deletion of personal data we hold about you (support emails, authentication records) by contacting:</p>
+        <p><strong>Email:</strong> <a href="mailto:info.apexracetech@gmail.com">info.apexracetech@gmail.com</a><br>
+        <strong>Subject:</strong> "Data Deletion Request"</p>
+        <p>Please include your email address (or the one associated with your Google sign-in), approximate date of your last interaction, and what data you want deleted.</p>
+        <p><strong>Response time:</strong> We will respond within 30 days and delete your data within a reasonable timeframe (usually within 30-60 days).</p>
+
+        <hr>
+
+        <h2>7. YOUR DATA RIGHTS (DPDP and GDPR)</h2>
+
+        <h3>7.1 Right to Access</h3>
+        <p>You have the right to request access to personal data we hold about you.</p>
+        <p><strong>How to request:</strong> Email <a href="mailto:info.apexracetech@gmail.com">info.apexracetech@gmail.com</a> with subject "Data Access Request"</p>
+        <p><strong>What we provide:</strong> A copy of your data (support emails, authentication records, analytics summaries) within 30 days.</p>
+
+        <h3>7.2 Right to Correction</h3>
+        <p>If your personal data is inaccurate or incomplete, you can request correction.</p>
+        <p><strong>How to request:</strong> Email <a href="mailto:info.apexracetech@gmail.com">info.apexracetech@gmail.com</a> with subject "Data Correction Request" and include details of the inaccuracy.</p>
+
+        <h3>7.3 Right to Erasure</h3>
+        <p>You can request deletion of your personal data in most cases.</p>
+        <p><strong>How to request:</strong> Email <a href="mailto:info.apexracetech@gmail.com">info.apexracetech@gmail.com</a> with subject "Data Deletion Request"</p>
+        <p><strong>Exceptions:</strong> We may retain data if required by law (e.g., tax records, legal disputes).</p>
+
+        <h3>7.4 Right to Withdraw Consent</h3>
+        <p>If we rely on your consent for analytics or feature tracking:</p>
+        <ul>
+            <li>You can withdraw consent at any time</li>
+            <li>Disable analytics in Settings > Analytics & Privacy > Disable Analytics & Telemetry</li>
+            <li>This will stop all PostHog event tracking (except Firebase authentication, which is essential for sign-in)</li>
+            <li>Stop sending feedback emails or bug reports</li>
+        </ul>
+        <p><strong>Important:</strong> Disabling analytics stops new data collection but does not retroactively delete previously collected data.</p>
+
+        <h3>7.5 Right to Data Portability (GDPR Only)</h3>
+        <p>If you are in the EU and we process data based on consent or contract, you can request a copy in machine-readable format.</p>
+        <p><strong>How to request:</strong> Email <a href="mailto:info.apexracetech@gmail.com">info.apexracetech@gmail.com</a> with subject "Data Portability Request"</p>
+        <p><strong>What we provide:</strong> A CSV or JSON file with your data within 30 days (if applicable).</p>
+
+        <h3>7.6 Right to Restrict Processing</h3>
+        <p>You can request that we restrict how we use your data (e.g., stop sending analytics but keep for legal purposes).</p>
+        <p><strong>How to request:</strong> Email <a href="mailto:info.apexracetech@gmail.com">info.apexracetech@gmail.com</a> with subject "Data Processing Restriction Request"</p>
+
+        <hr>
+
+        <h2>8. CHILDREN AND MINORS</h2>
+        <p>RACE Insight is designed for motorsports professionals and enthusiasts, typically 18 and older.</p>
+        <ul>
+            <li>We do not knowingly collect data from children under 13</li>
+            <li>If you are under 18, please obtain parental consent before using the Software</li>
+            <li>If we discover we have collected data from a child under 13, we will delete it immediately</li>
+        </ul>
+        <p><strong>Contact:</strong> <a href="mailto:info.apexracetech@gmail.com">info.apexracetech@gmail.com</a> if you have concerns about a child's data.</p>
+
+        <hr>
+
+        <h2>9. SECURITY AND DATA PROTECTION</h2>
+
+        <h3>9.1 Our Security Measures</h3>
+        <p>We take reasonable steps to protect your data:</p>
+        <ul>
+            <li>Encryption in transit: Data sent from the app to PostHog uses HTTPS (encrypted)</li>
+            <li>Encryption at rest: PostHog stores data encrypted on their servers</li>
+            <li>Restricted access: Support emails are stored in a password-protected account</li>
+            <li>Automatic deletion: Event logs are automatically deleted after 30 days</li>
+            <li>Local storage only: Anonymous user IDs are stored locally on your device, not on our servers</li>
+            <li>No session recording: Session replay is disabled in PostHog</li>
+            <li>No backup of local data: We do not back up your project files without your explicit consent</li>
+            <li>Temporary file cleanup: Backend deletes temporary parsing files after processing</li>
+        </ul>
+
+        <h3>9.2 What We Do Not Have</h3>
+        <ul>
+            <li>Your project files (stored completely locally)</li>
+            <li>Your telemetry data (never uploaded)</li>
+            <li>Session recordings (disabled)</li>
+            <li>Keystroke logs (disabled)</li>
+            <li>Screen recordings (disabled)</li>
+        </ul>
+
+        <h3>9.3 Limitations and Risks</h3>
+        <ul>
+            <li>No guarantee of absolute security: No system is 100% secure</li>
+            <li>Your responsibility: Back up important data locally. Do not rely on cloud sync until officially provided</li>
+            <li>Third-party risks: PostHog and Google may be subject to breaches</li>
+            <li>Browser storage risk: Your anonymous user ID is stored in localStorage; clearing your browser cache will remove it</li>
+            <li>Local data at risk: If your device is compromised, local files may be at risk (encrypt your device for additional protection)</li>
+        </ul>
+
+        <h3>9.4 Data Breach Notification</h3>
+        <p>If we discover a breach of your personal data, we will:</p>
+        <ul>
+            <li>Notify you within 30 days via email (or earlier if required by law)</li>
+            <li>Provide details: What happened, what data was affected, what steps you should take</li>
+            <li>Report to authorities: If required by DPDP or GDPR</li>
+        </ul>
+
+        <hr>
+
+        <h2>10. OFFLINE OPERATION AND DATA QUEUING</h2>
+
+        <h3>10.1 Offline Capability</h3>
+        <p>RACE Insight works mostly offline:</p>
+        <ul>
+            <li>File import and analysis work offline (after initial sign-in)</li>
+            <li>Telemetry visualization works offline</li>
+            <li>First-time sign-in requires internet (Google authentication)</li>
+            <li>Map tiles (Mapbox/OpenStreetMap) require internet</li>
+            <li>PostHog events are queued locally if offline, sent when online</li>
+        </ul>
+
+        <h3>10.2 Event Queuing</h3>
+        <p>When you are offline:</p>
+        <ul>
+            <li>Analytics events are stored in local storage (analytics_event_queue)</li>
+            <li>Maximum queue size: 100 events</li>
+            <li>Events are flushed (sent to PostHog) when you reconnect to the internet</li>
+            <li>Events are timestamped with their original occurrence time</li>
+        </ul>
+
+        <h3>10.3 Local Data Caching</h3>
+        <p>The app caches data locally for performance:</p>
+        <ul>
+            <li>Session configurations in localStorage</li>
+            <li>Settings in localStorage</li>
+            <li>Panel layouts and preferences in localStorage</li>
+            <li>These survive offline operation and app restarts</li>
+        </ul>
+
+        <hr>
+
+        <h2>11. FUTURE FEATURES AND UPDATES TO THIS POLICY</h2>
+
+        <h3>11.1 Current Scope (Local-Only Beta)</h3>
+        <p>This Policy applies to the local-only, no cloud, no AI beta version with manual event tracking only.</p>
+
+        <h3>11.2 Future Changes We May Make</h3>
+        <p>When we introduce cloud synchronization, AI-powered features, subscription/account systems, team/collaborative features, or additional tracking, we will:</p>
+        <ul>
+            <li>Update this Privacy Policy with detailed sections on new data processing</li>
+            <li>Notify you via email, in-app message, or website notice (at least 30 days in advance)</li>
+            <li>Allow opt-out or modification: You can choose not to use new features, or continue with the existing version</li>
+        </ul>
+
+        <h3>11.3 How We Will Notify You</h3>
+        <ul>
+            <li>Email to the address associated with your Google account (if signed in)</li>
+            <li>In-app notification on next launch</li>
+            <li>Website notice at <a href="https://www.apexracetech.com/privacy" target="_blank" rel="noopener noreferrer">https://www.apexracetech.com/privacy</a> with an "Updated" date</li>
+            <li>For major changes, we will provide 30 days' notice before implementation</li>
+        </ul>
+
+        <hr>
+
+        <h2>12. INTERNATIONAL DATA TRANSFERS</h2>
+
+        <h3>12.1 Where Your Data Is Stored</h3>
+        <p><strong>Desktop/App Data (Local):</strong> Stored on your device, in India or wherever you are located. Not transferred internationally unless you explicitly use future cloud features. Under your complete control.</p>
+        <p><strong>PostHog Analytics Event Data:</strong> Processed by PostHog (EU or US, depending on their configuration). May be transferred outside your country.</p>
+        <p><strong>Google Firebase (If You Sign In):</strong> Processed by Google (US servers primarily). Email, display name, and authentication data stored by Google.</p>
+        <p><strong>Website Analytics:</strong> Processed by Google Analytics (US servers).</p>
+
+        <h3>12.2 India-to-EU/US Transfer (GDPR)</h3>
+        <p>If you are in the EU and data is transferred from India to the US or EU:</p>
+        <ul>
+            <li>We rely on Standard Contractual Clauses (SCCs) with third parties (PostHog, Google)</li>
+            <li>These clauses provide GDPR-equivalent protections during the transfer</li>
+            <li>PostHog and Google have their own compliance certifications (Data Processing Agreements available)</li>
+        </ul>
+
+        <h3>12.3 Your Consent</h3>
+        <p>By using RACE Insight, you consent to:</p>
+        <ul>
+            <li>Processing of your data in the locations described above</li>
+            <li>International transfers as necessary to provide the service</li>
+            <li>If analytics are disabled, only essential authentication data (if signed in) will be processed</li>
+        </ul>
+
+        <hr>
+
+        <h2>13. CONTACT AND SUPPORT</h2>
+        <p>For questions or requests regarding this Privacy Policy, contact:</p>
+        <p><strong>Email:</strong> <a href="mailto:info.apexracetech@gmail.com">info.apexracetech@gmail.com</a><br>
+        <strong>Address:</strong> Chennai, Tamil Nadu, India<br>
+        <strong>Website:</strong> <a href="https://www.apexracetech.com/support" target="_blank" rel="noopener noreferrer">https://www.apexracetech.com/support</a></p>
+
+        <hr>
+
+        <h2>14. COMPLAINTS AND ESCALATION</h2>
+
+        <h3>14.1 Complaint Process</h3>
+        <p>If you believe we are mishandling your data:</p>
+        <ol>
+            <li>Contact us first at <a href="mailto:info.apexracetech@gmail.com">info.apexracetech@gmail.com</a> with description of the issue, when it occurred, and what outcome you are seeking</li>
+            <li>We will respond within 30 days with investigation results and remedial action (if applicable)</li>
+        </ol>
+
+        <h3>14.2 Regulatory Complaints</h3>
+        <p>If you are not satisfied with our response, you can file a complaint with:</p>
+        <ul>
+            <li><strong>India (DPDP Act):</strong> Data Protection Board of India (once operational) or the Ministry of Electronics and Information Technology (MeitY)</li>
+            <li><strong>EU (GDPR):</strong> Your national data protection authority (DPA). See <a href="https://edpb.ec.europa.eu/about-edpb/board/members_en" target="_blank" rel="noopener noreferrer">https://edpb.ec.europa.eu/about-edpb/board/members_en</a></li>
+            <li><strong>UK (UK-GDPR):</strong> Information Commissioner's Office (ICO) at <a href="https://ico.org.uk" target="_blank" rel="noopener noreferrer">https://ico.org.uk</a></li>
+            <li><strong>US (State Privacy Laws):</strong> Depending on your state's privacy law (CCPA, VCCPA, etc.), you may have additional rights.</li>
+        </ul>
+
+        <hr>
+
+        <h2>15. COOKIES AND TRACKING TECHNOLOGIES</h2>
+
+        <h3>15.1 Cookies</h3>
+        <p><strong>Desktop App:</strong> The RACE Insight desktop application does not use cookies (Electron app, not web-based).</p>
+        <p><strong>Website:</strong> The RACE Insight website (<a href="https://www.apexracetech.com" target="_blank" rel="noopener noreferrer">https://www.apexracetech.com</a>) uses Google Analytics (analytics cookies) and essential cookies (session, security).</p>
+        <p>You can disable cookies in your browser settings or use the Google Analytics opt-out browser add-on.</p>
+
+        <h3>15.2 Local Storage</h3>
+        <p>The desktop app uses localStorage for:</p>
+        <ul>
+            <li>Anonymous user ID (UUID)</li>
+            <li>Session configurations</li>
+            <li>Settings and preferences</li>
+            <li>Analytics event queue (offline)</li>
+        </ul>
+        <p>You can clear localStorage by going to Settings > Privacy > Clear Local Data or by clearing your browser data.</p>
+
+        <hr>
+
+        <h2>16. THIRD-PARTY LINKS AND SERVICES</h2>
+        <p>RACE Insight may contain links to external websites or services (e.g., GitHub, documentation, tutorials).</p>
+        <ul>
+            <li>We are not responsible for third-party privacy practices</li>
+            <li>Review their privacy policies before providing information</li>
+            <li>This Privacy Policy applies only to RACE Insight, not to external sites</li>
+        </ul>
+
+        <hr>
+
+        <h2>17. CHANGES TO THIS PRIVACY POLICY</h2>
+        <p>APEX Race Technologies may update this Policy at any time. Changes will be posted at <a href="https://www.apexracetech.com/privacy" target="_blank" rel="noopener noreferrer">https://www.apexracetech.com/privacy</a></p>
+        <ul>
+            <li>Latest update: December 26, 2025</li>
+            <li>Significant changes will be announced via email (if you signed in) or in-app notification</li>
+            <li>Continued use of RACE Insight after changes are posted constitutes your acceptance of the updated policy</li>
+        </ul>
+
+        <hr>
+
+        <h2>18. RELATED DOCUMENTS</h2>
+        <ul>
+            <li>End User License Agreement (EULA): <a href="https://www.apexracetech.com/eula" target="_blank" rel="noopener noreferrer">https://www.apexracetech.com/eula</a></li>
+            <li>Terms of Service: <a href="https://www.apexracetech.com/terms" target="_blank" rel="noopener noreferrer">https://www.apexracetech.com/terms</a></li>
+            <li>Third-Party Licenses: <a href="https://www.apexracetech.com/third-party-licenses" target="_blank" rel="noopener noreferrer">https://www.apexracetech.com/third-party-licenses</a></li>
+            <li>Help & Documentation: <a href="https://www.apexracetech.com/help" target="_blank" rel="noopener noreferrer">https://www.apexracetech.com/help</a></li>
+        </ul>
+
+        <hr>
+
+        <p>Copyright 2025 APEX Race Technologies. All rights reserved.</p>
+        <p><strong>Last Updated:</strong> December 26, 2025</p>
+        <p><strong>Version:</strong> 2.0 (Beta - Based on Codebase Analysis)</p>
 
     </main>
 

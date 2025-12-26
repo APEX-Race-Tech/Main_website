@@ -16,7 +16,7 @@
     <style>
         .policy-content {
             padding: 8rem 2rem 4rem;
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             color: white;
         }
@@ -33,6 +33,13 @@
             margin-bottom: 1rem;
             color: #e5e5e5;
         }
+        .policy-content h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: #e5e5e5;
+        }
         .policy-content p {
             margin-bottom: 1rem;
             line-height: 1.6;
@@ -44,6 +51,32 @@
             margin-bottom: 1rem;
             color: #d1d5db;
         }
+        .policy-content ol {
+            list-style-type: decimal;
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+            color: #d1d5db;
+        }
+        .policy-content li {
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+        .policy-content a {
+            color: #00d2ff;
+            text-decoration: underline;
+        }
+        .policy-content a:hover {
+            color: #00a8cc;
+        }
+        .policy-content hr {
+            border: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 2rem 0;
+        }
+        .policy-content strong {
+            font-weight: 600;
+            color: #e5e5e5;
+        }
         .license-item {
             margin-bottom: 2rem;
             padding-bottom: 2rem;
@@ -51,6 +84,15 @@
         }
         .license-item:last-child {
             border-bottom: none;
+        }
+        .license-info {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        .license-info p {
+            margin-bottom: 0.5rem;
         }
     </style>
 </head>
@@ -90,23 +132,622 @@
     </div>
 
     <main class="policy-content">
-        <h1>Third-Party Licenses</h1>
-        <p>Last updated: December 25, 2025</p>
+        <h1>THIRD-PARTY LICENSES AND ATTRIBUTIONS</h1>
+        <p><strong>RACE Insight – Third-Party Software Licenses</strong></p>
+        <p><strong>Effective Date:</strong> December 26, 2025</p>
 
-        <p>This page lists the third-party libraries, frameworks, and software used in Race Insight along with their respective licenses.</p>
+        <hr>
 
-        <!-- License items will be added here -->
-        <!-- Example structure:
+        <h2>1. OVERVIEW</h2>
+        <p>RACE Insight incorporates third-party open-source software, libraries, and services. This document provides attribution and license information for all third-party components used in the Software.</p>
+        <p>By using RACE Insight, you acknowledge that you have reviewed and agree to comply with the license terms of all third-party software listed below.</p>
+
+        <hr>
+
+        <h2>2. FRONTEND FRAMEWORK AND CORE LIBRARIES</h2>
+
         <div class="license-item">
-            <h2>Library Name</h2>
-            <p><strong>Version:</strong> X.X.X</p>
-            <p><strong>License:</strong> MIT License</p>
-            <p><strong>License Text:</strong></p>
-            <pre style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; overflow-x: auto;">
-[License text here]
-            </pre>
+            <h3>2.1 React</h3>
+            <div class="license-info">
+                <p><strong>Library:</strong> React</p>
+                <p><strong>Version:</strong> 18.3.1</p>
+                <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> Facebook, Inc. and its affiliates</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/facebook/react/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/facebook/react/blob/main/LICENSE</a></p>
+                <p><strong>Usage:</strong> Core UI framework for building the application interface</p>
+            </div>
         </div>
-        -->
+
+        <div class="license-item">
+            <h3>2.2 React DOM</h3>
+            <div class="license-info">
+                <p><strong>Library:</strong> React DOM</p>
+                <p><strong>Version:</strong> 18.3.1</p>
+                <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> Facebook, Inc. and its affiliates</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/facebook/react/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/facebook/react/blob/main/LICENSE</a></p>
+                <p><strong>Usage:</strong> React rendering for web and Electron</p>
+            </div>
+        </div>
+
+        <hr>
+
+        <h2>3. UI COMPONENT LIBRARIES</h2>
+
+        <div class="license-item">
+            <h3>3.1 Radix UI Components</h3>
+            <div class="license-info">
+                <p><strong>Libraries:</strong> @radix-ui/react-* (Accordion, Alert Dialog, Aspect Ratio, Avatar, Checkbox, Collapsible, Context Menu, Dialog, Dropdown Menu, Hover Card, Label, Menubar, Navigation Menu, Popover, Progress, Radio Group, Scroll Area, Select, Separator, Slider, Slot, Switch, Tabs, Toggle, Toggle Group, Tooltip)</p>
+                <p><strong>Version:</strong> Various (1.1.2 - 2.2.6)</p>
+                <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> Radix UI</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/radix-ui/primitives/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/radix-ui/primitives/blob/main/LICENSE</a></p>
+                <p><strong>Usage:</strong> Accessible, unstyled UI primitives for building the application interface</p>
+            </div>
+        </div>
+
+        <div class="license-item">
+            <h3>3.2 Lucide React</h3>
+            <div class="license-info">
+                <p><strong>Library:</strong> lucide-react</p>
+                <p><strong>Version:</strong> 0.487.0</p>
+                <p><strong>License:</strong> ISC License</p>
+                <p><strong>Copyright:</strong> Lucide Contributors</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/lucide-icons/lucide/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/lucide-icons/lucide/blob/main/LICENSE</a></p>
+                <p><strong>Usage:</strong> Icon library for UI icons throughout the application</p>
+            </div>
+        </div>
+
+        <div class="license-item">
+            <h3>3.3 Class Variance Authority</h3>
+            <div class="license-info">
+                <p><strong>Library:</strong> class-variance-authority</p>
+                <p><strong>Version:</strong> 0.7.1</p>
+                <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> Joe Bell</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/joe-bell/cva/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/joe-bell/cva/blob/main/LICENSE</a></p>
+                <p><strong>Usage:</strong> Utility for managing component variants</p>
+            </div>
+        </div>
+
+        <div class="license-item">
+            <h3>3.4 clsx</h3>
+            <div class="license-info">
+                <p><strong>Library:</strong> clsx</p>
+                <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> Luke Edwards</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/lukeed/clsx/blob/master/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/lukeed/clsx/blob/master/LICENSE</a></p>
+                <p><strong>Usage:</strong> Utility for constructing className strings conditionally</p>
+            </div>
+        </div>
+
+        <div class="license-item">
+            <h3>3.5 Tailwind Merge</h3>
+            <div class="license-info">
+                <p><strong>Library:</strong> tailwind-merge</p>
+                <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> Dany Castillo</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/dcastil/tailwind-merge/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/dcastil/tailwind-merge/blob/main/LICENSE</a></p>
+                <p><strong>Usage:</strong> Utility for merging Tailwind CSS classes</p>
+            </div>
+        </div>
+
+        <div class="license-item">
+            <h3>3.6 Command Menu (cmdk)</h3>
+            <div class="license-info">
+                <p><strong>Library:</strong> cmdk</p>
+                <p><strong>Version:</strong> 1.1.1</p>
+                <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> Paco Coursey</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/pacocoursey/cmdk/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/pacocoursey/cmdk/blob/main/LICENSE</a></p>
+                <p><strong>Usage:</strong> Command palette component</p>
+            </div>
+        </div>
+
+        <div class="license-item">
+            <h3>3.7 Sonner</h3>
+            <div class="license-info">
+                <p><strong>Library:</strong> sonner</p>
+                <p><strong>Version:</strong> 2.0.3</p>
+                <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> Emil Kowalski</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/emilkowalski/sonner/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/emilkowalski/sonner/blob/main/LICENSE</a></p>
+                <p><strong>Usage:</strong> Toast notification system</p>
+            </div>
+        </div>
+
+        <div class="license-item">
+            <h3>3.8 Vaul</h3>
+            <div class="license-info">
+                <p><strong>Library:</strong> vaul</p>
+                <p><strong>Version:</strong> 1.1.2</p>
+                <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> Emil Kowalski</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/emilkowalski/vaul/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/emilkowalski/vaul/blob/main/LICENSE</a></p>
+                <p><strong>Usage:</strong> Drawer component</p>
+            </div>
+        </div>
+
+        <div class="license-item">
+            <h3>3.9 Input OTP</h3>
+            <div class="license-info">
+                <p><strong>Library:</strong> input-otp</p>
+                <p><strong>Version:</strong> 1.4.2</p>
+                <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> Bruno Lemos</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/brunolemos/input-otp/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/brunolemos/input-otp/blob/main/LICENSE</a></p>
+                <p><strong>Usage:</strong> OTP input component</p>
+            </div>
+        </div>
+
+        <div class="license-item">
+            <h3>3.10 React Hook Form</h3>
+            <div class="license-info">
+                <p><strong>Library:</strong> react-hook-form</p>
+                <p><strong>Version:</strong> 7.55.0</p>
+                <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> React Hook Form</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/react-hook-form/react-hook-form/blob/master/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/react-hook-form/react-hook-form/blob/master/LICENSE</a></p>
+                <p><strong>Usage:</strong> Form state management and validation</p>
+            </div>
+        </div>
+
+        <div class="license-item">
+            <h3>3.11 React Resizable Panels</h3>
+            <div class="license-info">
+                <p><strong>Library:</strong> react-resizable-panels</p>
+                <p><strong>Version:</strong> 2.1.7</p>
+                <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> Brian Vaughn</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/bvaughn/react-resizable-panels/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/bvaughn/react-resizable-panels/blob/main/LICENSE</a></p>
+                <p><strong>Usage:</strong> Resizable panel layouts</p>
+            </div>
+        </div>
+
+        <div class="license-item">
+            <h3>3.12 Re-resizable</h3>
+            <div class="license-info">
+                <p><strong>Library:</strong> re-resizable</p>
+                <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> bokuweb</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/bokuweb/re-resizable/blob/master/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/bokuweb/re-resizable/blob/master/LICENSE</a></p>
+                <p><strong>Usage:</strong> Resizable components</p>
+            </div>
+        </div>
+
+        <div class="license-item">
+            <h3>3.13 React Window</h3>
+            <div class="license-info">
+                <p><strong>Library:</strong> react-window</p>
+                <p><strong>Version:</strong> 2.2.3</p>
+                <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> Brian Vaughn</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/bvaughn/react-window/blob/master/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/bvaughn/react-window/blob/master/LICENSE</a></p>
+                <p><strong>Usage:</strong> Virtualized windowing for large lists</p>
+            </div>
+        </div>
+
+        <div class="license-item">
+            <h3>3.14 React Day Picker</h3>
+            <div class="license-info">
+                <p><strong>Library:</strong> react-day-picker</p>
+                <p><strong>Version:</strong> 8.10.1</p>
+                <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> Giampaolo Bellavite</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/gpbl/react-day-picker/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/gpbl/react-day-picker/blob/main/LICENSE</a></p>
+                <p><strong>Usage:</strong> Date picker component</p>
+            </div>
+        </div>
+
+        <div class="license-item">
+            <h3>3.15 Embla Carousel</h3>
+            <div class="license-info">
+                <p><strong>Library:</strong> embla-carousel-react</p>
+                <p><strong>Version:</strong> 8.6.0</p>
+                <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> David Thyresson</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/davidjerleke/embla-carousel/blob/master/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/davidjerleke/embla-carousel/blob/master/LICENSE</a></p>
+                <p><strong>Usage:</strong> Carousel component</p>
+            </div>
+        </div>
+
+        <div class="license-item">
+            <h3>3.16 Next Themes</h3>
+            <div class="license-info">
+                <p><strong>Library:</strong> next-themes</p>
+                <p><strong>Version:</strong> 0.4.6</p>
+                <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> shadcn</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/pacocoursey/next-themes/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/pacocoursey/next-themes/blob/main/LICENSE</a></p>
+                <p><strong>Usage:</strong> Theme management</p>
+            </div>
+        </div>
+
+        <hr>
+
+        <h2>4. CHARTING AND VISUALIZATION LIBRARIES</h2>
+
+        <div class="license-item">
+            <h3>4.1 Apache ECharts</h3>
+            <div class="license-info">
+                <p><strong>Library:</strong> echarts</p>
+                <p><strong>Version:</strong> 6.0.0</p>
+                <p><strong>License:</strong> Apache License 2.0</p>
+                <p><strong>Copyright:</strong> Apache Software Foundation</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/apache/echarts/blob/master/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/apache/echarts/blob/master/LICENSE</a></p>
+                <p><strong>Usage:</strong> Primary charting library for telemetry data visualization</p>
+            </div>
+        </div>
+
+        <div class="license-item">
+            <h3>4.2 ECharts for React</h3>
+            <div class="license-info">
+                <p><strong>Library:</strong> echarts-for-react</p>
+                <p><strong>Version:</strong> 3.0.5</p>
+                <p><strong>License:</strong> Apache License 2.0</p>
+                <p><strong>Copyright:</strong> Apache Software Foundation</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/hustcc/echarts-for-react/blob/master/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/hustcc/echarts-for-react/blob/master/LICENSE</a></p>
+                <p><strong>Usage:</strong> React wrapper for Apache ECharts</p>
+            </div>
+        </div>
+
+        <div class="license-item">
+            <h3>4.3 Recharts</h3>
+            <div class="license-info">
+                <p><strong>Library:</strong> recharts</p>
+                <p><strong>Version:</strong> 2.15.2</p>
+                <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> Recharts Group</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/recharts/recharts/blob/master/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/recharts/recharts/blob/master/LICENSE</a></p>
+                <p><strong>Usage:</strong> Additional charting components for React</p>
+            </div>
+        </div>
+
+        <div class="license-item">
+            <h3>4.4 uPlot</h3>
+            <div class="license-info">
+                <p><strong>Library:</strong> uplot</p>
+                <p><strong>Version:</strong> 1.6.32</p>
+                <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> Leon Sorokin</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/leeoniya/uPlot/blob/master/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/leeoniya/uPlot/blob/master/LICENSE</a></p>
+                <p><strong>Usage:</strong> Fast, lightweight charting library for time-series data</p>
+            </div>
+        </div>
+
+        <div class="license-item">
+            <h3>4.5 uPlot React</h3>
+            <div class="license-info">
+                <p><strong>Library:</strong> uplot-react</p>
+                <p><strong>Version:</strong> 1.2.4</p>
+                <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> Leon Sorokin</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/leeoniya/uPlot/blob/master/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/leeoniya/uPlot/blob/master/LICENSE</a></p>
+                <p><strong>Usage:</strong> React wrapper for uPlot</p>
+            </div>
+        </div>
+
+        <hr>
+
+        <h2>5. MAPPING AND GEOGRAPHIC SERVICES</h2>
+
+        <div class="license-item">
+            <h3>5.1 Mapbox GL JS</h3>
+            <div class="license-info">
+                <p><strong>Library:</strong> mapbox-gl</p>
+                <p><strong>Version:</strong> 3.17.0</p>
+                <p><strong>License:</strong> BSD 2-Clause License</p>
+                <p><strong>Copyright:</strong> Mapbox</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/mapbox/mapbox-gl-js/blob/main/LICENSE.txt" target="_blank" rel="noopener noreferrer">https://github.com/mapbox/mapbox-gl-js/blob/main/LICENSE.txt</a></p>
+                <p><strong>Usage:</strong> Interactive map rendering for circuit visualization</p>
+                <p><strong>Additional Terms:</strong> Mapbox GL JS uses WebGL and requires attribution. See Mapbox Terms of Service: <a href="https://www.mapbox.com/legal/tos/" target="_blank" rel="noopener noreferrer">https://www.mapbox.com/legal/tos/</a></p>
+            </div>
+        </div>
+
+        <div class="license-item">
+            <h3>5.2 React Map GL</h3>
+            <div class="license-info">
+                <p><strong>Library:</strong> react-map-gl</p>
+                <p><strong>Version:</strong> 8.1.0</p>
+                <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> Uber Technologies, Inc.</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/visgl/react-map-gl/blob/master/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/visgl/react-map-gl/blob/master/LICENSE</a></p>
+                <p><strong>Usage:</strong> React wrapper for Mapbox GL</p>
+            </div>
+        </div>
+
+        <div class="license-item">
+            <h3>5.3 OpenStreetMap</h3>
+            <div class="license-info">
+                <p><strong>Service:</strong> OpenStreetMap</p>
+                <p><strong>License:</strong> Open Database License (ODbL)</p>
+                <p><strong>Copyright:</strong> OpenStreetMap Contributors</p>
+                <p><strong>License URL:</strong> <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">https://www.openstreetmap.org/copyright</a></p>
+                <p><strong>Usage:</strong> Map tile data source (via Mapbox)</p>
+                <p><strong>Attribution Required:</strong> © OpenStreetMap contributors</p>
+            </div>
+        </div>
+
+        <hr>
+
+        <h2>6. AUTHENTICATION AND BACKEND SERVICES</h2>
+
+        <div class="license-item">
+            <h3>6.1 Google Firebase</h3>
+            <div class="license-info">
+                <p><strong>Service:</strong> Firebase (Authentication)</p>
+                <p><strong>Version:</strong> 12.6.0</p>
+                <p><strong>License:</strong> Proprietary (Google Terms of Service)</p>
+                <p><strong>Copyright:</strong> Google LLC</p>
+                <p><strong>Terms URL:</strong> <a href="https://firebase.google.com/terms" target="_blank" rel="noopener noreferrer">https://firebase.google.com/terms</a></p>
+                <p><strong>Privacy URL:</strong> <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">https://policies.google.com/privacy</a></p>
+                <p><strong>Usage:</strong> User authentication via Google Sign-In</p>
+                <p><strong>Note:</strong> Firebase is a proprietary service. Your use of Firebase is subject to Google's Terms of Service and Privacy Policy.</p>
+            </div>
+        </div>
+
+        <div class="license-item">
+            <h3>6.2 PostHog</h3>
+            <div class="license-info">
+                <p><strong>Service:</strong> PostHog (Analytics)</p>
+                <p><strong>Library:</strong> posthog-js</p>
+                <p><strong>Version:</strong> 1.310.1</p>
+                <p><strong>License:</strong> MIT License (Library) / Proprietary (Service)</p>
+                <p><strong>Copyright:</strong> PostHog, Inc.</p>
+                <p><strong>Library License URL:</strong> <a href="https://github.com/PostHog/posthog-js/blob/master/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/PostHog/posthog-js/blob/master/LICENSE</a></p>
+                <p><strong>Service Terms URL:</strong> <a href="https://posthog.com/terms" target="_blank" rel="noopener noreferrer">https://posthog.com/terms</a></p>
+                <p><strong>Privacy URL:</strong> <a href="https://posthog.com/privacy" target="_blank" rel="noopener noreferrer">https://posthog.com/privacy</a></p>
+                <p><strong>Usage:</strong> Anonymous usage analytics and event tracking</p>
+                <p><strong>Note:</strong> The PostHog JavaScript library is open-source (MIT), but the PostHog service itself is proprietary. Analytics data is sent to PostHog servers.</p>
+            </div>
+        </div>
+
+        <hr>
+
+        <h2>7. ELECTRON FRAMEWORK</h2>
+
+        <div class="license-item">
+            <h3>7.1 Electron</h3>
+            <div class="license-info">
+                <p><strong>Framework:</strong> Electron</p>
+                <p><strong>Version:</strong> 39.2.3</p>
+                <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> GitHub Inc.</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/electron/electron/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/electron/electron/blob/main/LICENSE</a></p>
+                <p><strong>Usage:</strong> Desktop application framework</p>
+            </div>
+        </div>
+
+        <div class="license-item">
+            <h3>7.2 Electron Log</h3>
+            <div class="license-info">
+                <p><strong>Library:</strong> electron-log</p>
+                <p><strong>Version:</strong> 5.4.3</p>
+                <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> Alexey Prokhorov</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/megahertz/electron-log/blob/master/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/megahertz/electron-log/blob/master/LICENSE</a></p>
+                <p><strong>Usage:</strong> Logging utility for Electron</p>
+            </div>
+        </div>
+
+        <div class="license-item">
+            <h3>7.3 Electron Updater</h3>
+            <div class="license-info">
+                <p><strong>Library:</strong> electron-updater</p>
+                <p><strong>Version:</strong> 6.6.2</p>
+                <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> Vercel, Inc.</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/electron-userland/electron-builder/blob/master/packages/electron-updater/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/electron-userland/electron-builder/blob/master/packages/electron-updater/LICENSE</a></p>
+                <p><strong>Usage:</strong> Automatic application updates</p>
+            </div>
+        </div>
+
+        <div class="license-item">
+            <h3>7.4 Update Electron App</h3>
+            <div class="license-info">
+                <p><strong>Library:</strong> update-electron-app</p>
+                <p><strong>Version:</strong> 3.1.2</p>
+                <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> Gregor Martynus</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/electron/update-electron-app/blob/master/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/electron/update-electron-app/blob/master/LICENSE</a></p>
+                <p><strong>Usage:</strong> Electron update notifications</p>
+            </div>
+        </div>
+
+        <hr>
+
+        <h2>8. BACKEND RUST DEPENDENCIES</h2>
+        <p>The RACE Insight backend is built with Rust and uses the following open-source crates:</p>
+
+        <h3>8.1 Web Framework</h3>
+        <div class="license-item">
+            <div class="license-info">
+                <p><strong>Crate:</strong> axum</p>
+                <p><strong>Version:</strong> 0.7</p>
+                <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> Tower Contributors</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/tokio-rs/axum/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/tokio-rs/axum/blob/main/LICENSE</a></p>
+                <p><strong>Usage:</strong> Web framework for the backend API</p>
+            </div>
+        </div>
+
+        <div class="license-item">
+            <div class="license-info">
+                <p><strong>Crate:</strong> tokio</p>
+                <p><strong>Version:</strong> 1.x</p>
+                <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> Tokio Contributors</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/tokio-rs/tokio/blob/master/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/tokio-rs/tokio/blob/master/LICENSE</a></p>
+                <p><strong>Usage:</strong> Async runtime</p>
+            </div>
+        </div>
+
+        <div class="license-item">
+            <div class="license-info">
+                <p><strong>Crate:</strong> tower</p>
+                <p><strong>Version:</strong> 0.4</p>
+                <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> Tower Contributors</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/tower-rs/tower/blob/master/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/tower-rs/tower/blob/master/LICENSE</a></p>
+                <p><strong>Usage:</strong> Middleware framework</p>
+            </div>
+        </div>
+
+        <div class="license-item">
+            <div class="license-info">
+                <p><strong>Crate:</strong> tower-http</p>
+                <p><strong>Version:</strong> 0.5</p>
+                <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> Tower Contributors</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/tower-rs/tower-http/blob/master/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/tower-rs/tower-http/blob/master/LICENSE</a></p>
+                <p><strong>Usage:</strong> HTTP middleware</p>
+            </div>
+        </div>
+
+        <h3>8.2 Serialization</h3>
+        <p>Key serialization crates include serde, serde_json, serde_yaml - all dual licensed under MIT or Apache 2.0. See full list in source documentation.</p>
+
+        <h3>8.3-8.6 Additional Rust Dependencies</h3>
+        <p>The backend uses additional Rust crates for binary parsing, CSV handling, error management, and utilities. All are open-source and properly licensed. For a complete list, see the Cargo.toml file in the source repository.</p>
+
+        <hr>
+
+        <h2>9. BUILD TOOLS AND DEVELOPMENT DEPENDENCIES</h2>
+
+        <div class="license-item">
+            <h3>9.1 Vite</h3>
+            <div class="license-info">
+                <p><strong>Tool:</strong> vite</p>
+                <p><strong>Version:</strong> 7.3.0</p>
+                <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> Evan You</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/vitejs/vite/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/vitejs/vite/blob/main/LICENSE</a></p>
+                <p><strong>Usage:</strong> Build tool and development server</p>
+            </div>
+        </div>
+
+        <div class="license-item">
+            <h3>9.2 TypeScript</h3>
+            <div class="license-info">
+                <p><strong>Language:</strong> typescript</p>
+                <p><strong>Version:</strong> 5.9.3</p>
+                <p><strong>License:</strong> Apache License 2.0</p>
+                <p><strong>Copyright:</strong> Microsoft Corporation</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/microsoft/TypeScript/blob/main/LICENSE.txt" target="_blank" rel="noopener noreferrer">https://github.com/microsoft/TypeScript/blob/main/LICENSE.txt</a></p>
+                <p><strong>Usage:</strong> Type-safe JavaScript development</p>
+            </div>
+        </div>
+
+        <div class="license-item">
+            <h3>9.3 Electron Forge</h3>
+            <div class="license-info">
+                <p><strong>Tool:</strong> @electron-forge/*</p>
+                <p><strong>Version:</strong> 7.10.2</p>
+            <p><strong>License:</strong> MIT License</p>
+                <p><strong>Copyright:</strong> Electron Forge Contributors</p>
+                <p><strong>License URL:</strong> <a href="https://github.com/electron/forge/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">https://github.com/electron/forge/blob/main/LICENSE</a></p>
+                <p><strong>Usage:</strong> Electron application packaging and distribution</p>
+            </div>
+        </div>
+
+        <p>Additional build tools and development dependencies use standard open-source licenses (primarily MIT). For a complete list, see package.json in the source repository.</p>
+
+        <hr>
+
+        <h2>10. LICENSE COMPLIANCE AND ATTRIBUTION</h2>
+
+        <h3>10.1 Open Source Compliance</h3>
+        <p>RACE Insight complies with all open-source license requirements. All third-party open-source software is:</p>
+        <ul>
+            <li>Properly attributed in this document</li>
+            <li>Used in accordance with their respective licenses</li>
+            <li>Not modified in ways that violate license terms (unless explicitly permitted)</li>
+        </ul>
+
+        <h3>10.2 MIT License</h3>
+        <p>Most dependencies use the MIT License, which permits:</p>
+        <ul>
+            <li>Commercial use</li>
+            <li>Modification</li>
+            <li>Distribution</li>
+            <li>Private use</li>
+        </ul>
+        <p><strong>Requirements:</strong></p>
+        <ul>
+            <li>License and copyright notice must be included</li>
+            <li>This document serves as the required attribution</li>
+        </ul>
+
+        <h3>10.3 Apache License 2.0</h3>
+        <p>Some dependencies use the Apache License 2.0, which permits:</p>
+        <ul>
+            <li>Commercial use</li>
+            <li>Modification</li>
+            <li>Distribution</li>
+            <li>Patent use</li>
+            <li>Private use</li>
+        </ul>
+        <p><strong>Requirements:</strong></p>
+        <ul>
+            <li>License and copyright notice must be included</li>
+            <li>Changes must be documented</li>
+            <li>This document serves as the required attribution</li>
+        </ul>
+
+        <h3>10.4 Proprietary Services</h3>
+        <p>Some services (Firebase, PostHog, Mapbox) are proprietary and subject to their own Terms of Service. Your use of RACE Insight constitutes acceptance of:</p>
+        <ul>
+            <li>Google Firebase Terms of Service</li>
+            <li>PostHog Terms of Service</li>
+            <li>Mapbox Terms of Service</li>
+        </ul>
+        <p>See Section 11 of the EULA for details.</p>
+
+        <hr>
+
+        <h2>11. SOURCE CODE AVAILABILITY</h2>
+
+        <h3>11.1 RACE Insight Source Code</h3>
+        <p>The RACE Insight application source code is proprietary and not publicly available. However, all third-party open-source dependencies are available from their respective repositories.</p>
+
+        <h3>11.2 Third-Party Source Code</h3>
+        <p>You may access the source code of all open-source dependencies from their respective GitHub repositories or package registries (npm, crates.io).</p>
+
+        <hr>
+
+        <h2>12. UPDATES TO THIS DOCUMENT</h2>
+
+        <h3>12.1 Version Control</h3>
+        <p>This document may be updated as dependencies are added, removed, or updated.</p>
+        <p><strong>Current Version:</strong> 1.0</p>
+        <p><strong>Last Updated:</strong> December 26, 2025</p>
+
+        <h3>12.2 Notification</h3>
+        <p>Major changes to third-party dependencies will be noted in release notes. This document will be updated to reflect current dependencies.</p>
+
+        <hr>
+
+        <h2>13. QUESTIONS AND CONTACT</h2>
+        <p>If you have questions about third-party licenses or need additional information:</p>
+        <p><strong>Email:</strong> <a href="mailto:info.apexracetech@gmail.com">info.apexracetech@gmail.com</a><br>
+        <strong>Website:</strong> <a href="https://www.apexracetech.com" target="_blank" rel="noopener noreferrer">https://www.apexracetech.com</a></p>
+
+        <hr>
+
+        <h2>14. ACKNOWLEDGMENT</h2>
+        <p>By using RACE Insight, you acknowledge that:</p>
+        <ol>
+            <li>You have reviewed this Third-Party Licenses document</li>
+            <li>You understand that RACE Insight incorporates third-party software</li>
+            <li>You agree to comply with the license terms of all third-party software</li>
+            <li>You understand that some services are proprietary and subject to separate Terms of Service</li>
+            <li>You accept that APEX Race Technologies is not responsible for third-party software issues</li>
+        </ol>
+
+        <hr>
+
+        <p>Copyright 2025 APEX Race Technologies. All rights reserved.</p>
+        <p>This Third-Party Licenses document is effective December 26, 2025 – Version 1.0</p>
 
     </main>
 
@@ -125,4 +766,3 @@
     <script src="../js/main.js"></script>
 </body>
 </html>
-
