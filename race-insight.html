@@ -492,10 +492,79 @@
                 return null;
             }
 
+            // Update UI for logged in user (defined before use)
+            function updateUIForLoggedInUser(user) {
+                console.log("=== updateUIForLoggedInUser called ===");
+                try {
+                    const navProfile = document.getElementById('nav-profile');
+                    const mobileNavProfile = document.getElementById('mobile-nav-profile');
+                    const navAuthBtn = document.getElementById('nav-auth-btn');
+                    const mobileNavAuthBtn = document.getElementById('mobile-nav-auth-btn');
+                    const navLogoutBtn = document.getElementById('nav-logout-btn');
+                    const mobileNavLogoutBtn = document.getElementById('mobile-nav-logout-btn');
+                    const downloadBtns = document.querySelectorAll('a[href="#download"]');
+
+                    console.log("Elements found:", {
+                        navProfile: !!navProfile,
+                        mobileNavProfile: !!mobileNavProfile,
+                        navAuthBtn: !!navAuthBtn,
+                        mobileNavAuthBtn: !!mobileNavAuthBtn,
+                        navLogoutBtn: !!navLogoutBtn,
+                        mobileNavLogoutBtn: !!mobileNavLogoutBtn,
+                        downloadBtns: downloadBtns.length
+                    });
+
+                    // Show profile links in nav
+                    if (navProfile) {
+                        navProfile.style.display = 'block';
+                        console.log("✓ navProfile set to block");
+                    } else {
+                        console.warn("✗ navProfile element not found");
+                    }
+                    if (mobileNavProfile) {
+                        mobileNavProfile.style.display = 'block';
+                        console.log("✓ mobileNavProfile set to block");
+                    }
+                    
+                    // Hide auth buttons with !important to override CSS
+                    if (navAuthBtn) {
+                        navAuthBtn.style.setProperty('display', 'none', 'important');
+                        console.log("✓ navAuthBtn hidden");
+                    } else {
+                        console.warn("✗ navAuthBtn element not found");
+                    }
+                    if (mobileNavAuthBtn) {
+                        mobileNavAuthBtn.style.setProperty('display', 'none', 'important');
+                        console.log("✓ mobileNavAuthBtn hidden");
+                    }
+                    
+                    // Show logout buttons with !important
+                    if (navLogoutBtn) {
+                        navLogoutBtn.style.setProperty('display', 'inline-flex', 'important');
+                        console.log("✓ navLogoutBtn shown");
+                    } else {
+                        console.warn("✗ navLogoutBtn element not found");
+                    }
+                    if (mobileNavLogoutBtn) {
+                        mobileNavLogoutBtn.style.setProperty('display', 'block', 'important');
+                        console.log("✓ mobileNavLogoutBtn shown");
+                    }
+
+                    // Update download button text
+                    downloadBtns.forEach(btn => {
+                        btn.textContent = "Download";
+                    });
+                    
+                    console.log("=== UI update complete ===");
+                } catch (error) {
+                    console.error("Error in updateUIForLoggedInUser:", error);
+                }
+            }
+
             // Monitor Auth State
             firebase.auth().onAuthStateChanged(async (user) => {
                 if (user) {
-                    console.log("User is signed in:", user.email);
+                    console.log("=== User is signed in:", user.email, "===");
                     // Try to create/update profile, but don't fail if Firestore is offline
                     try {
                         await createUserProfile(user);
@@ -504,7 +573,7 @@
                     }
                     
                     // Update UI first
-                    await updateUIForLoggedInUser(user);
+                    updateUIForLoggedInUser(user);
                     
                     // Close modal immediately if it's open
                     if (authModal) {
@@ -514,7 +583,7 @@
                         // Hide modal after animation
                         setTimeout(() => {
                             authModal.style.setProperty('display', 'none', 'important');
-                            console.log("Modal display set to none");
+                            console.log("✓ Modal display set to none");
                         }, 300);
                         
                         // Execute pending download action if any
@@ -526,7 +595,7 @@
                         }
                     }
                 } else {
-                    console.log("User is signed out");
+                    console.log("=== User is signed out ===");
                     updateUIForLoggedOutUser();
                     // Ensure modal is hidden when logged out
                     if (authModal) {
@@ -543,58 +612,6 @@
                     authModal.style.display = 'none';
                 }, 300);
             });
-
-            // Update UI for logged in user
-            async function updateUIForLoggedInUser(user) {
-                console.log("updateUIForLoggedInUser called");
-                const navProfile = document.getElementById('nav-profile');
-                const mobileNavProfile = document.getElementById('mobile-nav-profile');
-                const navAuthBtn = document.getElementById('nav-auth-btn');
-                const mobileNavAuthBtn = document.getElementById('mobile-nav-auth-btn');
-                const navLogoutBtn = document.getElementById('nav-logout-btn');
-                const mobileNavLogoutBtn = document.getElementById('mobile-nav-logout-btn');
-                const downloadBtns = document.querySelectorAll('a[href="#download"]');
-
-                // Show profile links in nav
-                if (navProfile) {
-                    navProfile.style.display = 'block';
-                    console.log("navProfile set to block");
-                } else {
-                    console.warn("navProfile element not found");
-                }
-                if (mobileNavProfile) {
-                    mobileNavProfile.style.display = 'block';
-                }
-                
-                // Hide auth buttons with !important to override CSS
-                if (navAuthBtn) {
-                    navAuthBtn.style.setProperty('display', 'none', 'important');
-                    console.log("navAuthBtn hidden");
-                } else {
-                    console.warn("navAuthBtn element not found");
-                }
-                if (mobileNavAuthBtn) {
-                    mobileNavAuthBtn.style.setProperty('display', 'none', 'important');
-                }
-                
-                // Show logout buttons with !important
-                if (navLogoutBtn) {
-                    navLogoutBtn.style.setProperty('display', 'inline-flex', 'important');
-                    console.log("navLogoutBtn shown");
-                } else {
-                    console.warn("navLogoutBtn element not found");
-                }
-                if (mobileNavLogoutBtn) {
-                    mobileNavLogoutBtn.style.setProperty('display', 'block', 'important');
-                }
-
-                // Update download button text
-                downloadBtns.forEach(btn => {
-                    btn.textContent = "Download";
-                });
-                
-                console.log("UI update complete");
-            }
 
             // Update UI for logged out user
             function updateUIForLoggedOutUser() {
