@@ -573,7 +573,13 @@
                     }
                     
                     // Update UI first
-                    updateUIForLoggedInUser(user);
+                    try {
+                        console.log("About to call updateUIForLoggedInUser");
+                        updateUIForLoggedInUser(user);
+                        console.log("updateUIForLoggedInUser call completed");
+                    } catch (error) {
+                        console.error("Error calling updateUIForLoggedInUser:", error);
+                    }
                     
                     // Close modal immediately if it's open
                     if (authModal) {
