@@ -418,38 +418,63 @@
             }
 
             // Create or update user profile in Firestore
+            // Always resolves successfully, even if Firestore operations fail (offline mode)
             async function createUserProfile(user, additionalData = {}) {
-                const userRef = db.collection('users').doc(user.uid);
-                const snapshot = await userRef.get();
-
-                if (!snapshot.exists) {
-                    const { displayName, email, photoURL } = user;
-                    const createdAt = new Date();
+                try {
+                    const userRef = db.collection('users').doc(user.uid);
+                    
+                    // Try to get user document, but don't fail if offline
+                    let snapshot;
                     try {
-                        await userRef.set({
-                            displayName: displayName || email.split('@')[0],
-                            email,
-                            photoURL: photoURL || '',
-                            createdAt,
-                            bio: '',
-                            location: '',
-                            downloadCount: 0,
-                            sessionCount: 0,
-                            lastLogin: createdAt,
-                            ...additionalData
-                        });
-                    } catch (error) {
-                        console.error('Error creating user profile:', error);
+                        snapshot = await userRef.get();
+                    } catch (getError) {
+                        // If get() fails (e.g., offline), assume document doesn't exist and try to create
+                        console.warn('Firestore get() failed (offline), will attempt to create profile:', getError.message);
+                        snapshot = { exists: false };
                     }
-                } else {
-                    // Update last login and increment session count
-                    const currentData = snapshot.data();
-                    await userRef.update({
-                        lastLogin: new Date(),
-                        sessionCount: (currentData.sessionCount || 0) + 1
-                    });
+
+                    if (!snapshot.exists) {
+                        // Create new user profile
+                        const { displayName, email, photoURL } = user;
+                        const createdAt = new Date();
+                        try {
+                            await userRef.set({
+                                displayName: displayName || email.split('@')[0],
+                                email,
+                                photoURL: photoURL || '',
+                                createdAt,
+                                bio: '',
+                                location: '',
+                                downloadCount: 0,
+                                sessionCount: 0,
+                                lastLogin: createdAt,
+                                ...additionalData
+                            });
+                            console.log('User profile created successfully');
+                        } catch (setError) {
+                            // If offline, Firestore will queue this for when connection is restored
+                            console.warn('User profile creation queued (offline mode):', setError.message);
+                        }
+                    } else {
+                        // Update existing user profile
+                        try {
+                            const currentData = snapshot.data();
+                            await userRef.update({
+                                lastLogin: new Date(),
+                                sessionCount: (currentData.sessionCount || 0) + 1
+                            });
+                            console.log('User profile updated successfully');
+                        } catch (updateError) {
+                            // If offline, Firestore will queue this for when connection is restored
+                            console.warn('User profile update queued (offline mode):', updateError.message);
+                        }
+                    }
+                    return userRef;
+                } catch (error) {
+                    // Catch any unexpected errors - always resolve successfully
+                    console.warn('Firestore operation failed (non-fatal):', error.message);
+                    return null;
                 }
-                return userRef;
             }
 
             // Load user profile data
@@ -469,7 +494,12 @@
             firebase.auth().onAuthStateChanged(async (user) => {
                 if (user) {
                     console.log("User is signed in:", user.email);
-                    await createUserProfile(user);
+                    // Try to create/update profile, but don't fail if Firestore is offline
+                    try {
+                        await createUserProfile(user);
+                    } catch (profileError) {
+                        console.error("Profile creation error in auth state change (non-fatal):", profileError);
+                    }
                     await updateUIForLoggedInUser(user);
                     
                     if (authModal.classList.contains('active') || authModal.style.display !== 'none') {
@@ -578,11 +608,21 @@
                 authSubmitBtn.disabled = true;
                 firebase.auth().signInWithPopup(provider)
                     .then(async (result) => {
-                        await createUserProfile(result.user);
+                        // createUserProfile always resolves, so this won't cause sign-in to fail
+                        await createUserProfile(result.user).catch(() => {
+                            // Extra safety - should never reach here, but just in case
+                            console.warn("Profile creation completed with warnings (non-fatal)");
+                        });
+                        // Sign-in succeeded - modal will close via onAuthStateChanged
                     })
                     .catch((error) => {
                         console.error("Google Sign In Error:", error);
-                        showAuthError("Google Sign In failed: " + error.message);
+                        // Only show error for actual authentication failures, not Firestore errors
+                        if (error.code && error.code.startsWith('auth/')) {
+                            showAuthError("Google Sign In failed: " + error.message);
+                        } else {
+                            showAuthError("Sign in error: " + error.message);
+                        }
                         authSubmitBtn.disabled = false;
                     });
             });
@@ -624,7 +664,12 @@
                 if (isSignUp) {
                     firebase.auth().createUserWithEmailAndPassword(email, password)
                         .then(async (userCredential) => {
-                            await createUserProfile(userCredential.user);
+                            // Try to create profile, but don't fail sign-up if it errors
+                            try {
+                                await createUserProfile(userCredential.user);
+                            } catch (profileError) {
+                                console.error("Profile creation error (non-fatal):", profileError);
+                            }
                             showAuthSuccess("Account created successfully!");
                             authSubmitBtn.textContent = "Sign Up";
                             authSubmitBtn.disabled = false;
@@ -638,7 +683,12 @@
                 } else {
                     firebase.auth().signInWithEmailAndPassword(email, password)
                         .then(async (userCredential) => {
-                            await createUserProfile(userCredential.user);
+                            // Try to create/update profile, but don't fail sign-in if it errors
+                            try {
+                                await createUserProfile(userCredential.user);
+                            } catch (profileError) {
+                                console.error("Profile creation error (non-fatal):", profileError);
+                            }
                             authSubmitBtn.textContent = "Sign In";
                             authSubmitBtn.disabled = false;
                         })

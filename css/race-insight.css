@@ -858,9 +858,9 @@
 }
 
 #race-insight-hero .hero-logo {
-  width: 100%;
-  max-width: 450px;
-  height: auto;
+  width: 275px;
+  height: 275px;
+  margin-bottom: 0;
   filter: drop-shadow(0 0 30px rgba(0, 210, 255, 0.2));
 }
 
