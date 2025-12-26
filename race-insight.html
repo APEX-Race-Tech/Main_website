@@ -371,8 +371,38 @@
         // Initialize Firestore
         const db = firebase.firestore();
 
+        // --- Cookie Utility Functions ---
+        function setCookie(name, value, days = 30) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = "expires=" + date.toUTCString();
+            document.cookie = name + "=" + value + ";" + expires + ";path=/;SameSite=Lax";
+        }
+
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        function deleteCookie(name) {
+            document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
+        }
+
         // --- Auth Logic ---
         document.addEventListener('DOMContentLoaded', async () => {
+            // Check if user was logged in via cookies (quick check before Firebase auth restores)
+            const userLoggedIn = getCookie('userLoggedIn');
+            if (userLoggedIn === 'true') {
+                console.log("Cookie indicates user was logged in, waiting for Firebase auth to restore...");
+                // Firebase will restore auth state automatically, we just use cookies as a backup indicator
+            }
+            
             const authModal = document.getElementById('auth-modal');
             // Ensure modals are hidden initially
             if (authModal) {
@@ -561,6 +591,12 @@
             firebase.auth().onAuthStateChanged(async (user) => {
                 if (user) {
                     console.log("=== User is signed in:", user.email, "===");
+                    
+                    // Store login state in cookies
+                    setCookie('userLoggedIn', 'true', 30);
+                    setCookie('userEmail', user.email || '', 30);
+                    setCookie('userId', user.uid || '', 30);
+                    
                     // Try to create/update profile, but don't fail if Firestore is offline
                     try {
                         await createUserProfile(user);
@@ -598,6 +634,12 @@
                     }
                 } else {
                     console.log("=== User is signed out ===");
+                    
+                    // Clear login cookies
+                    deleteCookie('userLoggedIn');
+                    deleteCookie('userEmail');
+                    deleteCookie('userId');
+                    
                     updateUIForLoggedOutUser();
                     // Ensure modal is hidden when logged out
                     if (authModal) {
@@ -862,6 +904,10 @@
                     btn.addEventListener('click', () => {
                         firebase.auth().signOut().then(() => {
                             console.log("User signed out");
+                            // Clear login cookies
+                            deleteCookie('userLoggedIn');
+                            deleteCookie('userEmail');
+                            deleteCookie('userId');
                         }).catch((error) => {
                             console.error("Sign out error:", error);
                         });
