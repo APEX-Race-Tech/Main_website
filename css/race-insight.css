@@ -719,6 +719,18 @@
   transform: scale(1);
 }
 
+/* Profile Modal Specific Styles */
+.profile-modal-content {
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 2.5rem;
+}
+
+.profile-modal-content .profile-container {
+  margin-top: 0;
+}
+
 .modal-close {
   position: absolute;
   top: 1rem;
