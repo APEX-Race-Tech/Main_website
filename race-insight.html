@@ -12,7 +12,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdn.tailwindcss.com"></script>
     <!-- Firebase SDKs (Compat) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
@@ -80,9 +79,9 @@
             </div>
             <div class="hero-text-wrapper">
                 <h1 class="hero-title">Race Insight</h1>
-                <p class="tagline">The Ultimate Sim Racing Telemetry Tool</p>
+                <p class="tagline">The Motorsport Data Analysis Platform</p>
                 <div class="hero-content">
-                    <p class="hero-description">Analyze your laps, compare telemetry, and improve your lap times with
+                    <p class="hero-description">Analyze your Data, compare Laps, and improve your Delta with
                         professional-grade data analysis.</p>
                     <div class="hero-actions">
                         <a href="#download" class="btn btn-primary">Get Started</a>
@@ -503,24 +502,37 @@
                     } catch (profileError) {
                         console.error("Profile creation error in auth state change (non-fatal):", profileError);
                     }
+                    
+                    // Update UI first
                     await updateUIForLoggedInUser(user);
                     
-                    // Close modal if it's open
-                    if (authModal && authModal.classList.contains('active')) {
+                    // Close modal immediately if it's open
+                    if (authModal) {
+                        console.log("Closing modal, active class:", authModal.classList.contains('active'));
+                        // Remove active class to trigger fade out
                         authModal.classList.remove('active');
+                        // Hide modal after animation
                         setTimeout(() => {
-                            if (authModal) {
-                                authModal.style.display = 'none';
-                            }
-                            if (pendingDownloadAction) {
+                            authModal.style.setProperty('display', 'none', 'important');
+                            console.log("Modal display set to none");
+                        }, 300);
+                        
+                        // Execute pending download action if any
+                        if (pendingDownloadAction) {
+                            setTimeout(() => {
                                 pendingDownloadAction();
                                 pendingDownloadAction = null;
-                            }
-                        }, 300);
+                            }, 350);
+                        }
                     }
                 } else {
                     console.log("User is signed out");
                     updateUIForLoggedOutUser();
+                    // Ensure modal is hidden when logged out
+                    if (authModal) {
+                        authModal.classList.remove('active');
+                        authModal.style.setProperty('display', 'none', 'important');
+                    }
                 }
             });
 
@@ -534,6 +546,7 @@
 
             // Update UI for logged in user
             async function updateUIForLoggedInUser(user) {
+                console.log("updateUIForLoggedInUser called");
                 const navProfile = document.getElementById('nav-profile');
                 const mobileNavProfile = document.getElementById('mobile-nav-profile');
                 const navAuthBtn = document.getElementById('nav-auth-btn');
@@ -543,21 +556,44 @@
                 const downloadBtns = document.querySelectorAll('a[href="#download"]');
 
                 // Show profile links in nav
-                if (navProfile) navProfile.style.display = 'block';
-                if (mobileNavProfile) mobileNavProfile.style.display = 'block';
+                if (navProfile) {
+                    navProfile.style.display = 'block';
+                    console.log("navProfile set to block");
+                } else {
+                    console.warn("navProfile element not found");
+                }
+                if (mobileNavProfile) {
+                    mobileNavProfile.style.display = 'block';
+                }
                 
-                // Hide auth buttons
-                if (navAuthBtn) navAuthBtn.style.display = 'none';
-                if (mobileNavAuthBtn) mobileNavAuthBtn.style.display = 'none';
+                // Hide auth buttons with !important to override CSS
+                if (navAuthBtn) {
+                    navAuthBtn.style.setProperty('display', 'none', 'important');
+                    console.log("navAuthBtn hidden");
+                } else {
+                    console.warn("navAuthBtn element not found");
+                }
+                if (mobileNavAuthBtn) {
+                    mobileNavAuthBtn.style.setProperty('display', 'none', 'important');
+                }
                 
-                // Show logout buttons
-                if (navLogoutBtn) navLogoutBtn.style.display = 'inline-flex';
-                if (mobileNavLogoutBtn) mobileNavLogoutBtn.style.display = 'block';
+                // Show logout buttons with !important
+                if (navLogoutBtn) {
+                    navLogoutBtn.style.setProperty('display', 'inline-flex', 'important');
+                    console.log("navLogoutBtn shown");
+                } else {
+                    console.warn("navLogoutBtn element not found");
+                }
+                if (mobileNavLogoutBtn) {
+                    mobileNavLogoutBtn.style.setProperty('display', 'block', 'important');
+                }
 
                 // Update download button text
                 downloadBtns.forEach(btn => {
                     btn.textContent = "Download";
                 });
+                
+                console.log("UI update complete");
             }
 
             // Update UI for logged out user
@@ -803,7 +839,7 @@
             
             // Listen for real-time updates
             downloadCountRef.onSnapshot((doc) => {
-                if (doc.exists()) {
+                if (doc && doc.exists) {
                     const count = doc.data().count || 0;
                     const currentText = downloadCountElement.textContent.trim();
                     const currentCount = parseInt(currentText.replace(/,/g, '')) || 0;
@@ -828,7 +864,7 @@
                 try {
                     await db.runTransaction(async (transaction) => {
                         const doc = await transaction.get(downloadCountRef);
-                        if (doc.exists()) {
+                        if (doc && doc.exists) {
                             const currentCount = doc.data().count || 0;
                             transaction.update(downloadCountRef, {
                                 count: currentCount + 1
