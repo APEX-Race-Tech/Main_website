@@ -41,10 +41,9 @@
                     <li id="nav-profile" style="display: none;"><a href="#profile">Profile</a></li>
                 </ul>
                 <div class="header-action-item">
-                    <button id="nav-profile-btn" class="btn-profile-icon" aria-label="Profile" title="Profile">
+                    <button id="nav-profile-btn" class="btn-profile-icon" aria-label="Profile" title="Profile" style="display: none;">
                         <i class="fas fa-user"></i>
                     </button>
-                    <button id="nav-auth-btn" class="btn btn-primary">Sign In</button>
                     <a href="#download" class="btn btn-primary" id="nav-download-btn">Download</a>
                     <button id="nav-logout-btn" class="btn btn-secondary" style="display: none;">Logout</button>
                 </div>
@@ -63,10 +62,9 @@
             <li id="mobile-nav-profile" style="display: none;"><a href="#profile">Profile</a></li>
         </ul>
         <div class="header-action-item">
-            <button id="mobile-nav-profile-btn" class="btn-profile-icon" style="margin-bottom: 0.5rem;" aria-label="Profile">
+            <button id="mobile-nav-profile-btn" class="btn-profile-icon" style="margin-bottom: 0.5rem; display: none;" aria-label="Profile">
                 <i class="fas fa-user"></i>
             </button>
-            <button id="mobile-nav-auth-btn" class="btn btn-primary" style="margin-bottom: 0.5rem; width: 100%;">Sign In</button>
             <a href="#download" class="btn btn-primary" id="mobile-nav-download-btn">Download</a>
             <button id="mobile-nav-logout-btn" class="btn btn-secondary" style="display: none; margin-top: 0.5rem; width: 100%;">Logout</button>
         </div>
@@ -642,8 +640,8 @@
                 try {
                     const navProfile = document.getElementById('nav-profile');
                     const mobileNavProfile = document.getElementById('mobile-nav-profile');
-                    const navAuthBtn = document.getElementById('nav-auth-btn');
-                    const mobileNavAuthBtn = document.getElementById('mobile-nav-auth-btn');
+                    const navProfileBtn = document.getElementById('nav-profile-btn');
+                    const mobileNavProfileBtn = document.getElementById('mobile-nav-profile-btn');
                     const navLogoutBtn = document.getElementById('nav-logout-btn');
                     const mobileNavLogoutBtn = document.getElementById('mobile-nav-logout-btn');
                     const downloadBtns = document.querySelectorAll('a[href="#download"]');
@@ -651,14 +649,14 @@
                     console.log("Elements found:", {
                         navProfile: !!navProfile,
                         mobileNavProfile: !!mobileNavProfile,
-                        navAuthBtn: !!navAuthBtn,
-                        mobileNavAuthBtn: !!mobileNavAuthBtn,
+                        navProfileBtn: !!navProfileBtn,
+                        mobileNavProfileBtn: !!mobileNavProfileBtn,
                         navLogoutBtn: !!navLogoutBtn,
                         mobileNavLogoutBtn: !!mobileNavLogoutBtn,
                         downloadBtns: downloadBtns.length
                     });
 
-                    // Show profile links in nav
+                    // Show profile links and buttons in nav
                     if (navProfile) {
                         navProfile.style.display = 'block';
                         console.log("✓ navProfile set to block");
@@ -669,17 +667,13 @@
                         mobileNavProfile.style.display = 'block';
                         console.log("✓ mobileNavProfile set to block");
                     }
-                    
-                    // Hide auth buttons with !important to override CSS
-                    if (navAuthBtn) {
-                        navAuthBtn.style.setProperty('display', 'none', 'important');
-                        console.log("✓ navAuthBtn hidden");
-                    } else {
-                        console.warn("✗ navAuthBtn element not found");
+                    if (navProfileBtn) {
+                        navProfileBtn.style.setProperty('display', 'inline-flex', 'important');
+                        console.log("✓ navProfileBtn shown");
                     }
-                    if (mobileNavAuthBtn) {
-                        mobileNavAuthBtn.style.setProperty('display', 'none', 'important');
-                        console.log("✓ mobileNavAuthBtn hidden");
+                    if (mobileNavProfileBtn) {
+                        mobileNavProfileBtn.style.setProperty('display', 'block', 'important');
+                        console.log("✓ mobileNavProfileBtn shown");
                     }
                     
                     // Show logout buttons with !important
@@ -737,15 +731,6 @@
                     // Close modal immediately if it's open
                     if (authModal) {
                         console.log("Closing modal, active class:", authModal.classList.contains('active'));
-                        // Ensure sign-in buttons are hidden immediately
-                        const navAuthBtn = document.getElementById('nav-auth-btn');
-                        const mobileNavAuthBtn = document.getElementById('mobile-nav-auth-btn');
-                        if (navAuthBtn) {
-                            navAuthBtn.style.setProperty('display', 'none', 'important');
-                        }
-                        if (mobileNavAuthBtn) {
-                            mobileNavAuthBtn.style.setProperty('display', 'none', 'important');
-                        }
                         // Remove active class to trigger fade out
                         authModal.classList.remove('active');
                         // Hide modal after animation
@@ -784,19 +769,6 @@
                 // Reset Google button state when closing modal
                 resetGoogleButton();
                 
-                // Check if user is logged in, and if so, hide sign-in buttons
-                const user = firebase.auth().currentUser;
-                if (user) {
-                    const navAuthBtn = document.getElementById('nav-auth-btn');
-                    const mobileNavAuthBtn = document.getElementById('mobile-nav-auth-btn');
-                    if (navAuthBtn) {
-                        navAuthBtn.style.setProperty('display', 'none', 'important');
-                    }
-                    if (mobileNavAuthBtn) {
-                        mobileNavAuthBtn.style.setProperty('display', 'none', 'important');
-                    }
-                }
-                
                 authModal.classList.remove('active');
                 setTimeout(() => {
                     authModal.style.display = 'none';
@@ -809,22 +781,18 @@
                 const mobileNavProfile = document.getElementById('mobile-nav-profile');
                 const navProfileBtn = document.getElementById('nav-profile-btn');
                 const mobileNavProfileBtn = document.getElementById('mobile-nav-profile-btn');
-                const navAuthBtn = document.getElementById('nav-auth-btn');
-                const mobileNavAuthBtn = document.getElementById('mobile-nav-auth-btn');
                 const navLogoutBtn = document.getElementById('nav-logout-btn');
                 const mobileNavLogoutBtn = document.getElementById('mobile-nav-logout-btn');
 
                 if (navProfile) navProfile.style.display = 'none';
                 if (mobileNavProfile) mobileNavProfile.style.display = 'none';
-                // Profile button remains visible even when logged out
+                // Hide profile buttons when logged out
                 if (navProfileBtn) {
-                    navProfileBtn.style.setProperty('display', 'flex', 'important');
+                    navProfileBtn.style.setProperty('display', 'none', 'important');
                 }
                 if (mobileNavProfileBtn) {
-                    mobileNavProfileBtn.style.setProperty('display', 'flex', 'important');
+                    mobileNavProfileBtn.style.setProperty('display', 'none', 'important');
                 }
-                if (navAuthBtn) navAuthBtn.style.display = 'inline-flex';
-                if (mobileNavAuthBtn) mobileNavAuthBtn.style.display = 'block';
                 if (navLogoutBtn) navLogoutBtn.style.display = 'none';
                 if (mobileNavLogoutBtn) mobileNavLogoutBtn.style.display = 'none';
             }
@@ -1019,30 +987,8 @@
                 }
             }
 
-            // Auth button click handlers (single button for Sign In/Sign Up)
-            const authBtns = [document.getElementById('nav-auth-btn'), document.getElementById('mobile-nav-auth-btn')];
-            authBtns.forEach(btn => {
-                if (btn) {
-                    btn.addEventListener('click', () => {
-                        // Default to sign in mode
-                        isSignUp = false;
-                        authTitle.textContent = "Sign In to Download";
-                        authSubtitle.textContent = "Create an account to access downloads and save your preferences.";
-                        authSubmitBtn.textContent = "Sign In";
-                        toggleAuthMode.textContent = "Sign Up";
-                        forgotPasswordLink.style.display = 'block';
-                        hideAuthMessages();
-                        
-                        // Reset Google button state when opening modal
-                        resetGoogleButton();
-                        
-                        authModal.style.display = 'flex';
-                        // Force reflow to ensure display: flex is applied before adding active class
-                        authModal.offsetHeight;
-                        setTimeout(() => authModal.classList.add('active'), 10);
-                    });
-                }
-            });
+            // Sign-in is now triggered by the Download button when user is not signed in
+            // Auth buttons removed - users sign in via download button
 
             // Logout functionality
             const logoutBtns = [
@@ -1115,8 +1061,7 @@
                         animateCount(downloadCountElement, count);
                     }
                 } else {
-                    // Initialize if document doesn't exist
-                    downloadCountRef.set({ count: 0 });
+                    // Show 0 if document doesn't exist yet
                     downloadCountElement.textContent = '0';
                 }
             }, (error) => {
