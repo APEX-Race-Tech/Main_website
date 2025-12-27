@@ -74,6 +74,10 @@
             <div class="hero-text-wrapper">
                 <h1 class="hero-title">Race Insight</h1>
                 <p class="tagline">The Motorsport Data Analysis Platform</p>
+                <blockquote class="hero-quote">
+                    <p>"Without data you're just another person with an option"</p>
+                    <cite>— W. Edward Deming</cite>
+                </blockquote>
                 <div class="hero-content">
                     <p class="hero-description">Analyze your Data, compare Laps, and improve your Delta with
                         professional-grade data analysis.</p>
@@ -86,7 +90,6 @@
             </div>
         </div>
     </section>
-]
 
     <section id="features" class="full-page-section">
         <div class="section-content">
@@ -106,6 +109,27 @@
                     <h4>Interactive Track Map</h4>
                     <p>Visualize your racing line and position on the track in real-time.</p>
                 </div>
+                <div class="advantage-card feature-card">
+                    <div class="feature-icon-container">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <h4>Supported File Formats</h4>
+                    <p style="padding-bottom: 0.5rem;">Compatible with popular data formats for seamless integration with your workflow.</p>
+                    <ul class="file-format-list">
+                        <li>MoTeC (.ld, .ldx)</li>
+                        <li>CSV</li>
+                        <li>JSON</li>
+                        <li>VBOX (.vbo)</li>
+                        <li>AIM (.drk, .xrk)</li>                    
+                    </ul>
+                </div>
+                <div class="advantage-card feature-card">
+                    <div class="feature-icon-container">
+                        <i class="fas fa-th"></i>
+                    </div>
+                    <h4>Custom Workbook</h4>
+                    <p>Create any type and size of layout you want for personalized data analysis.</p>
+                </div>
             </div>
         </div>
     </section>
@@ -122,8 +146,8 @@
                 </div>
                 <div class="update-card">
                     <div class="update-icon"><i class="fas fa-globe"></i></div>
-                    <h4>Full Web App</h4>
-                    <p>Access your data from any device with our upcoming cloud-based web application.</p>
+                    <h4>Cross Platform Support</h4>
+                    <p>Full cross platform support across multiple devices.</p>
                 </div>
                 <div class="update-card">
                     <div class="update-icon"><i class="fas fa-stopwatch-20"></i></div>
@@ -131,9 +155,19 @@
                     <p>Real-time predictive lap timing to help you push your limits.</p>
                 </div>
                 <div class="update-card">
-                    <div class="update-icon"><i class="fas fa-chart-line"></i></div>
+                    <div class="update-icon"><i class="fas fa-robot"></i></div>
                     <h4>Advanced Data Analysis</h4>
-                    <p>AI-powered insights to suggest setup changes and driving improvements.</p>
+                    <p>Create custom graphs with prompts using AI-powered insights.</p>
+                </div>
+                <div class="update-card">
+                    <div class="update-icon"><i class="fas fa-window-restore"></i></div>
+                    <h4>Multi-Window Support</h4>
+                    <p>Open multiple data views simultaneously for enhanced analysis and comparison.</p>
+                </div>
+                <div class="update-card">
+                    <div class="update-icon"><i class="fas fa-map"></i></div>
+                    <h4>Offline Maps</h4>
+                    <p>Access track maps and data visualization without requiring an internet connection.</p>
                 </div>
             </div>
         </div>
@@ -746,6 +780,9 @@
                     console.error("Error in updateUIForLoggedInUser:", error);
                 }
             }
+
+            // Ensure profile buttons are hidden initially (before auth state is determined)
+            updateUIForLoggedOutUser();
 
             // Monitor Auth State
             firebase.auth().onAuthStateChanged(async (user) => {
