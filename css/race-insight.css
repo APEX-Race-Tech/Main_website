@@ -1367,3 +1367,1156 @@ select option {
     width: 100%;
   }
 }
+
+/* --- Shrunk Navigation Icons in Header --- */
+.shrunk-nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  background: transparent;
+  border: 1px solid transparent;
+  position: relative;
+}
+
+.shrunk-nav-icon i {
+  font-size: 1.1rem;
+}
+
+.shrunk-nav-icon .shrunk-nav-plus-icon {
+  font-size: 0.7rem;
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: var(--primary-color);
+  color: #000;
+  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(0, 210, 255, 0.5);
+}
+
+.shrunk-nav-icon:hover {
+  color: var(--primary-color);
+  background: rgba(0, 210, 255, 0.1);
+  border-color: rgba(0, 210, 255, 0.3);
+}
+
+.shrunk-nav-icon.active {
+  color: #00d2ff;
+  background: rgba(0, 210, 255, 0.15);
+  border-color: rgba(0, 210, 255, 0.4);
+  box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+}
+
+@media (max-width: 768px) {
+  .shrunk-nav-icons-container {
+    gap: 1rem;
+  }
+
+  .shrunk-nav-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .shrunk-nav-icon i {
+    font-size: 1rem;
+  }
+}
+
+/* --- Feature Sections --- */
+.feature-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6rem 2rem 8rem;
+}
+
+.feature-section .section-content {
+  max-width: 1200px;
+  width: 100%;
+}
+
+/* Section Header Card Style */
+.section-header-card {
+  background: unset;
+  background-color: rgba(20, 20, 20, 0.8);
+  background-image: none;
+  border-radius: 12px;
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 3px solid var(--primary-color);
+  padding-top: 15px;
+  padding-bottom: 15px;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  height: 68px;
+  font-family: Inter, sans-serif;
+  font-weight: 400;
+  font-size: 48px;
+}
+
+.section-header-icon {
+  width: 55px;
+  height: 55px;
+  background: var(--primary-color);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding-left: 0px;
+  padding-right: 0px;
+  margin-left: 15px;
+  margin-right: 15px;
+}
+
+.section-header-icon i {
+  font-size: 2.5rem;
+  color: #000;
+}
+
+.section-header-text {
+  flex: 1;
+}
+
+.section-header-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-color-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 0.5rem;
+}
+
+.feature-section .section-title {
+  font-size: 31px;
+  font-weight: 700;
+  margin: 0;
+  height: 30px;
+  line-height: 31px;
+  color: var(--text-color);
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
+  -webkit-text-fill-color: var(--text-color);
+  text-align: left;
+}
+
+.feature-section .section-subtitle {
+  font-size: 13px;
+  color: var(--text-color-secondary);
+  text-align: left;
+  margin: 0;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.feature-content {
+  background: rgba(20, 20, 20, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 3rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.feature-intro {
+  font-size: 1.2rem;
+  color: var(--text-color);
+  line-height: 1.8;
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+/* Innovative Hybrid Layout: Glassmorphism + Overlapping Layers + Accordion + Particle Glow */
+.feature-details.innovative-layout {
+  display: flex;
+  position: relative;
+  gap: 0;
+  padding: 2rem 0;
+  min-height: 500px;
+  align-items: center;
+  justify-content: center;
+}
+
+.feature-detail-item {
+  border-radius: 10px;
+}
+
+.innovative-card {
+  position: relative;
+  width: 320px;
+  min-height: 450px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  z-index: 1;
+  margin: 0 -40px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.innovative-card:nth-child(1) {
+  z-index: 1;
+  transform: translateX(0) scale(0.9);
+}
+
+.innovative-card:nth-child(2) {
+  z-index: 3;
+  transform: translateX(0) scale(1);
+}
+
+.innovative-card:nth-child(3) {
+  z-index: 1;
+  transform: translateX(0) scale(0.9);
+}
+
+.innovative-card.active {
+  z-index: 5 !important;
+  width: 420px;
+  min-height: 500px;
+  transform: translateX(0) scale(1.05) !important;
+  box-shadow: 0 20px 60px rgba(0, 210, 255, 0.3), 0 0 80px rgba(0, 210, 255, 0.2);
+  border-color: rgba(0, 210, 255, 0.5);
+}
+
+.innovative-card:hover:not(.active) {
+  z-index: 4;
+  transform: translateX(0) scale(0.95);
+  box-shadow: 0 12px 40px rgba(0, 210, 255, 0.2);
+}
+
+/* Card Glow Effect (Surprise 4th: Animated Particle Glow) */
+.card-glow {
+  display: none; /* Blue glow removed */
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.2) rotate(180deg);
+    opacity: 0.6;
+  }
+}
+
+/* Image Wrapper */
+.card-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  background: rgba(20, 20, 20, 0.3);
+}
+
+.innovative-card.active .card-image-wrapper {
+  height: 250px;
+}
+
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: brightness(0.8) contrast(1.1);
+}
+
+.innovative-card.active .card-image {
+  transform: scale(1.1);
+  filter: brightness(1) contrast(1.2);
+}
+
+.image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 0, 0, 0.3) 50%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
+  opacity: 0.6;
+  transition: opacity 0.6s ease;
+}
+
+.innovative-card.active .image-overlay {
+  opacity: 0.4;
+}
+
+/* Card Content */
+.card-content {
+  padding: 2rem;
+  position: relative;
+  z-index: 2;
+  background: rgba(20, 20, 20, 0.4);
+  backdrop-filter: blur(10px);
+  height: calc(100% - 200px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.6s ease;
+}
+
+.innovative-card.active .card-content {
+  height: calc(100% - 250px);
+  padding: 2.5rem;
+  background: rgba(20, 20, 20, 0.6);
+}
+
+.innovative-card h4 {
+  color: var(--primary-color);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  transition: all 0.6s ease;
+  text-shadow: none;
+}
+
+.innovative-card.active h4 {
+  font-size: 1.5rem;
+  text-shadow: none;
+}
+
+.innovative-card p {
+  color: var(--text-color-secondary);
+  line-height: 1.7;
+  font-size: 0.95rem;
+  opacity: 0.8;
+  transition: all 0.6s ease;
+  max-height: 0;
+  overflow: hidden;
+}
+
+.innovative-card.active p {
+  opacity: 1;
+  max-height: 200px;
+  font-size: 1rem;
+}
+
+/* Particle Effects (Surprise 4th: Animated Particles) */
+.card-particles {
+  display: none; /* Blue particles removed */
+}
+
+@keyframes float-particles {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.6;
+  }
+  25% {
+    transform: translate(20px, -30px) scale(1.2);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-15px, -50px) scale(0.8);
+    opacity: 0.8;
+  }
+  75% {
+    transform: translate(30px, -20px) scale(1.1);
+    opacity: 0.9;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .innovative-card {
+    width: 280px;
+    margin: 0 -30px;
+  }
+  
+  .innovative-card.active {
+    width: 360px;
+  }
+}
+
+@media (max-width: 768px) {
+  .feature-details.innovative-layout,
+  .feature-details.style-overlapping,
+  .feature-details.style-accordion,
+  .feature-details.style-glassmorphism,
+  .feature-details.style-particles,
+  .feature-details.style-isometric {
+    flex-direction: column;
+    gap: 2rem;
+    padding: 1rem 0;
+  }
+  
+  .innovative-card {
+    width: 100% !important;
+    max-width: 400px;
+    margin: 0 !important;
+    transform: none !important;
+    min-height: 400px;
+  }
+  
+  .innovative-card.active {
+    transform: scale(1.02) !important;
+  }
+}
+
+/* ============================================
+   STYLE 1: OVERLAPPING LAYERS (Data Import)
+   ============================================ */
+.feature-details.style-overlapping {
+  display: flex;
+  position: relative;
+  gap: 0;
+  padding: 3rem 0;
+  min-height: 500px;
+  align-items: center;
+  justify-content: center;
+  perspective: 1000px;
+}
+
+.style-overlapping .innovative-card {
+  position: absolute;
+  width: 350px;
+  min-height: 450px;
+  background: rgba(20, 20, 20, 0.8);
+  border: 2px solid rgba(0, 210, 255, 0.3);
+  border-radius: 20px;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.style-overlapping .innovative-card:nth-child(1) {
+  transform: translateX(-180px) translateY(-20px) rotateY(-15deg) scale(0.85);
+  z-index: 1;
+  opacity: 0.7;
+}
+
+.style-overlapping .innovative-card:nth-child(2) {
+  transform: translateX(0) translateY(0) rotateY(0deg) scale(1);
+  z-index: 3;
+  opacity: 1;
+}
+
+.style-overlapping .innovative-card:nth-child(3) {
+  transform: translateX(180px) translateY(-20px) rotateY(15deg) scale(0.85);
+  z-index: 1;
+  opacity: 0.7;
+}
+
+.style-overlapping .innovative-card:hover {
+  z-index: 5 !important;
+  transform: translateX(0) translateY(-30px) rotateY(0deg) scale(1.05) !important;
+  opacity: 1 !important;
+  box-shadow: 0 25px 60px rgba(0, 210, 255, 0.4);
+  border-color: rgba(0, 210, 255, 0.8);
+}
+
+.style-overlapping .innovative-card.active {
+  z-index: 5 !important;
+  transform: translateX(0) translateY(-40px) rotateY(0deg) scale(1.1) !important;
+  opacity: 1 !important;
+  box-shadow: 0 30px 80px rgba(0, 210, 255, 0.5);
+  border-color: var(--primary-color);
+}
+
+/* ============================================
+   STYLE 2: INTERACTIVE ACCORDION (Data Overview)
+   ============================================ */
+.feature-details.style-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 2rem 0;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.style-accordion .innovative-card {
+  position: relative;
+  width: 100%;
+  min-height: 120px;
+  max-height: 120px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.style-accordion .innovative-card.active {
+  min-height: 400px;
+  max-height: 500px;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--primary-color);
+  box-shadow: 0 15px 50px rgba(0, 210, 255, 0.3);
+}
+
+.style-accordion .card-image-wrapper {
+  width: 200px;
+  height: 120px;
+  flex-shrink: 0;
+  transition: all 0.5s ease;
+}
+
+.style-accordion .innovative-card.active .card-image-wrapper {
+  width: 100%;
+  height: 250px;
+}
+
+.style-accordion .card-content {
+  padding: 1.5rem;
+  flex: 1;
+  height: auto;
+  background: transparent;
+  backdrop-filter: none;
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: all 0.5s ease 0.2s;
+}
+
+.style-accordion .innovative-card.active .card-content {
+  opacity: 1;
+  transform: translateX(0);
+  padding: 2rem;
+}
+
+.style-accordion .innovative-card h4 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  white-space: nowrap;
+  position: absolute;
+  left: 220px;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: all 0.5s ease;
+}
+
+.style-accordion .innovative-card.active h4 {
+  position: static;
+  transform: none;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  white-space: normal;
+}
+
+.style-accordion .innovative-card p {
+  max-height: 0;
+  opacity: 0;
+}
+
+.style-accordion .innovative-card.active p {
+  max-height: 200px;
+  opacity: 1;
+}
+
+/* ============================================
+   STYLE 3: GLASSMORPHISM FLOATING PANELS (Analysis)
+   ============================================ */
+.feature-details.style-glassmorphism {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  padding: 2rem 0;
+  perspective: 1200px;
+}
+
+.style-glassmorphism .innovative-card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  height: auto;
+  min-height: auto;
+  max-height: none;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 0px;
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px;
+  border-bottom-left-radius: 0px;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  margin: 0;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transform-style: preserve-3d;
+}
+
+.style-glassmorphism .innovative-card:hover {
+  aspect-ratio: auto;
+  height: 554px;
+  min-height: 554px;
+  max-height: 554px;
+  transform: translateY(-20px) rotateX(0deg) rotateY(0deg) scale(1.05);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.3);
+  border-radius: 0px;
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px;
+  border-bottom-left-radius: 0px;
+  box-shadow: 
+    0 25px 70px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.style-glassmorphism .innovative-card.active:hover {
+  aspect-ratio: auto;
+  height: 554px;
+  min-height: 554px;
+  max-height: 554px;
+}
+
+.style-glassmorphism .card-image-wrapper {
+  height: 100%;
+  width: 100%;
+  border-radius: 0px;
+  transition: height 0.5s ease;
+}
+
+.style-glassmorphism .innovative-card:hover .card-image-wrapper {
+  height: 250px;
+}
+
+.style-glassmorphism .card-content {
+  background: rgba(20, 20, 20, 0.3);
+  backdrop-filter: blur(20px);
+  border-radius: 0px;
+  opacity: 0;
+  max-height: 0;
+  overflow: visible;
+  transition: all 0.5s ease;
+  padding: 0 2rem;
+  position: relative;
+}
+
+.style-glassmorphism .innovative-card:hover .card-content {
+  opacity: 1;
+  max-height: 400px;
+  padding: 2rem;
+}
+
+.style-glassmorphism .innovative-card h4 {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.5s ease 0.2s;
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  right: 1rem;
+  color: var(--text-color);
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  z-index: 3;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+.style-glassmorphism .innovative-card:hover h4 {
+  position: static;
+  font-size: 1.5rem;
+  color: var(--primary-color);
+  text-shadow: none;
+  margin-bottom: 1rem;
+}
+
+.style-glassmorphism .innovative-card p {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.5s ease 0.3s;
+  max-height: 0;
+}
+
+.style-glassmorphism .innovative-card:hover p {
+  opacity: 1;
+  transform: translateY(0);
+  max-height: 200px;
+}
+
+/* ============================================
+   STYLE 4: PARTICLE GLOW MORPHING (Custom Workbook)
+   ============================================ */
+.feature-details.style-particles {
+  display: flex;
+  position: relative;
+  gap: 2rem;
+  padding: 3rem 0;
+  min-height: 500px;
+  align-items: center;
+  justify-content: center;
+}
+
+.style-particles .innovative-card {
+  position: relative;
+  width: 320px;
+  min-height: 450px;
+  background: rgba(20, 20, 20, 0.6);
+  border: 2px solid transparent;
+  border-radius: 20px;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.6s ease;
+  overflow: visible;
+  margin: 0;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+.style-particles .card-glow {
+  position: absolute;
+  top: -100%;
+  left: -100%;
+  width: 300%;
+  height: 300%;
+  background: radial-gradient(
+    circle,
+    rgba(0, 210, 255, 0.4) 0%,
+    rgba(0, 120, 255, 0.2) 25%,
+    transparent 50%
+  );
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  animation: morph-glow 6s ease-in-out infinite;
+  pointer-events: none;
+  border-radius: 50%;
+}
+
+.style-particles .innovative-card.active .card-glow {
+  opacity: 1;
+  animation: morph-glow 3s ease-in-out infinite;
+}
+
+@keyframes morph-glow {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(0.8) rotate(0deg);
+    border-radius: 50% 40% 60% 30%;
+  }
+  25% {
+    transform: translate(-50%, -50%) scale(1.1) rotate(90deg);
+    border-radius: 60% 50% 40% 70%;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(0.9) rotate(180deg);
+    border-radius: 40% 60% 50% 50%;
+  }
+  75% {
+    transform: translate(-50%, -50%) scale(1.05) rotate(270deg);
+    border-radius: 50% 50% 60% 40%;
+  }
+}
+
+.style-particles .innovative-card:hover {
+  transform: scale(1.05);
+  border-color: rgba(0, 210, 255, 0.5);
+  box-shadow: 0 15px 50px rgba(0, 210, 255, 0.3);
+}
+
+.style-particles .innovative-card.active {
+  transform: scale(1.1);
+  border-color: var(--primary-color);
+  box-shadow: 0 20px 70px rgba(0, 210, 255, 0.5);
+}
+
+.style-particles .card-particles {
+  opacity: 1;
+}
+
+.style-particles .card-particles::before,
+.style-particles .card-particles::after {
+  animation: morph-particles 10s ease-in-out infinite;
+}
+
+@keyframes morph-particles {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    border-radius: 50%;
+  }
+  25% {
+    transform: translate(30px, -40px) scale(1.3);
+    border-radius: 30% 70% 50% 50%;
+  }
+  50% {
+    transform: translate(-20px, -60px) scale(0.8);
+    border-radius: 70% 30% 50% 50%;
+  }
+  75% {
+    transform: translate(40px, -30px) scale(1.2);
+    border-radius: 50% 50% 70% 30%;
+  }
+}
+
+/* ============================================
+   STYLE 5: ISOMETRIC 3D BOXES (Data Export)
+   ============================================ */
+.feature-details.style-isometric {
+  display: flex;
+  position: relative;
+  gap: 3rem;
+  padding: 4rem 0;
+  min-height: 500px;
+  align-items: center;
+  justify-content: center;
+  perspective: 1500px;
+  perspective-origin: center center;
+}
+
+.style-isometric .innovative-card {
+  position: relative;
+  width: 300px;
+  min-height: 400px;
+  background: rgba(20, 20, 20, 0.9);
+  border: 2px solid rgba(0, 210, 255, 0.3);
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  margin: 0;
+  transform-style: preserve-3d;
+  transform: rotateX(15deg) rotateY(-25deg) translateZ(0);
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    inset 0 0 40px rgba(0, 210, 255, 0.1);
+}
+
+.style-isometric .innovative-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 210, 255, 0.1) 0%,
+    transparent 50%,
+    rgba(0, 120, 255, 0.1) 100%
+  );
+  transform: translateZ(50px);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.style-isometric .innovative-card:hover {
+  transform: rotateX(10deg) rotateY(-20deg) translateZ(50px) scale(1.05);
+  border-color: rgba(0, 210, 255, 0.6);
+  box-shadow: 
+    0 30px 80px rgba(0, 210, 255, 0.3),
+    inset 0 0 60px rgba(0, 210, 255, 0.2);
+}
+
+.style-isometric .innovative-card:hover::before {
+  opacity: 1;
+}
+
+.style-isometric .innovative-card.active {
+  transform: rotateX(5deg) rotateY(-15deg) translateZ(100px) scale(1.1);
+  border-color: var(--primary-color);
+  box-shadow: 
+    0 40px 100px rgba(0, 210, 255, 0.4),
+    inset 0 0 80px rgba(0, 210, 255, 0.3);
+  z-index: 10;
+}
+
+.style-isometric .innovative-card.active::before {
+  opacity: 1;
+}
+
+.style-isometric .card-image-wrapper {
+  transform: translateZ(30px);
+  transition: transform 0.6s ease;
+}
+
+.style-isometric .innovative-card.active .card-image-wrapper {
+  transform: translateZ(60px) scale(1.1);
+}
+
+.style-isometric .card-content {
+  transform: translateZ(20px);
+  background: rgba(20, 20, 20, 0.8);
+  backdrop-filter: blur(10px);
+}
+
+.style-isometric .innovative-card.active .card-content {
+  transform: translateZ(50px);
+}
+
+/* ============================================
+   STYLE 6: MINIMAL CLEAN CARDS (Data Overview)
+   ============================================ */
+.feature-details.style-minimal {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  padding: 2rem 0;
+}
+
+.style-minimal .innovative-card {
+  position: relative;
+  width: 100% !important;
+  min-height: 420px !important;
+  background: rgba(20, 20, 20, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  margin: 0 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  transform: none !important;
+}
+
+.style-minimal .innovative-card:nth-child(1),
+.style-minimal .innovative-card:nth-child(2),
+.style-minimal .innovative-card:nth-child(3) {
+  transform: none !important;
+  width: 100% !important;
+  min-height: 420px !important;
+}
+
+.style-minimal .innovative-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: 2;
+}
+
+.style-minimal .innovative-card:hover::before {
+  opacity: 1;
+}
+
+.style-minimal .innovative-card:hover:not(.active) {
+  transform: translateY(-8px);
+  border-color: rgba(0, 210, 255, 0.3);
+  box-shadow: 0 12px 40px rgba(0, 210, 255, 0.15), 0 0 0 1px rgba(0, 210, 255, 0.1);
+  background: rgba(20, 20, 20, 0.6);
+}
+
+.style-minimal .innovative-card.active {
+  transform: none !important;
+  width: 100% !important;
+  min-height: 420px !important;
+  border-color: var(--primary-color);
+  box-shadow: 0 12px 40px rgba(0, 210, 255, 0.25), 0 0 0 1px rgba(0, 210, 255, 0.2);
+  background: rgba(20, 20, 20, 0.7);
+}
+
+.style-minimal .innovative-card.active:hover {
+  transform: none;
+}
+
+.style-minimal .innovative-card.active::before {
+  opacity: 1;
+}
+
+.style-minimal .card-image-wrapper {
+  height: 200px;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  transition: height 0.4s ease;
+}
+
+.style-minimal .innovative-card:hover .card-image-wrapper {
+  height: 200px;
+}
+
+.style-minimal .innovative-card.active .card-image-wrapper {
+  height: 200px !important;
+}
+
+.style-minimal .card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: brightness(0.85) contrast(1.05);
+}
+
+.style-minimal .innovative-card:hover .card-image {
+  transform: scale(1.08);
+  filter: brightness(0.95) contrast(1.1);
+}
+
+.style-minimal .innovative-card.active .card-image {
+  transform: scale(1);
+  filter: brightness(0.85) contrast(1.05);
+}
+
+.style-minimal .image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 0, 0, 0.2) 50%,
+    rgba(0, 0, 0, 0.5) 100%
+  );
+  opacity: 0.6;
+  transition: opacity 0.4s ease;
+}
+
+.style-minimal .innovative-card:hover .image-overlay,
+.style-minimal .innovative-card.active .image-overlay {
+  opacity: 0.3;
+}
+
+.style-minimal .card-content {
+  padding: 2rem !important;
+  background: transparent;
+  height: auto;
+  transition: all 0.4s ease;
+  position: relative;
+}
+
+.style-minimal .innovative-card.active .card-content {
+  padding: 2rem !important;
+  height: auto;
+}
+
+.style-minimal .innovative-card h4 {
+  color: var(--text-color);
+  font-size: 1.3rem !important;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  transition: all 0.4s ease;
+  line-height: 1.3;
+}
+
+.style-minimal .innovative-card:hover h4,
+.style-minimal .innovative-card.active h4 {
+  color: var(--primary-color);
+  transform: translateX(4px);
+  font-size: 1.3rem !important;
+}
+
+.style-minimal .innovative-card p {
+  color: var(--text-color-secondary);
+  line-height: 1.7;
+  font-size: 0.95rem;
+  margin: 0;
+  opacity: 0.85;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  transform: translateY(4px);
+}
+
+.style-minimal .innovative-card:hover p,
+.style-minimal .innovative-card.active p {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.style-minimal .card-glow {
+  display: none;
+}
+
+.style-minimal .card-particles {
+  display: none;
+}
+
+/* Responsive for minimal style */
+@media (max-width: 992px) {
+  .feature-details.style-minimal {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .feature-section {
+    padding: 4rem 1rem 6rem;
+  }
+  
+  .feature-details.style-minimal {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .style-minimal .innovative-card {
+    min-height: 380px;
+  }
+
+  .section-header-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 1.5rem;
+  }
+
+  .section-header-icon {
+    width: 60px;
+    height: 60px;
+  }
+
+  .section-header-icon i {
+    font-size: 2rem;
+  }
+
+  .section-header-text {
+    text-align: center;
+  }
+
+  .feature-section .section-title {
+    font-size: 2rem;
+    text-align: center;
+  }
+
+  .feature-section .section-subtitle {
+    font-size: 1rem;
+    text-align: center;
+  }
+
+  .feature-content {
+    padding: 2rem 1.5rem;
+  }
+
+  .feature-intro {
+    font-size: 1rem;
+  }
+
+  .feature-details {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}

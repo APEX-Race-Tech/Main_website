@@ -15,11 +15,22 @@
 html {
     font-size: 100%; /* 16px */
     scroll-behavior: smooth;
+    border-width: 0px;
     border-radius: 0px !important;
     border-top-left-radius: 0px !important;
     border-top-right-radius: 0px !important;
     border-bottom-right-radius: 0px !important;
     border-bottom-left-radius: 0px !important;
+}
+
+/* Hide scrollbar but keep scrolling - applied globally */
+html {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+
+html::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
 }
 
 body {
@@ -33,8 +44,29 @@ body {
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE/Edge */
 }
+
 body::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Opera */
+}
+
+/* Hide scrollbar for any scrollable containers */
+* {
+    scrollbar-width: thin; /* Firefox - minimal scrollbar */
+    scrollbar-color: transparent transparent; /* Firefox - make it invisible */
+}
+
+*::-webkit-scrollbar {
+    width: 0px; /* Chrome, Safari, Opera - minimal width */
+    background: transparent; /* Make it invisible */
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent; /* Hide track */
+}
+
+*::-webkit-scrollbar-thumb {
+    background: transparent; /* Hide thumb */
+    border: none;
 }
 
 a {

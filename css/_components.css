@@ -59,6 +59,15 @@ select:required:invalid {
     /* Hide labels, using placeholders instead */
 }
 
+form.contact-form {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    padding-top: 121px;
+    padding-bottom: 121px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
 .contact-form .btn,
 .waitlist-form .btn {
     width: 100%;

@@ -169,12 +169,12 @@
 .header.scrolled .nav-container {
     max-width: 800px;
     height: 100%;
-    background-color: rgba(20, 20, 20, 0.7);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background-color: rgba(20, 20, 20, 1);
     border-radius: 12px;
     border: 1px solid var(--border-color);
     padding: 0 1.5rem;
+    justify-content: space-between;
+    position: relative;
 }
 
 .header.scrolled .header__logo .logo--full {
@@ -184,6 +184,36 @@
 .header.scrolled .header__logo .logo--icon {
     display: block;
     height: 30px;
+}
+
+/* Keep logo visible when scrolled */
+.header.scrolled .header__logo {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+/* Shrunk nav icons - hidden by default */
+.shrunk-nav-icons-container {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+}
+
+/* Show icons when header is scrolled and center them */
+.header.scrolled .shrunk-nav-icons-container {
+    display: flex;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 100%;
+}
+
+/* Keep nav-right visible when scrolled */
+.header.scrolled .nav-right {
+    flex-shrink: 0;
+    margin-left: auto;
 }
 
 .button1 {

@@ -27,6 +27,23 @@
 </head>
 
 <body>
+    <!-- Social Media Bar -->
+    <div class="social-media-bar">
+        <div class="follow-prompt">
+            <img src="assets/arrow.png" alt="Follow us on social media" class="follow-arrow-img">
+        </div>
+        <div class="social-icons-container">
+            <a href="https://www.instagram.com/apex.race.tech/" class="social-icon" target="_blank"
+                rel="noopener noreferrer"><i class="fab fa-instagram"></i></a>
+            <a href="https://twitter.com/apexracetech" class="social-icon" target="_blank" rel="noopener noreferrer"><i
+                    class="fa-brands fa-x-twitter"></i></a>
+            <a href="#" class="social-icon" target="_blank" rel="noopener noreferrer"><i
+                    class="fab fa-linkedin-in"></i></a>
+            <a href="https://discord.gg/gednFunCrv" class="social-icon" target="_blank" rel="noopener noreferrer"><i
+                    class="fab fa-discord"></i></a>
+        </div>
+    </div>
+
     <header class="header">
         <nav class="nav-container">
             <a href="index.html" class="header__logo">
@@ -35,6 +52,23 @@
                 <img src="assets/images/apex_orange_ONLY LOGO.svg" alt="APEX Race Technologies Icon" class="logo--icon"
                     style="filter: hue-rotate(190deg) brightness(1.2);">
             </a>
+            <div class="shrunk-nav-icons-container">
+                <a href="#data-import" class="shrunk-nav-icon" title="Data Import">
+                    <i class="fas fa-upload"></i>
+                </a>
+                <a href="#data-overview" class="shrunk-nav-icon" title="Data Overview">
+                    <i class="fas fa-file-alt"></i>
+                </a>
+                <a href="#analysis" class="shrunk-nav-icon" title="Analysis">
+                    <i class="fas fa-chart-bar"></i>
+                </a>
+                <a href="#custom-workbook" class="shrunk-nav-icon" title="Custom Workbook">
+                    <i class="fas fa-robot"></i>
+                </a>
+                <a href="#data-export" class="shrunk-nav-icon" title="Data Export">
+                    <i class="fas fa-download"></i>
+                </a>
+            </div>
             <div class="nav-right">
                 <ul class="nav-links">
                     <li><a href="https://docs.apexracetech.in" target="_blank" rel="noopener noreferrer">Docs</a></li>
@@ -91,7 +125,278 @@
         </div>
     </section>
 
-    <section id="features" class="full-page-section">
+    <!-- Feature Sections -->
+    <section id="data-import" class="full-page-section feature-section">
+        <div class="section-content">
+            <div class="section-header-card">
+                <div class="section-header-icon">
+                    <i class="fas fa-upload"></i>
+                </div>
+                <div class="section-header-text">
+                    <h2 class="section-title">Data Import</h2>
+                    <p class="section-subtitle">Seamless Ingestion for High-Performance Analysis</p>
+                </div>
+            </div>
+            <div class="feature-content">
+                <div class="feature-details style-minimal">
+                    <div class="feature-detail-item innovative-card" data-card="1">
+                        <div class="card-glow"></div>
+                        <div class="card-image-wrapper">
+                            <img src="assets/images/lap_comparison_ui.png" alt="Universal Format Support" class="card-image">
+                            <div class="image-overlay"></div>
+                        </div>
+                        <div class="card-content">
+                            <h4>Universal Format Support</h4>
+                            <p>Direct support for industry-standard formats including MoTeC (.ld), iRacing (.ibt), AiM (.xrk, .drk), RaceLogic (.vbox), and custom CSV mappings.</p>
+                        </div>
+                        <div class="card-particles"></div>
+                    </div>
+                    <div class="feature-detail-item innovative-card" data-card="2">
+                        <div class="card-glow"></div>
+                        <div class="card-image-wrapper">
+                            <img src="assets/images/telemetry_graphs_ui.png" alt="High-Speed Processing" class="card-image">
+                            <div class="image-overlay"></div>
+                        </div>
+                        <div class="card-content">
+                            <h4>High-Speed Processing</h4>
+                            <p>Built with Axum & Tokio, our backend parses files as large as 200MB+ in seconds, preparing them for instant visualization.</p>
+                        </div>
+                        <div class="card-particles"></div>
+                    </div>
+                    <div class="feature-detail-item innovative-card" data-card="3">
+                        <div class="card-glow"></div>
+                        <div class="card-image-wrapper">
+                            <img src="assets/images/track_map_ui.png" alt="Automated Heuristics" class="card-image">
+                            <div class="image-overlay"></div>
+                        </div>
+                        <div class="card-content">
+                            <h4>Automated Heuristics</h4>
+                            <p>Smart lap detection and min-max downsampling ensure your data is clean and accurate, preserving critical peaks such as brake lock-ups and wheel spin-outs.</p>
+                        </div>
+                        <div class="card-particles"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="data-overview" class="full-page-section feature-section">
+        <div class="section-content">
+            <div class="section-header-card">
+                <div class="section-header-icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <div class="section-header-text">
+                    <h2 class="section-title">Data Overview and Management</h2>
+                    <p class="section-subtitle">Intelligent Session Intelligence at a Glance</p>
+                </div>
+            </div>
+            <div class="feature-content">
+                <div class="feature-details style-minimal">
+                    <div class="feature-detail-item innovative-card" data-card="1">
+                        <div class="card-glow"></div>
+                        <div class="card-image-wrapper">
+                            <img src="assets/images/track_map_ui.png" alt="Advanced Session Queue" class="card-image">
+                            <div class="image-overlay"></div>
+                        </div>
+                        <div class="card-content">
+                            <h4>Advanced Session Queue</h4>
+                            <p>Instantly filter through thousands of sessions by Track, Driver, or Vehicle. Sort by date, lap count, or best lap time to find the data you need.</p>
+                        </div>
+                        <div class="card-particles"></div>
+                    </div>
+                    <div class="feature-detail-item innovative-card" data-card="2">
+                        <div class="card-glow"></div>
+                        <div class="card-image-wrapper">
+                            <img src="assets/images/lap_comparison_ui.png" alt="Real-Time Previews" class="card-image">
+                            <div class="image-overlay"></div>
+                        </div>
+                        <div class="card-content">
+                            <h4>Real-Time Previews</h4>
+                            <p>Select a session to view instant performance statistics, including average lap times, consistency scores, and theoretical bests.</p>
+                        </div>
+                        <div class="card-particles"></div>
+                    </div>
+                    <div class="feature-detail-item innovative-card" data-card="3">
+                        <div class="card-glow"></div>
+                        <div class="card-image-wrapper">
+                            <img src="assets/images/telemetry_graphs_ui.png" alt="Lap Breakdown Analytics" class="card-image">
+                            <div class="image-overlay"></div>
+                        </div>
+                        <div class="card-content">
+                            <h4>Lap Breakdown Analytics</h4>
+                            <p>Detailed lap tables with delta-time highlights and inlap/outlap markers, allowing you to focus on your fastest sectors.</p>
+                        </div>
+                        <div class="card-particles"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="analysis" class="full-page-section feature-section">
+        <div class="section-content">
+            <div class="section-header-card">
+                <div class="section-header-icon">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <div class="section-header-text">
+                    <h2 class="section-title">Analysis</h2>
+                    <p class="section-subtitle">High-Fidelity Visualization for Split-Second Decisions</p>
+                </div>
+            </div>
+            <div class="feature-content">
+                <div class="feature-details style-minimal">
+                    <div class="feature-detail-item innovative-card" data-card="1">
+                        <div class="card-glow"></div>
+                        <div class="card-image-wrapper">
+                            <img src="assets/images/telemetry_graphs_ui.png" alt="Professional Graphing Engine" class="card-image">
+                            <div class="image-overlay"></div>
+                        </div>
+                        <div class="card-content">
+                            <h4>Professional Graphing Engine</h4>
+                            <p>High-fidelity time-series visualization using ECharts, optimized for 100Hz+ telemetry data with fluid 60FPS interaction.</p>
+                        </div>
+                        <div class="card-particles"></div>
+                    </div>
+                    <div class="feature-detail-item innovative-card" data-card="2">
+                        <div class="card-glow"></div>
+                        <div class="card-image-wrapper">
+                            <img src="assets/images/lap_comparison_ui.png" alt="Synchronized Ecosystem" class="card-image">
+                            <div class="image-overlay"></div>
+                        </div>
+                        <div class="card-content">
+                            <h4>Synchronized Ecosystem</h4>
+                            <p>A unified cursor system ensures that moving your mouse on a graph updates the track map, G-force gauges, and technical widgets simultaneously.</p>
+                        </div>
+                        <div class="card-particles"></div>
+                    </div>
+                    <div class="feature-detail-item innovative-card" data-card="3">
+                        <div class="card-glow"></div>
+                        <div class="card-image-wrapper">
+                            <img src="assets/images/track_map_ui.png" alt="Multi-Lap Comparison" class="card-image">
+                            <div class="image-overlay"></div>
+                        </div>
+                        <div class="card-content">
+                            <h4>Multi-Lap Comparison</h4>
+                            <p>Compare laps with ease. Our system interpolates data between laps of different frequencies to provide perfectly aligned delta comparisons.</p>
+                        </div>
+                        <div class="card-particles"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="custom-workbook" class="full-page-section feature-section">
+        <div class="section-content">
+            <div class="section-header-card">
+                <div class="section-header-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="section-header-text">
+                    <h2 class="section-title">Custom Workbook (AI Workbook)</h2>
+                    <p class="section-subtitle">Your Modular Mission Control</p>
+                </div>
+            </div>
+            <div class="feature-content">
+                <div class="feature-details style-minimal">
+                    <div class="feature-detail-item innovative-card" data-card="1">
+                        <div class="card-glow"></div>
+                        <div class="card-image-wrapper">
+                            <img src="assets/images/telemetry_graphs_ui.png" alt="AI-Driven Layout Generation" class="card-image">
+                            <div class="image-overlay"></div>
+                        </div>
+                        <div class="card-content">
+                            <h4>AI-Driven Layout Generation</h4>
+                            <p>Use natural language to instantly create custom workbook layouts and complex analysis graphs tailored to your specific racing discipline.</p>
+                        </div>
+                        <div class="card-particles"></div>
+                    </div>
+                    <div class="feature-detail-item innovative-card" data-card="2">
+                        <div class="card-glow"></div>
+                        <div class="card-image-wrapper">
+                            <img src="assets/images/track_map_ui.png" alt="Dynamic Workspace Canvas" class="card-image">
+                            <div class="image-overlay"></div>
+                        </div>
+                        <div class="card-content">
+                            <h4>Dynamic Workspace Canvas</h4>
+                            <p>A futuristic, grid-snapping canvas where you can place, resize, and arrange widgets to create your ideal dashboard.</p>
+                        </div>
+                        <div class="card-particles"></div>
+                    </div>
+                    <div class="feature-detail-item innovative-card" data-card="3">
+                        <div class="card-glow"></div>
+                        <div class="card-image-wrapper">
+                            <img src="assets/images/lap_comparison_ui.png" alt="Modular Library" class="card-image">
+                            <div class="image-overlay"></div>
+                        </div>
+                        <div class="card-content">
+                            <h4>Modular Library</h4>
+                            <p>Choose from a growing library of professional widgets: Speed & RPM Dials, Driver Input Dashboards (Throttle/Brake/Steering), Professional Tyre Monitors, G-Force Gauges & Hybrid System Monitors.</p>
+                        </div>
+                        <div class="card-particles"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="data-export" class="full-page-section feature-section">
+        <div class="section-content">
+            <div class="section-header-card">
+                <div class="section-header-icon">
+                    <i class="fas fa-download"></i>
+                </div>
+                <div class="section-header-text">
+                    <h2 class="section-title">Data Export</h2>
+                    <p class="section-subtitle">Open Compatibility for Professional Workflows</p>
+                </div>
+            </div>
+            <div class="feature-content">
+                <div class="feature-details style-minimal">
+                    <div class="feature-detail-item innovative-card" data-card="1">
+                        <div class="card-glow"></div>
+                        <div class="card-image-wrapper">
+                            <img src="assets/images/lap_comparison_ui.png" alt="Standardized CSV Export" class="card-image">
+                            <div class="image-overlay"></div>
+                        </div>
+                        <div class="card-content">
+                            <h4>Standardized CSV Export</h4>
+                            <p>Export your refined telemetry data to a clean, well-documented CSV format compatible with Excel, MATLAB, and specialized data science tools.</p>
+                        </div>
+                        <div class="card-particles"></div>
+                    </div>
+                    <div class="feature-detail-item innovative-card" data-card="2">
+                        <div class="card-glow"></div>
+                        <div class="card-image-wrapper">
+                            <img src="assets/images/telemetry_graphs_ui.png" alt="MoTeC Ecosystem Integration" class="card-image">
+                            <div class="image-overlay"></div>
+                        </div>
+                        <div class="card-content">
+                            <h4>MoTeC Ecosystem Integration</h4>
+                            <p>Generate .ldx metadata files to preserve event details and beacon markers across professional analysis software.</p>
+                        </div>
+                        <div class="card-particles"></div>
+                    </div>
+                    <div class="feature-detail-item innovative-card" data-card="3">
+                        <div class="card-glow"></div>
+                        <div class="card-image-wrapper">
+                            <img src="assets/images/track_map_ui.png" alt="Metadata Management" class="card-image">
+                            <div class="image-overlay"></div>
+                        </div>
+                        <div class="card-content">
+                            <h4>Metadata Management</h4>
+                            <p>Edit and export session metadata (Venue, Driver, Event) to keep your local archives and professional logs perfectly organized.</p>
+                        </div>
+                        <div class="card-particles"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="full-page-section" style="display: none;">
         <div class="section-content">
             <div class="advantage-cards">
                 <div class="advantage-card feature-card">
@@ -169,6 +474,11 @@
                     <h4>Offline Maps</h4>
                     <p>Access track maps and data visualization without requiring an internet connection.</p>
                 </div>
+                <div class="update-card">
+                    <div class="update-icon"><i class="fas fa-cloud"></i></div>
+                    <h4>Multi Device Session Sync</h4>
+                    <p>Sync your session data across multiple devices using cloud storage for seamless access anywhere.</p>
+                </div>
             </div>
         </div>
     </section>
@@ -229,19 +539,6 @@
             </form>
         </div>
     </section>
-
-    <footer>
-        <div class="footer-content">
-            <p>&copy; 2024 APEX Race Technologies. All rights reserved.</p>
-            <div style="margin-top: 1rem; font-size: 0.9rem;">
-                <a href="https://docs.apexracetech.in" target="_blank" rel="noopener noreferrer" style="color: #bbb; text-decoration: none; margin-right: 1rem;">Documentation</a>
-                <a href="race-insight/eula.html" style="color: #bbb; text-decoration: none; margin-right: 1rem;">EULA</a>
-                <a href="race-insight/terms.html" style="color: #bbb; text-decoration: none; margin-right: 1rem;">Terms of Service</a>
-                <a href="race-insight/third-party-licenses.html" style="color: #bbb; text-decoration: none; margin-right: 1rem;">Third-Party Licenses</a>
-                <a href="race-insight/privacy-policy.html" style="color: #bbb; text-decoration: none;">Privacy Policy</a>
-            </div>
-        </div>
-    </footer>
 
     <!-- Profile Modal -->
     <div id="profile-modal" class="modal-backdrop" style="display: none;">
@@ -1538,8 +1835,110 @@
                     }
                 });
             }
+
+            // --- Shrunk Navigation Icons Functionality ---
+            const shrunkNavIcons = document.querySelectorAll('.shrunk-nav-icon');
+            
+            // Smooth scroll to sections
+            shrunkNavIcons.forEach(icon => {
+                icon.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = icon.getAttribute('href');
+                    const targetSection = document.querySelector(targetId);
+                    
+                    if (targetSection) {
+                        // Remove active class from all icons
+                        shrunkNavIcons.forEach(i => i.classList.remove('active'));
+                        // Add active class to clicked icon
+                        icon.classList.add('active');
+                        
+                        // Smooth scroll to section
+                        targetSection.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+
+            // Update active icon based on scroll position
+            function updateActiveNavIcon() {
+                const sections = document.querySelectorAll('.feature-section');
+                const scrollPosition = window.scrollY + window.innerHeight / 2;
+
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.offsetHeight;
+                    const sectionId = section.getAttribute('id');
+
+                    if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+                        shrunkNavIcons.forEach(icon => {
+                            icon.classList.remove('active');
+                            const href = icon.getAttribute('href');
+                            if (href === `#${sectionId}`) {
+                                icon.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Update on scroll
+            let scrollTimeout;
+            window.addEventListener('scroll', () => {
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(updateActiveNavIcon, 100);
+            });
+
+            // Initial update
+            updateActiveNavIcon();
+
+            // Innovative Card Functionality (works for all style variations)
+            function initInnovativeCards() {
+                // Get all feature sections with any innovative style
+                const styleSelectors = [
+                    '.feature-details.style-overlapping',
+                    '.feature-details.style-accordion',
+                    '.feature-details.style-glassmorphism',
+                    '.feature-details.style-particles',
+                    '.feature-details.style-isometric',
+                    '.feature-details.style-minimal',
+                    '.feature-details.innovative-layout'
+                ];
+                
+                styleSelectors.forEach(selector => {
+                    const layouts = document.querySelectorAll(selector);
+                    
+                    layouts.forEach(layout => {
+                        const cards = layout.querySelectorAll('.innovative-card');
+                        
+                        cards.forEach(card => {
+                            card.addEventListener('click', function() {
+                                // Remove active class from all cards in this layout
+                                cards.forEach(c => c.classList.remove('active'));
+                                // Add active class to clicked card
+                                this.classList.add('active');
+                            });
+                        });
+                    });
+                });
+            }
+
+            // Initialize innovative cards
+            initInnovativeCards();
         });
     </script>
+
+    <div class="footer-content">
+        <p>&copy; 2024 APEX Race Technologies. All rights reserved.</p>
+        <div style="margin-top: 1rem; font-size: 0.9rem;">
+            <a href="https://docs.apexracetech.in" target="_blank" rel="noopener noreferrer" style="color: #bbb; text-decoration: none; margin-right: 1rem;">Documentation</a>
+            <a href="race-insight/eula.html" style="color: #bbb; text-decoration: none; margin-right: 1rem;">EULA</a>
+            <a href="race-insight/terms.html" style="color: #bbb; text-decoration: none; margin-right: 1rem;">Terms of Service</a>
+            <a href="race-insight/third-party-licenses.html" style="color: #bbb; text-decoration: none; margin-right: 1rem;">Third-Party Licenses</a>
+            <a href="race-insight/privacy-policy.html" style="color: #bbb; text-decoration: none;">Privacy Policy</a>
+        </div>
+    </div>
 </body>
 
 </html>
