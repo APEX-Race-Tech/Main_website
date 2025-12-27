@@ -451,13 +451,19 @@
                 try {
                     const userRef = db.collection('users').doc(user.uid);
                     
-                    // Try to get user document, but don't fail if offline
+                    // Try to get user document, but don't fail if offline or API not enabled
                     let snapshot;
                     try {
                         snapshot = await userRef.get();
                     } catch (getError) {
-                        // If get() fails (e.g., offline), assume document doesn't exist and try to create
-                        console.warn('Firestore get() failed (offline), will attempt to create profile:', getError.message);
+                        // Handle different error types
+                        if (getError.code === 'permission-denied') {
+                            console.warn('Firestore permission denied. Make sure Firestore database is created and security rules allow access:', getError.message);
+                        } else if (getError.code === 'failed-precondition') {
+                            console.warn('Firestore API may not be fully enabled yet. Please wait a few minutes:', getError.message);
+                        } else {
+                            console.warn('Firestore get() failed (offline/API issue), will attempt to create profile:', getError.message);
+                        }
                         snapshot = { exists: false };
                     }
 
@@ -480,8 +486,15 @@
                             });
                             console.log('User profile created successfully');
                         } catch (setError) {
-                            // If offline, Firestore will queue this for when connection is restored
-                            console.warn('User profile creation queued (offline mode):', setError.message);
+                            // Handle different error types
+                            if (setError.code === 'permission-denied') {
+                                console.warn('Firestore permission denied. Check security rules:', setError.message);
+                            } else if (setError.code === 'failed-precondition') {
+                                console.warn('Firestore API may not be fully enabled yet. Please wait a few minutes:', setError.message);
+                            } else {
+                                // If offline, Firestore will queue this for when connection is restored
+                                console.warn('User profile creation queued (offline mode):', setError.message);
+                            }
                         }
                     } else {
                         // Update existing user profile
@@ -493,8 +506,15 @@
                             });
                             console.log('User profile updated successfully');
                         } catch (updateError) {
-                            // If offline, Firestore will queue this for when connection is restored
-                            console.warn('User profile update queued (offline mode):', updateError.message);
+                            // Handle different error types
+                            if (updateError.code === 'permission-denied') {
+                                console.warn('Firestore permission denied. Check security rules:', updateError.message);
+                            } else if (updateError.code === 'failed-precondition') {
+                                console.warn('Firestore API may not be fully enabled yet. Please wait a few minutes:', updateError.message);
+                            } else {
+                                // If offline, Firestore will queue this for when connection is restored
+                                console.warn('User profile update queued (offline mode):', updateError.message);
+                            }
                         }
                     }
                     return userRef;
@@ -616,6 +636,15 @@
                     // Close modal immediately if it's open
                     if (authModal) {
                         console.log("Closing modal, active class:", authModal.classList.contains('active'));
+                        // Ensure sign-in buttons are hidden immediately
+                        const navAuthBtn = document.getElementById('nav-auth-btn');
+                        const mobileNavAuthBtn = document.getElementById('mobile-nav-auth-btn');
+                        if (navAuthBtn) {
+                            navAuthBtn.style.setProperty('display', 'none', 'important');
+                        }
+                        if (mobileNavAuthBtn) {
+                            mobileNavAuthBtn.style.setProperty('display', 'none', 'important');
+                        }
                         // Remove active class to trigger fade out
                         authModal.classList.remove('active');
                         // Hide modal after animation
@@ -653,6 +682,20 @@
             closeAuthModal.addEventListener('click', () => {
                 // Reset Google button state when closing modal
                 resetGoogleButton();
+                
+                // Check if user is logged in, and if so, hide sign-in buttons
+                const user = firebase.auth().currentUser;
+                if (user) {
+                    const navAuthBtn = document.getElementById('nav-auth-btn');
+                    const mobileNavAuthBtn = document.getElementById('mobile-nav-auth-btn');
+                    if (navAuthBtn) {
+                        navAuthBtn.style.setProperty('display', 'none', 'important');
+                    }
+                    if (mobileNavAuthBtn) {
+                        mobileNavAuthBtn.style.setProperty('display', 'none', 'important');
+                    }
+                }
+                
                 authModal.classList.remove('active');
                 setTimeout(() => {
                     authModal.style.display = 'none';

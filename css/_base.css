@@ -28,7 +28,6 @@ body {
     color: var(--text-color);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
 
     /* Hide scrollbar but keep scrolling */
     scrollbar-width: none; /* Firefox */

@@ -675,9 +675,7 @@
   transition: background 0.2s ease;
 }
 
-.file-input::-webkit-file-upload-button:hover {
-  background: #00b0d4;
-}
+/* Note: :hover doesn't work on ::-webkit-file-upload-button pseudo-element */
 
 /* --- Auth Modal Styling --- */
 .modal-backdrop {

@@ -868,8 +868,8 @@ h2.tagline {
 img,
 video {
     /* Prevent content layout shifts */
-    aspect-ratio: attr(width) / attr(height);
     height: auto;
+    max-width: 100%;
 }
 
 /* Force hardware acceleration for important animations */
