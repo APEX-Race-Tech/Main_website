@@ -231,9 +231,11 @@
                     </div>
                 </div>
 
-                <div class="profile-actions">
+                <div class="profile-actions" style="margin-top: 2rem;">
                     <button id="edit-profile-btn" class="btn btn-primary"><i class="fas fa-edit"></i> Edit Profile</button>
-                    <button id="change-password-btn" class="btn btn-secondary"><i class="fas fa-key"></i> Change Password</button>
+                    <button id="change-password-btn" class="btn btn-secondary"><i class="fas fa-key"></i> Passwords</button>
+                    <button id="modal-logout-btn" class="btn btn-secondary" style="border-color: rgba(255,255,255,0.1); color: #fff;" aria-label="Logout" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+                    <button id="delete-account-btn" class="btn btn-secondary" style="border-color: #ff4757; color: #ff4757;"><i class="fas fa-trash-alt"></i> Delete Account</button>
                 </div>
 
                 <div id="profile-edit-form" class="profile-edit-form" style="display: none;">
@@ -282,8 +284,20 @@
 
                 <div class="profile-stats">
                     <div class="stat-card">
-                        <div class="stat-value" id="stat-downloads">0</div>
-                        <div class="stat-label">Downloads</div>
+                        <div class="stat-value" id="profile-simulator">N/A</div>
+                        <div class="stat-label">Simulator</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="profile-experience">N/A</div>
+                        <div class="stat-label">Experience</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="profile-referral" style="font-size: 1.1rem;">N/A</div>
+                        <div class="stat-label">Discovery</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="profile-location-display" style="font-size: 1.1rem;">N/A</div>
+                        <div class="stat-label">Location</div>
                     </div>
                 </div>
             </div>
@@ -311,21 +325,78 @@
             <div id="auth-success" class="auth-success" style="display: none; background: rgba(0, 255, 0, 0.1); border: 1px solid rgba(0, 255, 0, 0.3); color: #51cf66; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem;"></div>
 
             <form id="email-auth-form">
-                <div class="form-group">
-                    <input type="email" id="auth-email" placeholder="Email Address" required>
+                <div class="form-group" style="position: relative; margin-bottom: 1.25rem;">
+                    <i class="fas fa-envelope" style="position: absolute; left: 1rem; top: 0.9rem; color: #555; z-index: 1;"></i>
+                    <input type="email" id="auth-email" placeholder="Email Address" required style="padding-left: 2.75rem; width: 100%; box-sizing: border-box;">
                 </div>
-                <div class="form-group">
-                    <input type="password" id="auth-password" placeholder="Password" required>
+                <div class="form-group" style="position: relative; margin-bottom: 1.25rem;">
+                    <i class="fas fa-lock" style="position: absolute; left: 1rem; top: 0.9rem; color: #555; z-index: 1;"></i>
+                    <input type="password" id="auth-password" placeholder="Password" required style="padding-left: 2.75rem; width: 100%; box-sizing: border-box;">
                     <div id="forgot-password-link" style="text-align: right; margin-top: 0.5rem; font-size: 0.85rem; display: none;">
                         <a href="#" id="forgot-password-btn" style="color: var(--primary-color); text-decoration: none;">Forgot Password?</a>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;" id="auth-submit-btn">Sign In</button>
+                <button type="submit" class="btn btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.75rem;" id="auth-submit-btn">
+                   <i class="fas fa-sign-in-alt"></i> Sign In
+                </button>
             </form>
 
             <div class="auth-switch">
                 <p id="auth-switch-text">Don't have an account? <a href="#" id="toggle-auth-mode">Sign Up</a></p>
             </div>
+        </div>
+    </div>
+
+    <!-- Onboarding Modal -->
+    <div id="onboarding-modal" class="modal-backdrop" style="display: none;">
+        <div class="modal-content">
+            <h3>Complete Your Profile</h3>
+            <p>Tell us a bit more about your racing setup to personalize your experience.</p>
+            
+            <form id="onboarding-form">
+                <div class="form-group">
+                    <label for="onboarding-simulator">Primary Racing Simulator</label>
+                    <select id="onboarding-simulator" name="simulator" required style="width: 100%; padding: 0.75rem; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: white;">
+                        <option value="">Select a Simulator</option>
+                        <option value="iRacing">iRacing</option>
+                        <option value="Assetto Corsa Competizione">Assetto Corsa Competizione (ACC)</option>
+                        <option value="Assetto Corsa">Assetto Corsa</option>
+                        <option value="F1 23/24">F1 23/24</option>
+                        <option value="Le Mans Ultimate">Le Mans Ultimate</option>
+                        <option value="rFactor 2">rFactor 2</option>
+                        <option value="BeamNG.drive">BeamNG.drive</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="onboarding-experience">Racing Experience</label>
+                    <select id="onboarding-experience" name="experience" required style="width: 100%; padding: 0.75rem; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: white;">
+                        <option value="">Select Level</option>
+                        <option value="Beginner">Sim/Real: Beginner (Just starting)</option>
+                        <option value="Intermediate">Sim/Real: Intermediate (Regular Racer)</option>
+                        <option value="Advanced">Sim/Real: Advanced (Competitive Racer)</option>
+                        <option value="Professional">Sim/Real: Professional / Elite</option>
+                        <option value="Real-Life Pro">Real-World Racing Professional</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="onboarding-location">Where are you from?</label>
+                    <input type="text" id="onboarding-location" name="location" placeholder="City, Country" required style="width: 100%; padding: 0.75rem; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: white;">
+                </div>
+                <div class="form-group">
+                    <label for="onboarding-referral">Where did you hear about us?</label>
+                    <select id="onboarding-referral" name="referral" required style="width: 100%; padding: 0.75rem; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: white;">
+                        <option value="">Select an option</option>
+                        <option value="Social Media">Social Media</option>
+                        <option value="YouTube">YouTube</option>
+                        <option value="Discord">Discord</option>
+                        <option value="Friend">Friend / Word of Mouth</option>
+                        <option value="Search">Search Engine</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Finish Setup</button>
+            </form>
         </div>
     </div>
 
@@ -479,51 +550,78 @@
                                 createdAt,
                                 bio: '',
                                 location: '',
+                                simulator: additionalData.simulator || 'Not selected',
+                                experience: additionalData.experience || 'Not selected',
+                                referral: additionalData.referral || 'Not selected',
                                 downloadCount: 0,
                                 sessionCount: 0,
                                 lastLogin: createdAt,
                                 ...additionalData
                             });
                             console.log('User profile created successfully');
+                            return { isNewUser: true };
                         } catch (setError) {
-                            // Handle different error types
-                            if (setError.code === 'permission-denied') {
-                                console.warn('Firestore permission denied. Check security rules:', setError.message);
-                            } else if (setError.code === 'failed-precondition') {
-                                console.warn('Firestore API may not be fully enabled yet. Please wait a few minutes:', setError.message);
-                            } else {
-                                // If offline, Firestore will queue this for when connection is restored
-                                console.warn('User profile creation queued (offline mode):', setError.message);
-                            }
+                            // ... existing catch ...
                         }
                     } else {
                         // Update existing user profile
-                        try {
-                            const currentData = snapshot.data();
-                            await userRef.update({
-                                lastLogin: new Date(),
-                                sessionCount: (currentData.sessionCount || 0) + 1
-                            });
-                            console.log('User profile updated successfully');
-                        } catch (updateError) {
-                            // Handle different error types
-                            if (updateError.code === 'permission-denied') {
-                                console.warn('Firestore permission denied. Check security rules:', updateError.message);
-                            } else if (updateError.code === 'failed-precondition') {
-                                console.warn('Firestore API may not be fully enabled yet. Please wait a few minutes:', updateError.message);
-                            } else {
-                                // If offline, Firestore will queue this for when connection is restored
-                                console.warn('User profile update queued (offline mode):', updateError.message);
-                            }
-                        }
+                        const currentData = snapshot.data();
+                        await userRef.update({
+                            lastLogin: new Date(),
+                            sessionCount: (currentData.sessionCount || 0) + 1
+                        });
+                        console.log('User profile updated successfully');
+                        return { isNewUser: false };
                     }
-                    return userRef;
+                    return { isNewUser: false };
                 } catch (error) {
-                    // Catch any unexpected errors - always resolve successfully
                     console.warn('Firestore operation failed (non-fatal):', error.message);
-                    return null;
+                    return { isNewUser: false };
                 }
             }
+
+            // Onboarding Logic
+            const onboardingModal = document.getElementById('onboarding-modal');
+            const onboardingForm = document.getElementById('onboarding-form');
+
+            async function checkOnboarding(user, profileResult) {
+                if (profileResult && profileResult.isNewUser) {
+                    onboardingModal.style.display = 'flex';
+                    onboardingModal.offsetHeight;
+                    onboardingModal.classList.add('active');
+                }
+            }
+
+            if (onboardingForm) {
+                onboardingForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const user = firebase.auth().currentUser;
+                    if (!user) return;
+
+                    const simulator = document.getElementById('onboarding-simulator').value;
+                    const experience = document.getElementById('onboarding-experience').value;
+                    const location = document.getElementById('onboarding-location').value;
+                    const referral = document.getElementById('onboarding-referral').value;
+
+                    try {
+                        await db.collection('users').doc(user.uid).update({
+                            simulator: simulator,
+                            experience: experience,
+                            location: location,
+                            referral: referral
+                        });
+                        onboardingModal.classList.remove('active');
+                        setTimeout(() => onboardingModal.style.display = 'none', 300);
+                        await loadProfileData(user);
+                    } catch (error) {
+                        console.error('Error saving onboarding data:', error);
+                        alert('Failed to save information. You can update it later in your profile.');
+                        onboardingModal.classList.remove('active');
+                        setTimeout(() => onboardingModal.style.display = 'none', 300);
+                    }
+                });
+            }
+
 
             // Load user profile data
             async function loadUserProfile(user) {
@@ -600,6 +698,9 @@
                     downloadBtns.forEach(btn => {
                         btn.textContent = "Download";
                     });
+
+                    // Update simulator and experience in profile
+                    loadProfileData(user);
                     
                     console.log("=== UI update complete ===");
                 } catch (error) {
@@ -653,7 +754,7 @@
                             console.log("✓ Modal display set to none");
                         }, 300);
                         
-                        // Execute pending download action if any
+                        // Execute pending download action or onboarding
                         if (pendingDownloadAction) {
                             setTimeout(() => {
                                 pendingDownloadAction();
@@ -777,11 +878,14 @@
                     .then(async (result) => {
                         clearTimeout(timeoutId);
                         console.log("Google sign-in successful:", result.user.email);
-                        // createUserProfile always resolves, so this won't cause sign-in to fail
-                        await createUserProfile(result.user).catch(() => {
-                            // Extra safety - should never reach here, but just in case
+                        const profileResult = await createUserProfile(result.user).catch(() => {
                             console.warn("Profile creation completed with warnings (non-fatal)");
+                            return { isNewUser: false };
                         });
+                        
+                        if (profileResult && profileResult.isNewUser) {
+                            await checkOnboarding(result.user, profileResult);
+                        }
                         // Sign-in succeeded - modal will close via onAuthStateChanged
                         // Button will be reset when modal reopens, so no need to restore here
                     })
@@ -941,12 +1045,21 @@
             });
 
             // Logout functionality
-            const logoutBtns = [document.getElementById('nav-logout-btn'), document.getElementById('mobile-nav-logout-btn')];
+            const logoutBtns = [
+                document.getElementById('nav-logout-btn'), 
+                document.getElementById('mobile-nav-logout-btn'),
+                document.getElementById('modal-logout-btn')
+            ];
             logoutBtns.forEach(btn => {
                 if (btn) {
                     btn.addEventListener('click', () => {
                         firebase.auth().signOut().then(() => {
                             console.log("User signed out");
+                            // Close modals if open
+                            if (profileModal) {
+                                profileModal.classList.remove('active');
+                                setTimeout(() => profileModal.style.display = 'none', 300);
+                            }
                             // Clear login cookies
                             deleteCookie('userLoggedIn');
                             deleteCookie('userEmail');
@@ -1220,8 +1333,16 @@
                     }
 
                     // Stats
-                    if (statDownloads) statDownloads.textContent = profileData?.downloadCount || 0;
                     if (statSessions) statSessions.textContent = profileData?.sessionCount || 0;
+                    
+                    const profileSim = document.getElementById('profile-simulator');
+                    const profileExp = document.getElementById('profile-experience');
+                    const profileRef = document.getElementById('profile-referral');
+                    const profileLoc = document.getElementById('profile-location-display');
+                    if (profileSim) profileSim.textContent = profileData?.simulator || 'Not selected';
+                    if (profileExp) profileExp.textContent = profileData?.experience || 'Not selected';
+                    if (profileRef) profileRef.textContent = profileData?.referral || 'Not selected';
+                    if (profileLoc) profileLoc.textContent = profileData?.location || 'Not selected';
 
                     // Pre-fill edit form
                     if (document.getElementById('profile-name')) {
@@ -1339,6 +1460,46 @@
                     } catch (error) {
                         console.error('Error updating password:', error);
                         alert('Failed to update password: ' + getErrorMessage(error));
+                    }
+                });
+            }
+
+            // Delete Account Logic
+            const deleteAccountBtn = document.getElementById('delete-account-btn');
+            if (deleteAccountBtn) {
+                deleteAccountBtn.addEventListener('click', async () => {
+                    const user = firebase.auth().currentUser;
+                    if (!user) return;
+
+                    const confirmed = confirm("WARNING: This will permanently delete your account and all associated data. This action cannot be undone. Are you sure?");
+                    
+                    if (confirmed) {
+                        try {
+                            // 1. Delete Firestore data
+                            await db.collection('users').doc(user.uid).delete();
+                            console.log("User data deleted from Firestore");
+
+                            // 2. Delete Firebase Auth user
+                            await user.delete();
+                            console.log("User account deleted");
+
+                            alert("Your account has been successfully deleted.");
+                            
+                            // 3. UI cleanup
+                            profileModal.classList.remove('active');
+                            setTimeout(() => profileModal.style.display = 'none', 300);
+                            deleteCookie('userLoggedIn');
+                            deleteCookie('userEmail');
+                            deleteCookie('userId');
+                            location.reload(); // Refresh to update nav/state
+                        } catch (error) {
+                            console.error("Error deleting account:", error);
+                            if (error.code === 'auth/requires-recent-login') {
+                                alert("For security reasons, this action requires a recent login. Please log out and log back in, then try again.");
+                            } else {
+                                alert("Failed to delete account: " + error.message);
+                            }
+                        }
                     }
                 });
             }
