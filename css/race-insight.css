@@ -2440,6 +2440,8 @@ select option {
   opacity: 0.85;
   transition: opacity 0.4s ease, transform 0.4s ease;
   transform: translateY(4px);
+  max-height: none;
+  overflow: visible;
 }
 
 .style-minimal .innovative-card:hover p,

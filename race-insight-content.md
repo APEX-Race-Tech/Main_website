@@ -7,75 +7,60 @@ This document contains specialized content extracted from the RACE Insight softw
 ## 1. Data Import
 ### Seamless Ingestion for High-Performance Analysis
 
-![Data Import](assets/images/data-import.png)
 
-RACE Insight features a high-performance Rust-powered backend designed to handle large-scale motorsports telemetry data with zero lag.
+**Universal Format Support**: Works with all the major racing data formats you already use. Whether your data comes from iRacing, MoTeC, AiM, RaceLogic, or custom CSV files, we've got you covered.
 
-**Universal Format Support**: Direct support for industry-standard formats including MoTeC (.ld), iRacing (.ibt), AiM (.xrk, .drk), RaceLogic (.vbox), and custom CSV mappings.
+**Lightning-Fast Processing**: Upload even the largest files (200MB+) and they're ready to analyze in seconds. No more waiting around for your data to load.
 
-**High-Speed Processing**: Built with Axum & Tokio, our backend parses files as large as 200MB+ in seconds, preparing them for instant visualization.
-
-**Offline Reliability**: Leverages IndexedDB for local persistence, allowing you to ingest once and analyze anywhere, even without an internet connection.
+**Works Offline**: Once you've imported your data, you can analyze it anywhere—even without internet. Perfect for working on the go or in areas with spotty connectivity.
 
 ---
 
 ## 2. Data Overview and Management
 ### Intelligent Session Intelligence at a Glance
 
-![Data Overview](assets/images/data-overview.png)
 
-The Data Overview hub provides a comprehensive interface for managing your entire racing career's worth of data.
+**Smart Session Search**: Quickly find any session from your racing history. Filter by track, driver, or car, then sort by date, lap count, or fastest lap time to find exactly what you're looking for.
 
-**Advanced Session Queue**: Instantly filter through thousands of sessions by Track, Driver, or Vehicle. Sort by date, lap count, or best lap time to find the data you need.
+**Instant Performance Stats**: Click any session to see your key metrics at a glance—average lap times, how consistent you were, and your theoretical best lap.
 
-**Real-Time Previews**: Select a session to view instant performance statistics, including average lap times, consistency scores, and theoretical bests.
-
-**Interactive Spatial Previews**: Integrated GPS track maps and lap-time trend charts provide immediate context for every session before you dive into deep analysis.
+**Visual Previews**: See track maps and lap-time trends right away, so you know what to expect before diving into detailed analysis.
 
 ---
 
 ## 3. Analysis
 ### High-Fidelity Visualization for Split-Second Decisions
 
-![Analysis](assets/images/telemetry_graphs_ui.png)
 
-The analysis engine is the heart of RACE Insight, providing professional-grade graphing tools that keep up with your data.
+**Professional Graphing Engine**: smooth graphs that display your racing data without any lag. Everything responds instantly as you explore your data.
 
-**Professional Graphing Engine**: High-fidelity time-series visualization using ECharts, optimized for 100Hz+ telemetry data with fluid 60FPS interaction.
+**Everything Connected**: Move your cursor on any graph and watch everything update together—track position, G-forces, and all your gauges move in perfect sync.
 
-**Synchronized Ecosystem**: A unified cursor system ensures that moving your mouse on a graph updates the track map, G-force gauges, and technical widgets simultaneously.
-
-**Multi-Lap Comparison**: Compare laps with ease. Our system interpolates data between laps of different frequencies to provide perfectly aligned delta comparisons.
+**Easy Lap Comparison**: Compare any laps side-by-side, even if they were recorded at different rates. The system automatically aligns everything so you can see exactly where you gained or lost time.
 
 ---
 
 ## 4. Custom Workbook (AI Workbook)
 ### Your Modular Mission Control
 
-![Custom Workbook](assets/images/custom-workbook.png)
 
-Build a bespoke analysis environment with our drag-and-drop modular workspace.
+**AI-Powered Creation**: Just describe what you want in plain English, and watch as your custom dashboard comes to life. No complex setup required.
 
-**AI-Driven Layout Generation**: Use natural language to instantly create custom workbook layouts and complex analysis graphs tailored to your specific racing discipline.
+**Drag-and-Drop Design**: Build your perfect workspace by simply dragging, resizing, and arranging widgets exactly where you want them. It's that easy.
 
-**Dynamic Workspace Canvas**: A futuristic, grid-snapping canvas where you can place, resize, and arrange widgets to create your ideal dashboard.
-
-**Modular Library**: Choose from a growing library of professional widgets including Speed & RPM Dials, Driver Input Dashboards, Professional Tyre Monitors, and G-Force Gauges & Hybrid System Monitors.
+**Widget Library**: Choose from professional tools like speed dials, throttle/brake displays, tire monitors, and G-force gauges. Mix and match to create your ideal setup.
 
 ---
 
 ## 5. Data Export
 ### Open Compatibility for Professional Workflows
 
-![Data Export](assets/images/data-export.png)
 
-RACE Insight respects your data sovereignty, ensuring you can move your data wherever it needs to go.
+**Export to CSV**: Save your analyzed data in a clean, easy-to-read format that works with Excel, MATLAB, and other tools you already use.
 
-**Standardized CSV Export**: Export your refined telemetry data to a clean, well-documented CSV format compatible with Excel, MATLAB, and specialized data science tools.
+**MoTeC Compatibility**: Export files that work seamlessly with professional MoTeC analysis software, preserving all your important markers and event details.
 
-**MoTeC Ecosystem Integration**: Generate .ldx metadata files to preserve event details and beacon markers across professional analysis software.
-
-**Batch Exporting**: Efficiently process and export multiple laps or entire sessions for external reporting and team sharing.
+**Export Multiple Sessions**: Save time by exporting entire sessions or multiple laps at once. Perfect for sharing with your team or creating reports.
 
 ---
 
