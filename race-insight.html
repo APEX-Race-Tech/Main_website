@@ -38,14 +38,12 @@
             <div class="nav-right">
                 <ul class="nav-links">
                     <li><a href="https://docs.apexracetech.in" target="_blank" rel="noopener noreferrer">Docs</a></li>
-                    <li id="nav-profile" style="display: none;"><a href="#profile">Profile</a></li>
                 </ul>
                 <div class="header-action-item">
                     <button id="nav-profile-btn" class="btn-profile-icon" aria-label="Profile" title="Profile" style="display: none;">
                         <i class="fas fa-user"></i>
                     </button>
                     <a href="#download" class="btn btn-primary" id="nav-download-btn">Download</a>
-                    <button id="nav-logout-btn" class="btn btn-secondary" style="display: none;">Logout</button>
                 </div>
             </div>
             <button class="hamburger-btn" aria-label="Toggle menu">
@@ -59,14 +57,12 @@
     <div class="mobile-nav">
         <ul class="nav-links">
             <li><a href="https://docs.apexracetech.in" target="_blank" rel="noopener noreferrer">Docs</a></li>
-            <li id="mobile-nav-profile" style="display: none;"><a href="#profile">Profile</a></li>
         </ul>
         <div class="header-action-item">
             <button id="mobile-nav-profile-btn" class="btn-profile-icon" style="margin-bottom: 0.5rem; display: none;" aria-label="Profile">
                 <i class="fas fa-user"></i>
             </button>
             <a href="#download" class="btn btn-primary" id="mobile-nav-download-btn">Download</a>
-            <button id="mobile-nav-logout-btn" class="btn btn-secondary" style="display: none; margin-top: 0.5rem; width: 100%;">Logout</button>
         </div>
     </div>
 
@@ -319,24 +315,79 @@
 
             <div class="divider"><span>OR</span></div>
 
+            <!-- Step Indicator -->
+            <div id="auth-step-indicator" class="auth-step-indicator" style="display: none; margin-bottom: 2rem;">
+                <div class="step step-1 active" data-step="1"><span>1</span><label>Account</label></div>
+                <div class="step-line"></div>
+                <div class="step step-2" data-step="2"><span>2</span><label>Profile</label></div>
+            </div>
+
             <div id="auth-error" class="auth-error" style="display: none; background: rgba(255, 0, 0, 0.1); border: 1px solid rgba(255, 0, 0, 0.3); color: #ff6b6b; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem;"></div>
             <div id="auth-success" class="auth-success" style="display: none; background: rgba(0, 255, 0, 0.1); border: 1px solid rgba(0, 255, 0, 0.3); color: #51cf66; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem;"></div>
 
             <form id="email-auth-form">
-                <div class="form-group" style="position: relative; margin-bottom: 1.25rem;">
-                    <i class="fas fa-envelope" style="position: absolute; left: 1rem; top: 0.9rem; color: #555; z-index: 1;"></i>
-                    <input type="email" id="auth-email" placeholder="Email Address" required style="padding-left: 2.75rem; width: 100%; box-sizing: border-box;">
+                <!-- Step 1: Credentials -->
+                <div id="auth-step-1" class="auth-step">
+                    <div class="form-group" style="position: relative; margin-bottom: 1.25rem;">
+                        <i class="fas fa-envelope" style="position: absolute; left: 1rem; top: 0.9rem; color: #555; z-index: 1;"></i>
+                        <input type="email" id="auth-email" placeholder="Email Address" required style="padding-left: 2.75rem; width: 100%; box-sizing: border-box;">
+                    </div>
+                    <div class="form-group" style="position: relative; margin-bottom: 1.25rem;">
+                        <i class="fas fa-lock" style="position: absolute; left: 1rem; top: 0.9rem; color: #555; z-index: 1;"></i>
+                        <input type="password" id="auth-password" placeholder="Password" required style="padding-left: 2.75rem; width: 100%; box-sizing: border-box;">
+                        <div id="forgot-password-link" style="text-align: right; margin-top: 0.5rem; font-size: 0.85rem; display: none;">
+                            <a href="#" id="forgot-password-btn" style="color: var(--primary-color); text-decoration: none;">Forgot Password?</a>
+                        </div>
+                    </div>
+                    <button type="button" id="auth-next-btn" class="btn btn-primary" style="width: 100%; display: none;">Next <i class="fas fa-arrow-right"></i></button>
+                    <button type="submit" id="auth-signin-btn" class="btn btn-primary" style="width: 100%;">Sign In</button>
                 </div>
-                <div class="form-group" style="position: relative; margin-bottom: 1.25rem;">
-                    <i class="fas fa-lock" style="position: absolute; left: 1rem; top: 0.9rem; color: #555; z-index: 1;"></i>
-                    <input type="password" id="auth-password" placeholder="Password" required style="padding-left: 2.75rem; width: 100%; box-sizing: border-box;">
-                    <div id="forgot-password-link" style="text-align: right; margin-top: 0.5rem; font-size: 0.85rem; display: none;">
-                        <a href="#" id="forgot-password-btn" style="color: var(--primary-color); text-decoration: none;">Forgot Password?</a>
+
+                <!-- Step 2: Profile (Hidden by default, used only for Sign-Up) -->
+                <div id="auth-step-2" class="auth-step" style="display: none;">
+                    <div class="form-group" style="margin-bottom: 1.25rem;">
+                        <label for="auth-simulator" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: #aaa;">Primary Racing Simulator</label>
+                        <select id="auth-simulator" name="simulator" style="width: 100%; padding: 0.75rem; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: white;">
+                            <option value="">Select a Simulator</option>
+                            <option value="iRacing">iRacing</option>
+                            <option value="ACC">ACC</option>
+                            <option value="Assetto Corsa">Assetto Corsa</option>
+                            <option value="F1 Series">F1 Series</option>
+                            <option value="rFactor 2">rFactor 2</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 1.25rem;">
+                        <label for="auth-experience" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: #aaa;">Racing Experience</label>
+                        <select id="auth-experience" name="experience" style="width: 100%; padding: 0.75rem; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: white;">
+                            <option value="">Select Level</option>
+                            <option value="Beginner">Beginner</option>
+                            <option value="Intermediate">Intermediate</option>
+                            <option value="Advanced">Advanced</option>
+                            <option value="Professional">Professional</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 1.25rem;">
+                        <label for="auth-location" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: #aaa;">Where are you from?</label>
+                        <input type="text" id="auth-location" placeholder="City, Country" style="width: 100%; padding: 0.75rem; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: white; box-sizing: border-box;">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label for="auth-referral" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: #aaa;">Where did you hear about us?</label>
+                        <select id="auth-referral" name="referral" style="width: 100%; padding: 0.75rem; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: white;">
+                            <option value="">Select Source</option>
+                            <option value="Social Media">Social Media</option>
+                            <option value="YouTube">YouTube</option>
+                            <option value="Discord">Discord</option>
+                            <option value="Friend">Friend</option>
+                            <option value="Search">Search</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="button" id="auth-back-btn" class="btn btn-secondary" style="flex: 1;">Back</button>
+                        <button type="submit" id="auth-signup-submit-btn" class="btn btn-primary" style="flex: 2;">Finish Sign Up</button>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.75rem;" id="auth-submit-btn">
-                   <i class="fas fa-sign-in-alt"></i> Sign In
-                </button>
             </form>
 
             <div class="auth-switch">
@@ -638,35 +689,17 @@
             function updateUIForLoggedInUser(user) {
                 console.log("=== updateUIForLoggedInUser called ===");
                 try {
-                    const navProfile = document.getElementById('nav-profile');
-                    const mobileNavProfile = document.getElementById('mobile-nav-profile');
                     const navProfileBtn = document.getElementById('nav-profile-btn');
                     const mobileNavProfileBtn = document.getElementById('mobile-nav-profile-btn');
-                    const navLogoutBtn = document.getElementById('nav-logout-btn');
-                    const mobileNavLogoutBtn = document.getElementById('mobile-nav-logout-btn');
                     const downloadBtns = document.querySelectorAll('a[href="#download"]');
 
                     console.log("Elements found:", {
-                        navProfile: !!navProfile,
-                        mobileNavProfile: !!mobileNavProfile,
                         navProfileBtn: !!navProfileBtn,
                         mobileNavProfileBtn: !!mobileNavProfileBtn,
-                        navLogoutBtn: !!navLogoutBtn,
-                        mobileNavLogoutBtn: !!mobileNavLogoutBtn,
                         downloadBtns: downloadBtns.length
                     });
 
-                    // Show profile links and buttons in nav
-                    if (navProfile) {
-                        navProfile.style.display = 'block';
-                        console.log("✓ navProfile set to block");
-                    } else {
-                        console.warn("✗ navProfile element not found");
-                    }
-                    if (mobileNavProfile) {
-                        mobileNavProfile.style.display = 'block';
-                        console.log("✓ mobileNavProfile set to block");
-                    }
+                    // Show profile icon buttons in nav
                     if (navProfileBtn) {
                         navProfileBtn.style.setProperty('display', 'inline-flex', 'important');
                         console.log("✓ navProfileBtn shown");
@@ -674,18 +707,6 @@
                     if (mobileNavProfileBtn) {
                         mobileNavProfileBtn.style.setProperty('display', 'block', 'important');
                         console.log("✓ mobileNavProfileBtn shown");
-                    }
-                    
-                    // Show logout buttons with !important
-                    if (navLogoutBtn) {
-                        navLogoutBtn.style.setProperty('display', 'inline-flex', 'important');
-                        console.log("✓ navLogoutBtn shown");
-                    } else {
-                        console.warn("✗ navLogoutBtn element not found");
-                    }
-                    if (mobileNavLogoutBtn) {
-                        mobileNavLogoutBtn.style.setProperty('display', 'block', 'important');
-                        console.log("✓ mobileNavLogoutBtn shown");
                     }
 
                     // Update download button text
@@ -777,15 +798,9 @@
 
             // Update UI for logged out user
             function updateUIForLoggedOutUser() {
-                const navProfile = document.getElementById('nav-profile');
-                const mobileNavProfile = document.getElementById('mobile-nav-profile');
                 const navProfileBtn = document.getElementById('nav-profile-btn');
                 const mobileNavProfileBtn = document.getElementById('mobile-nav-profile-btn');
-                const navLogoutBtn = document.getElementById('nav-logout-btn');
-                const mobileNavLogoutBtn = document.getElementById('mobile-nav-logout-btn');
 
-                if (navProfile) navProfile.style.display = 'none';
-                if (mobileNavProfile) mobileNavProfile.style.display = 'none';
                 // Hide profile buttons when logged out
                 if (navProfileBtn) {
                     navProfileBtn.style.setProperty('display', 'none', 'important');
@@ -793,8 +808,6 @@
                 if (mobileNavProfileBtn) {
                     mobileNavProfileBtn.style.setProperty('display', 'none', 'important');
                 }
-                if (navLogoutBtn) navLogoutBtn.style.display = 'none';
-                if (mobileNavLogoutBtn) mobileNavLogoutBtn.style.display = 'none';
             }
 
             // Toggle Sign In / Sign Up
@@ -990,10 +1003,8 @@
             // Sign-in is now triggered by the Download button when user is not signed in
             // Auth buttons removed - users sign in via download button
 
-            // Logout functionality
+            // Logout functionality (only in profile modal)
             const logoutBtns = [
-                document.getElementById('nav-logout-btn'), 
-                document.getElementById('mobile-nav-logout-btn'),
                 document.getElementById('modal-logout-btn')
             ];
             logoutBtns.forEach(btn => {
