@@ -145,11 +145,13 @@
                 <h3>Download Race Insight</h3>
                 <p>Choose your platform and start analyzing your racing data.</p>
 
-                <div class="download-counter" style="margin: 1.5rem 0; padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 8px; text-align: center;">
+                <div class="download-card" style="margin-bottom: 3rem;">
+                <div id="total-download-container" class="counter-container" style="margin-bottom: 2rem; padding: 1.5rem; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); display: none;">
                     <p style="margin: 0; font-size: 0.9rem; color: #aaa; margin-bottom: 0.5rem;">Total Downloads</p>
                     <div id="download-count" style="font-size: 2rem; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums;">
                         <span style="opacity: 0.5;">Loading...</span>
                     </div>
+                </div>
                 </div>
 
                 <div class="platform-options">
@@ -244,8 +246,30 @@
                             <textarea id="profile-bio" name="bio" rows="3" placeholder="Tell us about yourself"></textarea>
                         </div>
                         <div class="form-group">
-                            <label for="profile-location">Location (Optional)</label>
+                            <label for="profile-location">Location</label>
                             <input type="text" id="profile-location" name="location" placeholder="City, Country">
+                        </div>
+                        <div class="form-group">
+                            <label for="profile-simulator-edit">Primary simulator</label>
+                            <select id="profile-simulator-edit" name="simulator" style="width: 100%; padding: 0.75rem; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: white;">
+                                <option value="">Select a Simulator</option>
+                                <option value="iRacing">iRacing</option>
+                                <option value="ACC">ACC</option>
+                                <option value="Assetto Corsa">Assetto Corsa</option>
+                                <option value="F1 Series">F1 Series</option>
+                                <option value="rFactor 2">rFactor 2</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="profile-experience-edit">Racing experience</label>
+                            <select id="profile-experience-edit" name="experience" style="width: 100%; padding: 0.75rem; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: white;">
+                                <option value="">Select Level</option>
+                                <option value="Beginner">Beginner</option>
+                                <option value="Intermediate">Intermediate</option>
+                                <option value="Advanced">Advanced</option>
+                                <option value="Professional">Professional</option>
+                            </select>
                         </div>
                         <div class="form-actions">
                             <button type="submit" class="btn btn-primary">Save Changes</button>
@@ -1058,22 +1082,30 @@
             
             // Fetch and display download count
             const downloadCountRef = db.collection('stats').doc('downloads');
+            const totalDownloadContainer = document.getElementById('total-download-container');
+            const DOWNLOAD_THRESHOLD = 50; // Big number threshold
             
             // Listen for real-time updates
             downloadCountRef.onSnapshot((doc) => {
                 if (doc && doc.exists) {
                     const count = doc.data().count || 0;
-                    const currentText = downloadCountElement.textContent.trim();
-                    const currentCount = parseInt(currentText.replace(/,/g, '')) || 0;
                     
-                    if (currentText === 'Loading...' || currentText === '') {
-                        downloadCountElement.textContent = formatNumber(count);
-                    } else if (count !== currentCount) {
-                        animateCount(downloadCountElement, count);
+                    if (count >= DOWNLOAD_THRESHOLD) {
+                        if (totalDownloadContainer) totalDownloadContainer.style.display = 'block';
+                        
+                        const currentText = downloadCountElement.textContent.trim();
+                        const currentCount = parseInt(currentText.replace(/,/g, '')) || 0;
+                        
+                        if (currentText === 'Loading...' || currentText === '') {
+                            downloadCountElement.textContent = formatNumber(count);
+                        } else if (count !== currentCount) {
+                            animateCount(downloadCountElement, count);
+                        }
+                    } else {
+                        if (totalDownloadContainer) totalDownloadContainer.style.display = 'none';
                     }
                 } else {
-                    // Show 0 if document doesn't exist yet
-                    downloadCountElement.textContent = '0';
+                    if (totalDownloadContainer) totalDownloadContainer.style.display = 'none';
                 }
             }, (error) => {
                 console.error('Error fetching download count:', error);
@@ -1310,6 +1342,12 @@
                     if (document.getElementById('profile-location')) {
                         document.getElementById('profile-location').value = profileData?.location || '';
                     }
+                    if (document.getElementById('profile-simulator-edit')) {
+                        document.getElementById('profile-simulator-edit').value = profileData?.simulator || '';
+                    }
+                    if (document.getElementById('profile-experience-edit')) {
+                        document.getElementById('profile-experience-edit').value = profileData?.experience || '';
+                    }
                 } catch (error) {
                     console.error('Error loading profile data:', error);
                 }
@@ -1356,12 +1394,16 @@
                     const displayName = document.getElementById('profile-name').value.trim();
                     const bio = document.getElementById('profile-bio').value.trim();
                     const location = document.getElementById('profile-location').value.trim();
-
+                    const simulator = document.getElementById('profile-simulator-edit').value;
+                    const experience = document.getElementById('profile-experience-edit').value;
+ 
                     try {
                         await db.collection('users').doc(user.uid).update({
                             displayName: displayName || user.email.split('@')[0],
                             bio: bio,
-                            location: location
+                            location: location,
+                            simulator: simulator,
+                            experience: experience
                         });
 
                         // Update Firebase Auth display name
