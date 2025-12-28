@@ -208,6 +208,14 @@
     left: 50%;
     transform: translateX(-50%);
     height: 100%;
+    opacity: 1;
+    transition: opacity 0.3s ease-out;
+}
+
+/* Fade out icons when scrolled past data-export section */
+.header.scrolled .shrunk-nav-icons-container.faded-out {
+    opacity: 0;
+    pointer-events: none;
 }
 
 /* Keep nav-right visible when scrolled */

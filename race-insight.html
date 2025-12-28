@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Race Insight | APEX Race Technologies</title>
-    <meta name="description" content="Download Race Insight - The advanced telemetry analysis tool for sim racers.">
+    <meta name="description" content="Download Race Insight - The advanced data analysis tool for sim racers.">
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/race-insight.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -121,6 +121,38 @@
                     </div>
                     <div class="hero-badge">Now Available in Beta</div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Image Slideshow -->
+    <section id="hero-slideshow" class="slideshow-section">
+        <div class="slideshow-container">
+            <div class="slideshow-wrapper">
+                <div class="slide active">
+                    <img src="assets/images/lap_comparison_ui.png" alt="Lap Comparison" class="slide-image">
+                </div>
+                <div class="slide">
+                    <img src="assets/images/telemetry_graphs_ui.png" alt="Data Analysis" class="slide-image">
+                </div>
+                <div class="slide">
+                    <img src="assets/images/track_map_ui.png" alt="Track Map" class="slide-image">
+                </div>
+            </div>
+            
+            <!-- Navigation Arrows -->
+            <button class="slideshow-nav slideshow-prev" aria-label="Previous slide">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="slideshow-nav slideshow-next" aria-label="Next slide">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            
+            <!-- Slide Indicators -->
+            <div class="slideshow-indicators">
+                <span class="indicator active" data-slide="0" aria-label="Slide 1"></span>
+                <span class="indicator" data-slide="1" aria-label="Slide 2"></span>
+                <span class="indicator" data-slide="2" aria-label="Slide 3"></span>
             </div>
         </div>
     </section>
@@ -405,8 +437,8 @@
                     <p>Compare multiple laps side-by-side to identify time gains and losses.</p>
                 </div>
                 <div class="advantage-card feature-card">
-                    <img src="assets/images/telemetry_graphs_ui.png" alt="Telemetry Analysis" class="feature-img">
-                    <h4>Advanced Telemetry</h4>
+                    <img src="assets/images/telemetry_graphs_ui.png" alt="Data Analysis" class="feature-img">
+                    <h4>Advanced Data Analysis</h4>
                     <p>Dive deep into speed, throttle, brake, and steering data with precise graphs.</p>
                 </div>
                 <div class="advantage-card feature-card">
@@ -447,7 +479,7 @@
                 <div class="update-card">
                     <div class="update-icon"><i class="fas fa-video"></i></div>
                     <h4>Video Support</h4>
-                    <p>Sync your onboard video with telemetry data for visual analysis.</p>
+                    <p>Sync your onboard video with racing data for visual analysis.</p>
                 </div>
                 <div class="update-card">
                     <div class="update-icon"><i class="fas fa-globe"></i></div>
@@ -801,6 +833,26 @@
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Finish Setup</button>
             </form>
+        </div>
+    </div>
+
+    <!-- Thank You Modal -->
+    <div id="thank-you-modal" class="modal-backdrop" style="display: none;">
+        <div class="modal-content">
+            <button id="close-thank-you-modal" class="modal-close">&times;</button>
+            <h3 style="margin-bottom: 1rem;">Thank You!</h3>
+            <p>Your download has started. We appreciate your interest in Race Insight!</p>
+            <button id="close-thank-you-btn" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;">Close</button>
+        </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="image-modal" class="modal-backdrop" style="display: none;">
+        <div class="modal-content image-modal-content">
+            <button id="close-image-modal" class="modal-close">&times;</button>
+            <div class="image-modal-container">
+                <img id="modal-image" src="" alt="Expanded view" class="modal-image">
+            </div>
         </div>
     </div>
 
@@ -1507,13 +1559,36 @@
                 triggerDownload();
             });
 
+            // Helper function to show thank you modal
+            function showThankYouModal() {
+                const thankYouModal = document.getElementById('thank-you-modal');
+                if (thankYouModal) {
+                    thankYouModal.style.display = 'flex';
+                    thankYouModal.offsetHeight;
+                    setTimeout(() => thankYouModal.classList.add('active'), 10);
+                }
+            }
+
             async function triggerDownload() {
-                let fileName = 'RaceInsight_Setup.exe';
-                switch (selectedPlatform) {
-                    case 'windows': fileName = 'RaceInsight_Setup_Windows.exe'; break;
-                    case 'linux': fileName = 'RaceInsight_Setup_Linux.AppImage'; break;
-                    case 'apple': fileName = 'RaceInsight_Setup_Mac.dmg'; break;
-                    case 'android': fileName = 'RaceInsight_Setup_Android.apk'; break;
+                // ===== OPTION 1: GitHub Releases API (Automatic - Gets Latest Release) =====
+                // GitHub repository configuration
+                const GITHUB_OWNER = 'APEX-Race-Tech';
+                const GITHUB_REPO = 'RACE-Insight';
+                
+                // ===== OPTION 2: Direct Links (Simpler - If you know exact URLs) =====
+                // Uncomment this section and comment out Option 1 if you prefer direct links:
+                /*
+                const downloadUrls = {
+                    'windows': 'https://github.com/YOUR_USERNAME/YOUR_REPO/releases/download/v1.0.0/RaceInsight_Setup_Windows.exe',
+                    'linux': 'https://github.com/YOUR_USERNAME/YOUR_REPO/releases/download/v1.0.0/RaceInsight_Setup_Linux.AppImage',
+                    'apple': 'https://github.com/YOUR_USERNAME/YOUR_REPO/releases/download/v1.0.0/RaceInsight_Setup_Mac.dmg',
+                    'android': 'https://github.com/YOUR_USERNAME/YOUR_REPO/releases/download/v1.0.0/RaceInsight_Setup_Android.apk'
+                };
+                
+                const downloadUrl = downloadUrls[selectedPlatform];
+                if (!downloadUrl) {
+                    alert('Platform not available yet.');
+                    return;
                 }
                 
                 // Increment download count
@@ -1531,7 +1606,101 @@
                     }
                 }
                 
-                alert(`Starting download for ${selectedPlatform}: ${fileName} (Placeholder)`);
+                // Trigger download
+                window.open(downloadUrl, '_blank');
+                return;
+                */
+                
+                // File name patterns for each platform (adjust based on your actual release file names)
+                const filePatterns = {
+                    'windows': /RaceInsight.*\.exe$/i,
+                    'linux': /RaceInsight.*\.AppImage$/i,
+                    'apple': /RaceInsight.*\.dmg$/i,
+                    'android': /RaceInsight.*\.apk$/i
+                };
+                
+                try {
+                    // Fetch latest release from GitHub
+                    const response = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`GitHub API error: ${response.status}`);
+                    }
+                    
+                    const release = await response.json();
+                    const pattern = filePatterns[selectedPlatform];
+                    
+                    // Find the asset matching the platform
+                    const asset = release.assets.find(asset => pattern.test(asset.name));
+                    
+                    if (!asset) {
+                        throw new Error(`No release file found for ${selectedPlatform}`);
+                    }
+                    
+                    // Increment download count
+                    await incrementDownloadCount();
+                    
+                    // Increment user download count
+                    const user = firebase.auth().currentUser;
+                    if (user) {
+                        try {
+                            await db.collection('users').doc(user.uid).update({
+                                downloadCount: firebase.firestore.FieldValue.increment(1)
+                            });
+                        } catch (error) {
+                            console.error('Error updating user download count:', error);
+                        }
+                    }
+                    
+                    // Trigger download
+                    const link = document.createElement('a');
+                    link.href = asset.browser_download_url;
+                    link.download = asset.name;
+                    link.target = '_blank';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    console.log(`Downloading ${asset.name} from GitHub Releases`);
+                    
+                    // Show thank you modal
+                    showThankYouModal();
+                    
+                } catch (error) {
+                    console.error('Download error:', error);
+                    alert(`Failed to download: ${error.message}. Please try again or contact support.`);
+                }
+            }
+
+            // --- Thank You Modal Functionality ---
+            const thankYouModal = document.getElementById('thank-you-modal');
+            const closeThankYouModal = document.getElementById('close-thank-you-modal');
+            const closeThankYouBtn = document.getElementById('close-thank-you-btn');
+
+            function closeThankYouModalFunc() {
+                if (thankYouModal) {
+                    thankYouModal.classList.remove('active');
+                    setTimeout(() => {
+                        thankYouModal.style.setProperty('display', 'none', 'important');
+                    }, 300);
+                }
+            }
+
+            if (closeThankYouModal) {
+                closeThankYouModal.addEventListener('click', closeThankYouModalFunc);
+            }
+
+            if (closeThankYouBtn) {
+                closeThankYouBtn.addEventListener('click', closeThankYouModalFunc);
+            }
+
+            // Close modal when clicking backdrop
+            if (thankYouModal) {
+                thankYouModal.addEventListener('click', (e) => {
+                    if (e.target === thankYouModal) {
+                        closeThankYouModalFunc();
+                    }
+                });
             }
 
             // --- Profile Modal Functionality ---
@@ -1883,15 +2052,39 @@
                 });
             }
 
+            // Fade out shrunk-nav-icons-container when scrolled past data-export section
+            function handleShrunkNavFade() {
+                const shrunkNavContainer = document.querySelector('.shrunk-nav-icons-container');
+                const dataExportSection = document.querySelector('#data-export');
+                
+                if (!shrunkNavContainer || !dataExportSection) return;
+                
+                // Get the bottom of the viewport
+                const viewportBottom = window.scrollY + window.innerHeight;
+                // Get the bottom of the data-export section
+                const dataExportBottom = dataExportSection.offsetTop + dataExportSection.offsetHeight;
+                
+                // If bottom of viewport has passed the bottom of data-export section, fade out
+                if (viewportBottom > dataExportBottom) {
+                    shrunkNavContainer.classList.add('faded-out');
+                } else {
+                    shrunkNavContainer.classList.remove('faded-out');
+                }
+            }
+
             // Update on scroll
             let scrollTimeout;
             window.addEventListener('scroll', () => {
                 clearTimeout(scrollTimeout);
-                scrollTimeout = setTimeout(updateActiveNavIcon, 100);
+                scrollTimeout = setTimeout(() => {
+                    updateActiveNavIcon();
+                    handleShrunkNavFade();
+                }, 100);
             });
 
             // Initial update
             updateActiveNavIcon();
+            handleShrunkNavFade();
 
             // Innovative Card Functionality (works for all style variations)
             function initInnovativeCards() {
@@ -1913,7 +2106,11 @@
                         const cards = layout.querySelectorAll('.innovative-card');
                         
                         cards.forEach(card => {
-                            card.addEventListener('click', function() {
+                            card.addEventListener('click', function(e) {
+                                // Don't trigger card activation if clicking on image wrapper
+                                if (e.target.closest('.card-image-wrapper')) {
+                                    return;
+                                }
                                 // Remove active class from all cards in this layout
                                 cards.forEach(c => c.classList.remove('active'));
                                 // Add active class to clicked card
@@ -1926,11 +2123,251 @@
 
             // Initialize innovative cards
             initInnovativeCards();
+
+            // --- Image Modal Functionality ---
+            function initImageModal() {
+                const imageModal = document.getElementById('image-modal');
+                const modalImage = document.getElementById('modal-image');
+                const closeImageModal = document.getElementById('close-image-modal');
+                const imageWrappers = document.querySelectorAll('.card-image-wrapper');
+
+                if (!imageModal || !modalImage) return;
+
+                // Function to open image modal
+                function openImageModal(imageSrc, imageAlt) {
+                    modalImage.src = imageSrc;
+                    modalImage.alt = imageAlt || 'Expanded view';
+                    imageModal.style.display = 'flex';
+                    imageModal.offsetHeight; // Force reflow
+                    setTimeout(() => imageModal.classList.add('active'), 10);
+                    document.body.style.overflow = 'hidden'; // Prevent scrolling
+                }
+
+                // Function to close image modal
+                function closeImageModalFunc() {
+                    imageModal.classList.remove('active');
+                    setTimeout(() => {
+                        imageModal.style.display = 'none';
+                        document.body.style.overflow = ''; // Restore scrolling
+                    }, 300);
+                }
+
+                // Add click handlers to all image wrappers
+                imageWrappers.forEach(wrapper => {
+                    wrapper.addEventListener('click', function(e) {
+                        e.stopPropagation(); // Prevent card click event
+                        const img = wrapper.querySelector('.card-image');
+                        if (img && img.src) {
+                            openImageModal(img.src, img.alt);
+                        }
+                    });
+                });
+
+                // Close modal handlers
+                if (closeImageModal) {
+                    closeImageModal.addEventListener('click', closeImageModalFunc);
+                }
+
+                // Close modal when clicking backdrop
+                imageModal.addEventListener('click', function(e) {
+                    if (e.target === imageModal) {
+                        closeImageModalFunc();
+                    }
+                });
+
+                // Close modal on Escape key
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && imageModal.classList.contains('active')) {
+                        closeImageModalFunc();
+                    }
+                });
+            }
+
+            // Initialize image modal
+            initImageModal();
+
+            // --- Hero Slideshow Functionality ---
+            function initSlideshow() {
+                const slides = document.querySelectorAll('.slide');
+                const indicators = document.querySelectorAll('.indicator');
+                const prevBtn = document.querySelector('.slideshow-prev');
+                const nextBtn = document.querySelector('.slideshow-next');
+                let currentSlide = 0;
+                let slideshowInterval;
+                let isAnimating = false;
+
+                // Function to show a specific slide with card shuffle animation
+                function showSlide(index, direction = 'next') {
+                    if (isAnimating || index === currentSlide) return;
+                    isAnimating = true;
+
+                    const prevIndex = currentSlide;
+                    const prevSlideEl = slides[prevIndex];
+                    const nextSlideEl = slides[index];
+
+                    if (!prevSlideEl || !nextSlideEl) {
+                        isAnimating = false;
+                        return;
+                    }
+
+                    // Remove all classes from slides
+                    slides.forEach(slide => {
+                        slide.classList.remove('active', 'prev', 'next');
+                    });
+
+                    // Remove active class from indicators
+                    indicators.forEach(indicator => indicator.classList.remove('active'));
+
+                    // Set initial transform positions based on direction
+                    if (direction === 'next') {
+                        // Next slide starts from right
+                        nextSlideEl.style.transform = 'translateX(100%) scale(0.95)';
+                        nextSlideEl.style.opacity = '0';
+                        nextSlideEl.style.transition = 'none';
+                    } else {
+                        // Next slide starts from left
+                        nextSlideEl.style.transform = 'translateX(-100%) scale(0.95)';
+                        nextSlideEl.style.opacity = '0';
+                        nextSlideEl.style.transition = 'none';
+                    }
+
+                    // Force reflow to apply initial position
+                    void nextSlideEl.offsetWidth;
+
+                    // Enable transitions and animate
+                    prevSlideEl.style.transition = 'all 0.7s cubic-bezier(0.4, 0, 0.2, 1)';
+                    nextSlideEl.style.transition = 'all 0.7s cubic-bezier(0.4, 0, 0.2, 1)';
+
+                    // Animate to final positions
+                    requestAnimationFrame(() => {
+                        if (direction === 'next') {
+                            prevSlideEl.style.transform = 'translateX(-100%) scale(0.95)';
+                            prevSlideEl.style.opacity = '0';
+                        } else {
+                            prevSlideEl.style.transform = 'translateX(100%) scale(0.95)';
+                            prevSlideEl.style.opacity = '0';
+                        }
+
+                        nextSlideEl.style.transform = 'translateX(0) scale(1)';
+                        nextSlideEl.style.opacity = '1';
+
+                        // After animation completes
+                        setTimeout(() => {
+                            // Clean up and set final state
+                            prevSlideEl.classList.remove('active');
+                            prevSlideEl.style.transform = '';
+                            prevSlideEl.style.opacity = '';
+                            prevSlideEl.style.transition = '';
+
+                            nextSlideEl.classList.add('active');
+                            nextSlideEl.style.transform = '';
+                            nextSlideEl.style.opacity = '';
+                            nextSlideEl.style.transition = '';
+                            
+                            // Update current slide index
+                            currentSlide = index;
+                            
+                            // Update indicators
+                            if (indicators[currentSlide]) {
+                                indicators[currentSlide].classList.add('active');
+                            }
+
+                            // Update prev/next classes
+                            updatePrevNextClasses();
+                            
+                            isAnimating = false;
+                        }, 700);
+                    });
+                }
+
+                // Update prev/next classes for visual effect
+                function updatePrevNextClasses() {
+                    slides.forEach((slide, index) => {
+                        slide.classList.remove('prev', 'next');
+                        if (index === currentSlide) return;
+                        
+                        const prevIndex = (currentSlide - 1 + slides.length) % slides.length;
+                        const nextIndex = (currentSlide + 1) % slides.length;
+                        
+                        if (index === prevIndex) {
+                            slide.classList.add('prev');
+                        } else if (index === nextIndex) {
+                            slide.classList.add('next');
+                        }
+                    });
+                }
+
+                // Function to go to next slide
+                function nextSlide() {
+                    const nextIndex = (currentSlide + 1) % slides.length;
+                    showSlide(nextIndex, 'next');
+                }
+
+                // Function to go to previous slide
+                function prevSlide() {
+                    const prevIndex = (currentSlide - 1 + slides.length) % slides.length;
+                    showSlide(prevIndex, 'prev');
+                }
+
+                // Function to start auto-play
+                function startAutoPlay() {
+                    slideshowInterval = setInterval(nextSlide, 5000); // Change slide every 5 seconds
+                }
+
+                // Function to stop auto-play
+                function stopAutoPlay() {
+                    clearInterval(slideshowInterval);
+                }
+
+                // Event listeners for navigation buttons
+                if (nextBtn) {
+                    nextBtn.addEventListener('click', () => {
+                        nextSlide();
+                        stopAutoPlay();
+                        startAutoPlay(); // Restart auto-play after manual navigation
+                    });
+                }
+
+                if (prevBtn) {
+                    prevBtn.addEventListener('click', () => {
+                        prevSlide();
+                        stopAutoPlay();
+                        startAutoPlay(); // Restart auto-play after manual navigation
+                    });
+                }
+
+                // Event listeners for indicators
+                indicators.forEach((indicator, index) => {
+                    indicator.addEventListener('click', () => {
+                        if (index === currentSlide) return;
+                        
+                        // Determine direction based on index
+                        const direction = index > currentSlide ? 'next' : 'prev';
+                        showSlide(index, direction);
+                        stopAutoPlay();
+                        startAutoPlay(); // Restart auto-play after manual navigation
+                    });
+                });
+
+                // Pause auto-play on hover
+                const slideshowContainer = document.querySelector('.slideshow-container');
+                if (slideshowContainer) {
+                    slideshowContainer.addEventListener('mouseenter', stopAutoPlay);
+                    slideshowContainer.addEventListener('mouseleave', startAutoPlay);
+                }
+
+                // Initialize - show first slide and start auto-play
+                showSlide(0, 'next');
+                startAutoPlay();
+            }
+
+            // Initialize slideshow
+            initSlideshow();
         });
     </script>
 
     <div class="footer-content">
-        <p>&copy; 2024 APEX Race Technologies. All rights reserved.</p>
+        <p>&copy; 2026 APEX Race Technologies. All rights reserved.</p>
         <div style="margin-top: 1rem; font-size: 0.9rem;">
             <a href="https://docs.apexracetech.in" target="_blank" rel="noopener noreferrer" style="color: #bbb; text-decoration: none; margin-right: 1rem;">Documentation</a>
             <a href="race-insight/eula.html" style="color: #bbb; text-decoration: none; margin-right: 1rem;">EULA</a>
