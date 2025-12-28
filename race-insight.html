@@ -176,7 +176,7 @@
                         <div class="card-image-wrapper">
                             <img src="assets/images/lap_comparison_ui.png" alt="Universal Format Support" class="card-image" style="display: none;">
                             <div class="image-overlay" style="background: #000 !important; opacity: 1 !important; display: flex !important; align-items: center !important; justify-content: center !important;">
-                                <i class="fas fa-globe" style="font-size: 4rem; color: #fff; transition: transform 0.3s ease, opacity 0.3s ease; opacity: 0.9;"></i>
+                                <i class="fas fa-globe" style="font-size: 4rem !important; color: #fff !important; opacity: 1 !important; z-index: 10 !important; position: relative !important; display: inline-block !important;"></i>
                             </div>
                         </div>
                         <div class="card-content">
@@ -190,7 +190,7 @@
                         <div class="card-image-wrapper">
                             <img src="assets/images/telemetry_graphs_ui.png" alt="High-Speed Processing" class="card-image" style="display: none;">
                             <div class="image-overlay" style="background: #000 !important; opacity: 1 !important; display: flex !important; align-items: center !important; justify-content: center !important;">
-                                <i class="fas fa-bolt" style="font-size: 4rem; color: #fff; transition: transform 0.3s ease, opacity 0.3s ease; opacity: 0.9;"></i>
+                                <i class="fas fa-bolt" style="font-size: 4rem !important; color: #fff !important; opacity: 1 !important; z-index: 10 !important; position: relative !important; display: inline-block !important;"></i>
                             </div>
                         </div>
                         <div class="card-content">
@@ -204,7 +204,7 @@
                         <div class="card-image-wrapper">
                             <img src="assets/images/track_map_ui.png" alt="Offline Reliability" class="card-image" style="display: none;">
                             <div class="image-overlay" style="background: #000 !important; opacity: 1 !important; display: flex !important; align-items: center !important; justify-content: center !important;">
-                                <i class="fas fa-wifi-slash" style="font-size: 4rem; color: #fff !important; transition: transform 0.3s ease, opacity 0.3s ease; opacity: 1 !important; z-index: 10; position: relative; display: block !important;"></i>
+                                <i class="fas fa-laptop" style="font-size: 4rem !important; color: #fff !important; opacity: 1 !important; z-index: 10 !important; position: relative !important; display: inline-block !important;"></i>
                             </div>
                         </div>
                         <div class="card-content">
@@ -225,7 +225,7 @@
                     <i class="fas fa-file-alt"></i>
                 </div>
                 <div class="section-header-text">
-                    <h2 class="section-title">Data Overview and Management</h2>
+                    <h2 class="section-title">Data Management</h2>
                     <p class="section-subtitle">Intelligent Session Intelligence at a Glance</p>
                 </div>
             </div>
@@ -333,8 +333,8 @@
                     <i class="fas fa-robot"></i>
                 </div>
                 <div class="section-header-text">
-                    <h2 class="section-title">Custom Workbook (AI Workbook)</h2>
-                    <p class="section-subtitle">Your Modular Mission Control</p>
+                    <h2 class="section-title">Custom workbook</h2>
+                    <p class="section-subtitle">Your Modular Mission Control (AI workbook)</p>
                 </div>
             </div>
             <div class="feature-content">
@@ -2378,6 +2378,65 @@
         });
     </script>
 
+    <script>
+        // #region agent log
+        (function() {
+            const log = (hypothesisId, message, data) => {
+                fetch('http://127.0.0.1:7243/ingest/a0857f31-9c4c-4a58-b6c0-704ab032f313', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        location: 'race-insight.html:debug-script-icons',
+                        message: message,
+                        data: data,
+                        timestamp: Date.now(),
+                        sessionId: 'debug-session-icons',
+                        hypothesisId: hypothesisId
+                    })
+                }).catch(() => {});
+            };
+
+            const checkIcons = () => {
+                const isMobile = window.innerWidth <= 768;
+                if (isMobile) {
+                    const overlays = document.querySelectorAll('.style-minimal .image-overlay');
+                    overlays.forEach((overlay, i) => {
+                        const icon = overlay.querySelector('i');
+                        const overlayStyle = window.getComputedStyle(overlay);
+                        
+                        let iconData = null;
+                        if (icon) {
+                            const iconStyle = window.getComputedStyle(icon);
+                            const iconRect = icon.getBoundingClientRect();
+                            iconData = {
+                                display: iconStyle.display,
+                                visibility: iconStyle.visibility,
+                                opacity: iconStyle.opacity,
+                                fontSize: iconStyle.fontSize,
+                                color: iconStyle.color,
+                                zIndex: iconStyle.zIndex,
+                                rect: { width: iconRect.width, height: iconRect.height, top: iconRect.top, left: iconRect.left }
+                            };
+                        }
+
+                        log('A/B/C/D', `Card ${i} Icon Check`, {
+                            overlay: {
+                                display: overlayStyle.display,
+                                opacity: overlayStyle.opacity,
+                                zIndex: overlayStyle.zIndex,
+                                backgroundColor: overlayStyle.backgroundColor
+                            },
+                            icon: iconData
+                        });
+                    });
+                }
+            };
+
+            window.addEventListener('load', checkIcons);
+            setTimeout(checkIcons, 2000);
+        })();
+        // #endregion
+    </script>
     <div class="footer-content">
         <p>&copy; 2026 APEX Race Technologies. All rights reserved.</p>
         <div style="margin-top: 1rem; font-size: 0.9rem;">

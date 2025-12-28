@@ -164,6 +164,11 @@
 
 /* Apply the gradient to the fixed background container so it covers the whole screen */
 .background-animations {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
   background: radial-gradient(
     circle at center,
     rgba(0, 210, 255, 0.15) 0%,
@@ -171,13 +176,15 @@
   );
   z-index: -1;
   /* Keep behind content */
+  pointer-events: none;
 }
 
 /* Ensure the canvas is fully visible and not washed out */
 #track-animation {
-  border-bottom: 1px solid var(--border-color);
-  margin-bottom: 1.5rem;
-  transition: transform 0.5s ease;
+  width: 100%;
+  height: 100%;
+  opacity: 1 !important;
+  mix-blend-mode: screen;
 }
 
 .advantage-card:hover .feature-img {
@@ -383,23 +390,6 @@
   color: var(--text-color);
 }
 
-/* Apply the gradient to the fixed background container so it covers the whole screen */
-.background-animations {
-  background: radial-gradient(
-    circle at center,
-    rgba(0, 210, 255, 0.15) 0%,
-    rgba(0, 0, 0, 0) 100%
-  );
-  z-index: -1;
-  /* Keep behind content */
-}
-
-/* Ensure the canvas is fully visible and not washed out */
-#track-animation {
-  opacity: 1 !important;
-  mix-blend-mode: screen;
-  /* Helps tracks pop against the dark background */
-}
 
 .advantage-card:hover .feature-img {
   transform: scale(1.05);
@@ -596,23 +586,6 @@
   color: var(--text-color);
 }
 
-/* Apply the gradient to the fixed background container so it covers the whole screen */
-.background-animations {
-  background: radial-gradient(
-    circle at center,
-    rgba(0, 210, 255, 0.15) 0%,
-    rgba(0, 0, 0, 0) 100%
-  );
-  z-index: -1;
-  /* Keep behind content */
-}
-
-/* Ensure the canvas is fully visible and not washed out */
-#track-animation {
-  opacity: 1 !important;
-  mix-blend-mode: screen;
-  /* Helps tracks pop against the dark background */
-}
 
 /* Ensure the hero section has a transparent background so the fixed gradient shows through */
 #race-insight-hero {
@@ -1675,19 +1648,72 @@ select option {
 
 @media (max-width: 768px) {
   .shrunk-nav-icons-container {
-    gap: 0.75rem !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    opacity: 1 !important;
-    visibility: visible !important;
+    display: none !important; /* Hide navigation icons on mobile to prevent overlap */
   }
 
   .header.scrolled .shrunk-nav-icons-container {
-    display: flex !important;
+    display: none !important;
+  }
+
+  .nav-container {
+    justify-content: space-between !important;
+    padding: 0 1rem !important;
+  }
+
+  .header.scrolled .logo--icon {
+    width: 35px !important;
+    height: auto !important;
+    display: block !important;
+  }
+
+  /* Fix Section Header Icons on mobile */
+  .section-header-icon {
+    width: 45px !important;
+    height: 45px !important;
+    border-radius: 10px !important;
+  }
+
+  .section-header-icon i {
+    font-size: 1.5rem !important;
+  }
+
+  /* Fix Hero Elements visibility on mobile */
+  #race-insight-hero .hero-title,
+  #race-insight-hero .hero-description,
+  #race-insight-hero .hero-badge,
+  #race-insight-hero .tagline {
     opacity: 1 !important;
     visibility: visible !important;
-    pointer-events: auto !important;
+    color: #fff !important;
+  }
+
+  #race-insight-hero .hero-title {
+    font-size: 2.5rem !important;
+    background: none !important;
+    -webkit-text-fill-color: #fff !important;
+  }
+
+  #race-insight-hero .tagline {
+    font-size: 1.2rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  #race-insight-hero .hero-description {
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+  }
+
+  /* Ensure card text is visible */
+  .style-minimal .innovative-card h4,
+  .style-minimal .innovative-card p {
+    opacity: 1 !important;
+    color: #fff !important;
+    transform: none !important;
+    visibility: visible !important;
+  }
+
+  .style-minimal .innovative-card h4 {
+    color: var(--primary-color) !important;
   }
 
   .shrunk-nav-icon {
@@ -1708,25 +1734,34 @@ select option {
     color: rgba(255, 255, 255, 0.6) !important;
   }
 
-  .shrunk-nav-icon:hover i,
-  .shrunk-nav-icon.active i {
-    color: var(--primary-color) !important;
-    opacity: 1 !important;
+  .hamburger-btn {
+    position: relative !important;
+    margin-left: auto !important;
+    z-index: 100 !important;
   }
 }
 
 @media (max-width: 480px) {
-  .shrunk-nav-icons-container {
-    gap: 0.5rem !important;
+  .section-header-card {
+    padding: 1rem;
+    gap: 0.75rem;
   }
 
-  .shrunk-nav-icon {
-    width: 32px !important;
-    height: 32px !important;
+  .section-header-icon {
+    width: 50px !important;
+    height: 50px !important;
   }
 
-  .shrunk-nav-icon i {
-    font-size: 0.9rem !important;
+  .section-header-icon i {
+    font-size: 1.5rem !important;
+  }
+
+  .feature-section .section-title {
+    font-size: 1.25rem;
+  }
+
+  .feature-section .section-subtitle {
+    font-size: 0.85rem;
   }
 }
 
@@ -1776,10 +1811,6 @@ select option {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  padding-left: 0px;
-  padding-right: 0px;
-  margin-left: 15px;
-  margin-right: 15px;
 }
 
 .section-header-icon i {
@@ -1789,6 +1820,8 @@ select option {
 
 .section-header-text {
   flex: 1;
+  position: absolute;
+  margin-left: 70px;
 }
 
 .section-header-label {
@@ -2688,19 +2721,18 @@ select option {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(0, 0, 0, 0.2) 50%,
-    rgba(0, 0, 0, 0.5) 100%
-  );
-  opacity: 0.6;
+  background: #000 !important;
+  opacity: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   transition: opacity 0.4s ease;
 }
 
 .style-minimal .innovative-card:hover .image-overlay,
 .style-minimal .innovative-card.active .image-overlay {
-  opacity: 0.3;
+  opacity: 1 !important;
+  background: #000 !important;
 }
 
 .style-minimal .card-content {
@@ -2760,6 +2792,11 @@ select option {
 
 /* Icon animation for style-minimal cards */
 .style-minimal .image-overlay i {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  font-size: 4rem !important;
+  color: #fff !important;
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
               opacity 0.4s ease,
               filter 0.4s ease;
@@ -2777,6 +2814,19 @@ select option {
   .feature-details.style-minimal {
     grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
+  }
+
+  .section-header-card {
+    gap: 1.5rem;
+    padding: 1.25rem;
+  }
+
+  .feature-section .section-title {
+    font-size: 1.75rem;
+  }
+
+  .feature-section .section-subtitle {
+    font-size: 0.95rem;
   }
 }
 
@@ -2798,6 +2848,8 @@ select option {
     flex-direction: column;
     text-align: center;
     padding: 1.5rem;
+    height: auto !important;
+    gap: 1rem;
   }
 
   .section-header-icon {
@@ -2807,6 +2859,11 @@ select option {
 
   .section-header-icon i {
     font-size: 2rem;
+  }
+
+  .section-header-text {
+    position: static !important;
+    text-align: center;
   }
 
   /* Ensure icons in image-overlay are visible on mobile */
@@ -2839,20 +2896,6 @@ select option {
     color: #fff !important;
     z-index: 10 !important;
     position: relative !important;
-  }
-
-  .section-header-text {
-    text-align: center;
-  }
-
-  .feature-section .section-title {
-    font-size: 2rem;
-    text-align: center;
-  }
-
-  .feature-section .section-subtitle {
-    font-size: 1rem;
-    text-align: center;
   }
 
   .feature-content {
