@@ -38,13 +38,12 @@ This document contains specialized content extracted from the RACE Insight softw
 
 **Easy Lap Comparison**: Compare any laps side-by-side, even if they were recorded at different rates. The system automatically aligns everything so you can see exactly where you gained or lost time.
 
----
 
 ## 4. Custom Workbook (AI Workbook)
 ### Your Modular Mission Control
 
 
-**AI-Powered Creation**: Just describe what you want in plain English, and watch as your custom dashboard comes to life. No complex setup required.
+**AI-Powered Creation**: Just describe what you want in plain English, and watch as your custom dashboard and graph comes to life. No complex setup required.
 
 **Drag-and-Drop Design**: Build your perfect workspace by simply dragging, resizing, and arranging widgets exactly where you want them. It's that easy.
 
@@ -58,9 +57,9 @@ This document contains specialized content extracted from the RACE Insight softw
 
 **Export to CSV**: Save your analyzed data in a clean, easy-to-read format that works with Excel, MATLAB, and other tools you already use.
 
-**MoTeC Compatibility**: Export files that work seamlessly with professional MoTeC analysis software, preserving all your important markers and event details.
+**Export PDF Reports**: Generate professional PDF reports with your analysis, graphs, and insights—perfect for sharing with your team or keeping records of your performance improvements.
 
-**Export Multiple Sessions**: Save time by exporting entire sessions or multiple laps at once. Perfect for sharing with your team or creating reports.
+**Export Track Maps**: Save high-quality track maps with your lap data overlaid, ideal for presentations, documentation, or detailed track analysis.
 
 ---
 
