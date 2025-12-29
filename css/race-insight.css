@@ -900,6 +900,24 @@ body {
   padding: 0 1rem;
 }
 
+/* Password toggle button styling */
+.password-toggle {
+  transition: color 0.2s ease, transform 0.1s ease;
+}
+
+.password-toggle:hover {
+  color: var(--primary-color) !important;
+  transform: scale(1.1);
+}
+
+.password-toggle:active {
+  transform: scale(0.95);
+}
+
+.password-toggle i {
+  transition: opacity 0.2s ease;
+}
+
 #email-auth-form .form-group {
   margin-bottom: 1rem;
 }

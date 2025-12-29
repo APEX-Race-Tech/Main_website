@@ -6,6 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Race Insight | APEX Race Technologies</title>
     <meta name="description" content="Download Race Insight - The advanced data analysis tool for sim racers.">
+    <meta name="keywords" content="race insight, telemetry analysis, sim racing, data analysis, racing software, APEX Race Technologies">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.apexracetech.in/race-insight.html">
+    <meta property="og:title" content="Race Insight | APEX Race Technologies">
+    <meta property="og:description" content="Download Race Insight - The advanced data analysis tool for sim racers. Free beta available now.">
+    <meta property="og:image" content="https://www.apexracetech.in/assets/images/og-image.png">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://www.apexracetech.in/race-insight.html">
+    <meta property="twitter:title" content="Race Insight | APEX Race Technologies">
+    <meta property="twitter:description" content="Download Race Insight - The advanced data analysis tool for sim racers. Free beta available now.">
+    <meta property="twitter:image" content="https://www.apexracetech.in/assets/images/og-image.png">
+    
     <!-- Preconnect to external resources for faster loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -761,14 +777,20 @@
                     </div>
                     <div class="form-group" style="position: relative; margin-bottom: 1.25rem;">
                         <i class="fas fa-lock" style="position: absolute; left: 1rem; top: 0.9rem; color: #555; z-index: 1;"></i>
-                        <input type="password" id="auth-password" placeholder="Password" required style="padding-left: 2.75rem; width: 100%; box-sizing: border-box;">
+                        <input type="password" id="auth-password" placeholder="Password" required style="padding-left: 2.75rem; padding-right: 2.75rem; width: 100%; box-sizing: border-box;">
+                        <button type="button" id="toggle-password" class="password-toggle" aria-label="Show password" style="position: absolute; right: 1rem; top: 0.75rem; background: none; border: none; color: #555; cursor: pointer; z-index: 2; padding: 0.25rem; font-size: 0.9rem;">
+                            <i class="fas fa-eye"></i>
+                        </button>
                         <div id="forgot-password-link" style="text-align: right; margin-top: 0.5rem; font-size: 0.85rem; display: none;">
                             <a href="#" id="forgot-password-btn" style="color: var(--primary-color); text-decoration: none;">Forgot Password?</a>
                         </div>
                     </div>
                     <div class="form-group" id="confirm-password-group" style="position: relative; margin-bottom: 1.25rem; display: none;">
                         <i class="fas fa-lock" style="position: absolute; left: 1rem; top: 0.9rem; color: #555; z-index: 1;"></i>
-                        <input type="password" id="auth-confirm-password" placeholder="Confirm Password" style="padding-left: 2.75rem; width: 100%; box-sizing: border-box;">
+                        <input type="password" id="auth-confirm-password" placeholder="Confirm Password" style="padding-left: 2.75rem; padding-right: 2.75rem; width: 100%; box-sizing: border-box;">
+                        <button type="button" id="toggle-confirm-password" class="password-toggle" aria-label="Show password" style="position: absolute; right: 1rem; top: 0.75rem; background: none; border: none; color: #555; cursor: pointer; z-index: 2; padding: 0.25rem; font-size: 0.9rem;">
+                            <i class="fas fa-eye"></i>
+                        </button>
                     </div>
                     <button type="button" id="auth-next-btn" class="btn btn-primary" style="width: 100%; display: none;">Next <i class="fas fa-arrow-right"></i></button>
                     <button type="submit" id="auth-submit-btn" class="btn btn-primary" style="width: 100%;">Sign In</button>
@@ -996,6 +1018,12 @@
             let isSignUp = false;
             let pendingDownloadAction = null;
             let isNewUserSignup = false; // Track if this is a new user signup
+
+            // Helper function to validate email format
+            function isValidEmail(email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
+            }
 
             // Helper function to show error
             function showAuthError(message) {
@@ -1479,6 +1507,34 @@
                     });
             });
 
+            // Password visibility toggle
+            const togglePasswordBtn = document.getElementById('toggle-password');
+            const toggleConfirmPasswordBtn = document.getElementById('toggle-confirm-password');
+            
+            if (togglePasswordBtn && passwordInput) {
+                togglePasswordBtn.addEventListener('click', () => {
+                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordInput.setAttribute('type', type);
+                    const icon = togglePasswordBtn.querySelector('i');
+                    if (icon) {
+                        icon.classList.toggle('fa-eye');
+                        icon.classList.toggle('fa-eye-slash');
+                    }
+                });
+            }
+            
+            if (toggleConfirmPasswordBtn && confirmPasswordInput) {
+                toggleConfirmPasswordBtn.addEventListener('click', () => {
+                    const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    confirmPasswordInput.setAttribute('type', type);
+                    const icon = toggleConfirmPasswordBtn.querySelector('i');
+                    if (icon) {
+                        icon.classList.toggle('fa-eye');
+                        icon.classList.toggle('fa-eye-slash');
+                    }
+                });
+            }
+
             // Forgot Password
             if (forgotPasswordBtn) {
                 forgotPasswordBtn.addEventListener('click', (e) => {
@@ -1486,6 +1542,10 @@
                     const email = emailInput ? emailInput.value.trim() : '';
                     if (!email) {
                         showAuthError("Please enter your email address first.");
+                        return;
+                    }
+                    if (!isValidEmail(email)) {
+                        showAuthError("Please enter a valid email address.");
                         return;
                     }
                     hideAuthMessages();
@@ -1510,6 +1570,12 @@
 
                 if (!email || !password) {
                     showAuthError("Please fill in all fields.");
+                    return;
+                }
+
+                // Validate email format
+                if (!isValidEmail(email)) {
+                    showAuthError("Please enter a valid email address.");
                     return;
                 }
 
@@ -1610,23 +1676,29 @@
                     case 'auth/email-already-in-use':
                         return 'This email is already registered. Please sign in instead.';
                     case 'auth/invalid-email':
-                        return 'Invalid email address.';
+                        return 'Please enter a valid email address.';
                     case 'auth/operation-not-allowed':
-                        return 'This operation is not allowed.';
+                        return 'This operation is not allowed. Please contact support if this persists.';
                     case 'auth/weak-password':
-                        return 'Password should be at least 6 characters.';
+                        return 'Password must be at least 6 characters long.';
                     case 'auth/user-disabled':
-                        return 'This account has been disabled.';
+                        return 'This account has been disabled. Please contact support.';
                     case 'auth/user-not-found':
                         return 'No account found with this email. Please sign up first.';
                     case 'auth/wrong-password':
-                        return 'Incorrect password. Please try again.';
+                        return 'Incorrect password. Please try again or use "Forgot Password?" to reset it.';
                     case 'auth/invalid-login-credentials':
                         return 'Invalid email or password. Please check your credentials and try again.';
                     case 'auth/invalid-credential':
                         return 'Invalid email or password. Please check your credentials and try again.';
+                    case 'auth/too-many-requests':
+                        return 'Too many failed attempts. Please wait a few minutes before trying again.';
+                    case 'auth/network-request-failed':
+                        return 'Network error. Please check your internet connection and try again.';
+                    case 'auth/popup-closed-by-user':
+                        return 'Sign-in popup was closed. Please try again.';
                     default:
-                        return error.message || 'An error occurred. Please try again.';
+                        return error.message || 'An unexpected error occurred. Please try again or contact support if the problem persists.';
                 }
             }
 
