@@ -766,8 +766,12 @@
                             <a href="#" id="forgot-password-btn" style="color: var(--primary-color); text-decoration: none;">Forgot Password?</a>
                         </div>
                     </div>
+                    <div class="form-group" id="confirm-password-group" style="position: relative; margin-bottom: 1.25rem; display: none;">
+                        <i class="fas fa-lock" style="position: absolute; left: 1rem; top: 0.9rem; color: #555; z-index: 1;"></i>
+                        <input type="password" id="auth-confirm-password" placeholder="Confirm Password" style="padding-left: 2.75rem; width: 100%; box-sizing: border-box;">
+                    </div>
                     <button type="button" id="auth-next-btn" class="btn btn-primary" style="width: 100%; display: none;">Next <i class="fas fa-arrow-right"></i></button>
-                    <button type="submit" id="auth-signin-btn" class="btn btn-primary" style="width: 100%;">Sign In</button>
+                    <button type="submit" id="auth-submit-btn" class="btn btn-primary" style="width: 100%;">Sign In</button>
                 </div>
 
                 <!-- Step 2: Profile (Hidden by default, used only for Sign-Up) -->
@@ -1012,6 +1016,32 @@
                 authSuccess.style.display = 'none';
             }
 
+            // Helper function to reset modal to sign-in state
+            function resetAuthModalToSignIn() {
+                isSignUp = false;
+                const titleEl = document.getElementById('auth-title');
+                const subtitleEl = document.getElementById('auth-subtitle');
+                const submitBtnEl = document.getElementById('auth-submit-btn');
+                const switchTextEl = document.getElementById('auth-switch-text');
+                const forgotPwdLinkEl = document.getElementById('forgot-password-link');
+                const confirmPwdGroup = document.getElementById('confirm-password-group');
+                const confirmPwdInput = document.getElementById('auth-confirm-password');
+                
+                if (titleEl) titleEl.textContent = "Sign In to Download";
+                if (subtitleEl) subtitleEl.textContent = "Create an account to access downloads and save your preferences.";
+                if (submitBtnEl) submitBtnEl.textContent = "Sign In";
+                if (switchTextEl) switchTextEl.innerHTML = 'Don\'t have an account? <a href="#" id="toggle-auth-mode">Sign Up</a>';
+                if (forgotPwdLinkEl) forgotPwdLinkEl.style.display = 'block';
+                if (confirmPwdGroup) {
+                    confirmPwdGroup.style.display = 'none';
+                    if (confirmPwdInput) {
+                        confirmPwdInput.required = false;
+                        confirmPwdInput.value = '';
+                    }
+                }
+                hideAuthMessages();
+            }
+
             // Create or update user profile in Firestore
             // Always resolves successfully, even if Firestore operations fail (offline mode)
             async function createUserProfile(user, additionalData = {}) {
@@ -1240,6 +1270,12 @@
                 // Reset Google button state when closing modal
                 resetGoogleButton();
                 
+                // Reset confirm password field
+                const confirmPwdInput = document.getElementById('auth-confirm-password');
+                const confirmPwdGroup = document.getElementById('confirm-password-group');
+                if (confirmPwdInput) confirmPwdInput.value = '';
+                if (confirmPwdGroup) confirmPwdGroup.style.display = 'none';
+                
                 authModal.classList.remove('active');
                 setTimeout(() => {
                     authModal.style.display = 'none';
@@ -1261,22 +1297,35 @@
             }
 
             // Toggle Sign In / Sign Up
-            toggleAuthMode.addEventListener('click', (e) => {
-                e.preventDefault();
-                hideAuthMessages();
-                isSignUp = !isSignUp;
-                if (isSignUp) {
-                    authTitle.textContent = "Create Account";
-                    authSubtitle.textContent = "Join Race Insight to start downloading.";
-                    authSubmitBtn.textContent = "Sign Up";
-                    toggleAuthMode.textContent = "Sign In";
-                    forgotPasswordLink.style.display = 'none';
-                } else {
-                    authTitle.textContent = "Sign In to Download";
-                    authSubtitle.textContent = "Create an account to access downloads and save your preferences.";
-                    authSubmitBtn.textContent = "Sign In";
-                    toggleAuthMode.textContent = "Sign Up";
-                    forgotPasswordLink.style.display = 'block';
+            const confirmPasswordGroup = document.getElementById('confirm-password-group');
+            const confirmPasswordInput = document.getElementById('auth-confirm-password');
+            const authSwitchText = document.getElementById('auth-switch-text');
+            
+            // Use event delegation on the parent to handle clicks on dynamically updated link
+            authSwitchText.addEventListener('click', (e) => {
+                const link = e.target.closest('#toggle-auth-mode') || (e.target.id === 'toggle-auth-mode' ? e.target : null);
+                if (link) {
+                    e.preventDefault();
+                    hideAuthMessages();
+                    isSignUp = !isSignUp;
+                    if (isSignUp) {
+                        authTitle.textContent = "Create Account";
+                        authSubtitle.textContent = "Join Race Insight to start downloading.";
+                        authSubmitBtn.textContent = "Create Account";
+                        authSwitchText.innerHTML = 'Already have an account? <a href="#" id="toggle-auth-mode">Sign In</a>';
+                        forgotPasswordLink.style.display = 'none';
+                        confirmPasswordGroup.style.display = 'block';
+                        confirmPasswordInput.required = true;
+                    } else {
+                        authTitle.textContent = "Sign In to Download";
+                        authSubtitle.textContent = "Create an account to access downloads and save your preferences.";
+                        authSubmitBtn.textContent = "Sign In";
+                        authSwitchText.innerHTML = 'Don\'t have an account? <a href="#" id="toggle-auth-mode">Sign Up</a>';
+                        forgotPasswordLink.style.display = 'block';
+                        confirmPasswordGroup.style.display = 'none';
+                        confirmPasswordInput.required = false;
+                        confirmPasswordInput.value = '';
+                    }
                 }
             });
 
@@ -1375,10 +1424,23 @@
                 hideAuthMessages();
                 const email = emailInput.value.trim();
                 const password = passwordInput.value;
+                const confirmPassword = confirmPasswordInput.value;
 
                 if (!email || !password) {
                     showAuthError("Please fill in all fields.");
                     return;
+                }
+
+                // Validate password confirmation for signup
+                if (isSignUp) {
+                    if (!confirmPassword) {
+                        showAuthError("Please confirm your password.");
+                        return;
+                    }
+                    if (password !== confirmPassword) {
+                        showAuthError("Passwords do not match.");
+                        return;
+                    }
                 }
 
                 authSubmitBtn.disabled = true;
@@ -1394,13 +1456,14 @@
                                 console.error("Profile creation error (non-fatal):", profileError);
                             }
                             showAuthSuccess("Account created successfully!");
-                            authSubmitBtn.textContent = "Sign Up";
+                            authSubmitBtn.textContent = "Create Account";
                             authSubmitBtn.disabled = false;
+                            confirmPasswordInput.value = '';
                         })
                         .catch((error) => {
                             console.error("Sign Up Error:", error);
                             showAuthError(getErrorMessage(error));
-                            authSubmitBtn.textContent = "Sign Up";
+                            authSubmitBtn.textContent = "Create Account";
                             authSubmitBtn.disabled = false;
                         });
                 } else {
@@ -1591,6 +1654,7 @@
                 const user = firebase.auth().currentUser;
                 if (!user) {
                     pendingDownloadAction = () => triggerDownload();
+                    resetAuthModalToSignIn();
                     authModal.style.display = 'flex';
                     authModal.offsetHeight;
                     setTimeout(() => authModal.classList.add('active'), 10);
@@ -1788,6 +1852,7 @@
                         setTimeout(() => profileModal.classList.add('active'), 10);
                         loadProfileData(user);
                     } else {
+                        resetAuthModalToSignIn();
                         authModal.style.display = 'flex';
                         authModal.offsetHeight;
                         setTimeout(() => authModal.classList.add('active'), 10);
@@ -1808,6 +1873,7 @@
                         setTimeout(() => profileModal.classList.add('active'), 10);
                         loadProfileData(user);
                     } else {
+                        resetAuthModalToSignIn();
                         authModal.style.display = 'flex';
                         authModal.offsetHeight;
                         setTimeout(() => authModal.classList.add('active'), 10);
@@ -1824,6 +1890,7 @@
                         setTimeout(() => profileModal.classList.add('active'), 10);
                         loadProfileData(user);
                     } else {
+                        resetAuthModalToSignIn();
                         authModal.style.display = 'flex';
                         authModal.offsetHeight;
                         setTimeout(() => authModal.classList.add('active'), 10);
