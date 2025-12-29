@@ -5,6 +5,7 @@ body {
   background-color: transparent;
   background-clip: unset;
   -webkit-background-clip: unset;
+  color: rgba(0, 0, 0, 1);
 }
 
 :root {
