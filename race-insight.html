@@ -616,7 +616,7 @@
     <div id="profile-modal" class="modal-backdrop" style="display: none;">
         <div class="modal-content profile-modal-content">
             <button id="close-profile-modal" class="modal-close">&times;</button>
-            <h2 class="section-title" style="margin-bottom: 2rem;">Profile</h2>
+            <h2 class="section-title">Profile</h2>
             <div class="profile-container">
                 <div class="profile-header">
                     <div class="profile-avatar">
@@ -625,15 +625,15 @@
                     </div>
                     <div class="profile-info">
                         <h3 id="profile-display-name">Loading...</h3>
-                        <p id="profile-email" style="color: var(--text-color-secondary);">Loading...</p>
-                        <p id="profile-member-since" style="color: var(--text-color-secondary); font-size: 0.9rem; margin-top: 0.5rem;">Member since: Loading...</p>
+                        <p id="profile-email" style="color: var(--text-color-secondary); margin: 0;">Loading...</p>
+                        <p id="profile-member-since" style="color: var(--text-color-secondary); font-size: 0.9rem; margin: 0;">Member since: Loading...</p>
                     </div>
                 </div>
 
-                <div class="profile-actions" style="margin-top: 2rem;">
+                <div class="profile-actions">
                     <button id="edit-profile-btn" class="btn btn-primary"><i class="fas fa-edit"></i> Edit Profile</button>
                     <button id="change-password-btn" class="btn btn-secondary"><i class="fas fa-key"></i> Passwords</button>
-                    <button id="modal-logout-btn" class="btn btn-secondary" style="border-color: rgba(255,255,255,0.1); color: #fff;" aria-label="Logout" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+                    <button id="modal-logout-btn" class="btn btn-secondary" style="border-color: rgba(255,255,255,0.1); color: #fff; min-width: 48px;" aria-label="Logout" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
                     <button id="delete-account-btn" class="btn btn-secondary" style="border-color: #ff4757; color: #ff4757;"><i class="fas fa-trash-alt"></i> Delete Account</button>
                 </div>
 
@@ -864,7 +864,7 @@
                     <input type="text" id="onboarding-location" name="location" placeholder="City, Country" required style="width: 100%; padding: 0.75rem; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: white;">
                 </div>
                 <div class="form-group">
-                    <label for="onboarding-referral">Where did you hear about us?</label>
+                    <label for="onboarding-referral">How did you hear about us?</label>
                     <select id="onboarding-referral" name="referral" required style="width: 100%; padding: 0.75rem; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: white;">
                         <option value="">Select an option</option>
                         <option value="Social Media">Social Media</option>
@@ -1133,10 +1133,20 @@
                     const user = firebase.auth().currentUser;
                     if (!user) return;
 
-                    const simulator = document.getElementById('onboarding-simulator').value;
-                    const experience = document.getElementById('onboarding-experience').value;
-                    const location = document.getElementById('onboarding-location').value;
-                    const referral = document.getElementById('onboarding-referral').value;
+                    const simulatorEl = document.getElementById('onboarding-simulator');
+                    const experienceEl = document.getElementById('onboarding-experience');
+                    const locationEl = document.getElementById('onboarding-location');
+                    const referralEl = document.getElementById('onboarding-referral');
+                    
+                    if (!simulatorEl || !experienceEl || !locationEl || !referralEl) {
+                        console.error('Onboarding form elements not found');
+                        return;
+                    }
+
+                    const simulator = simulatorEl.value;
+                    const experience = experienceEl.value;
+                    const location = locationEl.value;
+                    const referral = referralEl.value;
 
                     try {
                         await db.collection('users').doc(user.uid).update({
@@ -1147,9 +1157,10 @@
                         });
                         
                         // Close onboarding modal
-                        onboardingModal.classList.remove('active');
-                        setTimeout(() => {
-                            onboardingModal.style.display = 'none';
+                        if (onboardingModal) {
+                            onboardingModal.classList.remove('active');
+                            setTimeout(() => {
+                                onboardingModal.style.display = 'none';
                             
                             // Execute pending download action after onboarding completes
                             if (pendingDownloadAction) {
@@ -1164,18 +1175,20 @@
                     } catch (error) {
                         console.error('Error saving onboarding data:', error);
                         alert('Failed to save information. You can update it later in your profile.');
-                        onboardingModal.classList.remove('active');
-                        setTimeout(() => {
-                            onboardingModal.style.display = 'none';
-                            
-                            // Still execute download action even if onboarding fails
-                            if (pendingDownloadAction) {
-                                setTimeout(() => {
-                                    pendingDownloadAction();
-                                    pendingDownloadAction = null;
-                                }, 100);
-                            }
-                        }, 300);
+                        if (onboardingModal) {
+                            onboardingModal.classList.remove('active');
+                            setTimeout(() => {
+                                onboardingModal.style.display = 'none';
+                                
+                                // Still execute download action even if onboarding fails
+                                if (pendingDownloadAction) {
+                                    setTimeout(() => {
+                                        pendingDownloadAction();
+                                        pendingDownloadAction = null;
+                                    }, 100);
+                                }
+                            }, 300);
+                        }
                     }
                 });
             }
@@ -1322,21 +1335,25 @@
             });
 
             // Close Modal
-            closeAuthModal.addEventListener('click', () => {
-                // Reset Google button state when closing modal
-                resetGoogleButton();
-                
-                // Reset confirm password field
-                const confirmPwdInput = document.getElementById('auth-confirm-password');
-                const confirmPwdGroup = document.getElementById('confirm-password-group');
-                if (confirmPwdInput) confirmPwdInput.value = '';
-                if (confirmPwdGroup) confirmPwdGroup.style.display = 'none';
-                
-                authModal.classList.remove('active');
-                setTimeout(() => {
-                    authModal.style.display = 'none';
-                }, 300);
-            });
+            if (closeAuthModal) {
+                closeAuthModal.addEventListener('click', () => {
+                    // Reset Google button state when closing modal
+                    if (googleBtn) resetGoogleButton();
+                    
+                    // Reset confirm password field
+                    const confirmPwdInput = document.getElementById('auth-confirm-password');
+                    const confirmPwdGroup = document.getElementById('confirm-password-group');
+                    if (confirmPwdInput) confirmPwdInput.value = '';
+                    if (confirmPwdGroup) confirmPwdGroup.style.display = 'none';
+                    
+                    if (authModal) {
+                        authModal.classList.remove('active');
+                        setTimeout(() => {
+                            authModal.style.display = 'none';
+                        }, 300);
+                    }
+                });
+            }
 
             // Update UI for logged out user
             function updateUIForLoggedOutUser() {
@@ -1358,44 +1375,51 @@
             const authSwitchText = document.getElementById('auth-switch-text');
             
             // Use event delegation on the parent to handle clicks on dynamically updated link
-            authSwitchText.addEventListener('click', (e) => {
-                const link = e.target.closest('#toggle-auth-mode') || (e.target.id === 'toggle-auth-mode' ? e.target : null);
-                if (link) {
-                    e.preventDefault();
-                    hideAuthMessages();
-                    isSignUp = !isSignUp;
-                    if (isSignUp) {
-                        authTitle.textContent = "Create Account";
-                        authSubtitle.textContent = "Join Race Insight to start downloading.";
-                        authSubmitBtn.textContent = "Create Account";
-                        authSwitchText.innerHTML = 'Already have an account? <a href="#" id="toggle-auth-mode">Sign In</a>';
-                        forgotPasswordLink.style.display = 'none';
-                        confirmPasswordGroup.style.display = 'block';
-                        confirmPasswordInput.required = true;
-                    } else {
-                        authTitle.textContent = "Sign In to Download";
-                        authSubtitle.textContent = "Create an account to access downloads and save your preferences.";
-                        authSubmitBtn.textContent = "Sign In";
-                        authSwitchText.innerHTML = 'Don\'t have an account? <a href="#" id="toggle-auth-mode">Sign Up</a>';
-                        forgotPasswordLink.style.display = 'block';
-                        confirmPasswordGroup.style.display = 'none';
-                        confirmPasswordInput.required = false;
-                        confirmPasswordInput.value = '';
+            if (authSwitchText) {
+                authSwitchText.addEventListener('click', (e) => {
+                    const link = e.target.closest('#toggle-auth-mode') || (e.target.id === 'toggle-auth-mode' ? e.target : null);
+                    if (link) {
+                        e.preventDefault();
+                        hideAuthMessages();
+                        isSignUp = !isSignUp;
+                        if (isSignUp) {
+                            if (authTitle) authTitle.textContent = "Create Account";
+                            if (authSubtitle) authSubtitle.textContent = "Join Race Insight to start downloading.";
+                            if (authSubmitBtn) authSubmitBtn.textContent = "Create Account";
+                            authSwitchText.innerHTML = 'Already have an account? <a href="#" id="toggle-auth-mode">Sign In</a>';
+                            if (forgotPasswordLink) forgotPasswordLink.style.display = 'none';
+                            if (confirmPasswordGroup) confirmPasswordGroup.style.display = 'block';
+                            if (confirmPasswordInput) confirmPasswordInput.required = true;
+                        } else {
+                            if (authTitle) authTitle.textContent = "Sign In to Download";
+                            if (authSubtitle) authSubtitle.textContent = "Create an account to access downloads and save your preferences.";
+                            if (authSubmitBtn) authSubmitBtn.textContent = "Sign In";
+                            authSwitchText.innerHTML = 'Don\'t have an account? <a href="#" id="toggle-auth-mode">Sign Up</a>';
+                            if (forgotPasswordLink) forgotPasswordLink.style.display = 'block';
+                            if (confirmPasswordGroup) confirmPasswordGroup.style.display = 'none';
+                            if (confirmPasswordInput) {
+                                confirmPasswordInput.required = false;
+                                confirmPasswordInput.value = '';
+                            }
+                        }
                     }
-                }
-            });
+                });
+            }
 
             // Store original Google button HTML
-            const googleBtnOriginalHTML = googleBtn.innerHTML;
+            const googleBtnOriginalHTML = googleBtn ? googleBtn.innerHTML : '';
             
             // Function to reset Google button to original state
             function resetGoogleButton() {
-                googleBtn.disabled = false;
-                googleBtn.innerHTML = googleBtnOriginalHTML;
+                if (googleBtn) {
+                    googleBtn.disabled = false;
+                    googleBtn.innerHTML = googleBtnOriginalHTML;
+                }
             }
             
             // Google Sign In
-            googleBtn.addEventListener('click', () => {
+            if (googleBtn) {
+                googleBtn.addEventListener('click', () => {
                 hideAuthMessages();
                 
                 // Disable the Google button to prevent multiple clicks
@@ -1456,23 +1480,25 @@
             });
 
             // Forgot Password
-            forgotPasswordBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                const email = emailInput.value.trim();
-                if (!email) {
-                    showAuthError("Please enter your email address first.");
-                    return;
-                }
-                hideAuthMessages();
-                firebase.auth().sendPasswordResetEmail(email)
-                    .then(() => {
-                        showAuthSuccess("Password reset email sent! Check your inbox.");
-                    })
-                    .catch((error) => {
-                        console.error("Password Reset Error:", error);
-                        showAuthError("Failed to send password reset email: " + error.message);
-                    });
-            });
+            if (forgotPasswordBtn) {
+                forgotPasswordBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const email = emailInput ? emailInput.value.trim() : '';
+                    if (!email) {
+                        showAuthError("Please enter your email address first.");
+                        return;
+                    }
+                    hideAuthMessages();
+                    firebase.auth().sendPasswordResetEmail(email)
+                        .then(() => {
+                            showAuthSuccess("Password reset email sent! Check your inbox.");
+                        })
+                        .catch((error) => {
+                            console.error("Password Reset Error:", error);
+                            showAuthError("Failed to send password reset email: " + error.message);
+                        });
+                });
+            }
 
             // Email Sign In / Sign Up
             emailForm.addEventListener('submit', (e) => {
@@ -1499,8 +1525,10 @@
                     }
                 }
 
-                authSubmitBtn.disabled = true;
-                authSubmitBtn.textContent = isSignUp ? "Creating Account..." : "Signing In...";
+                if (authSubmitBtn) {
+                    authSubmitBtn.disabled = true;
+                    authSubmitBtn.textContent = isSignUp ? "Creating Account..." : "Signing In...";
+                }
 
                 if (isSignUp) {
                     firebase.auth().createUserWithEmailAndPassword(email, password)
@@ -1519,21 +1547,25 @@
                             showAuthSuccess("Account created successfully! Logging you in...");
                             
                             // Clear form fields
-                            emailInput.value = '';
-                            passwordInput.value = '';
-                            confirmPasswordInput.value = '';
+                            if (emailInput) emailInput.value = '';
+                            if (passwordInput) passwordInput.value = '';
+                            if (confirmPasswordInput) confirmPasswordInput.value = '';
                             
                             // Note: User is automatically signed in by Firebase after createUserWithEmailAndPassword
                             // The onAuthStateChanged handler will take care of closing modal and showing onboarding
                             
-                            authSubmitBtn.textContent = "Create Account";
-                            authSubmitBtn.disabled = false;
+                            if (authSubmitBtn) {
+                                authSubmitBtn.textContent = "Create Account";
+                                authSubmitBtn.disabled = false;
+                            }
                         })
                         .catch((error) => {
                             console.error("Sign Up Error:", error);
                             showAuthError(getErrorMessage(error));
-                            authSubmitBtn.textContent = "Create Account";
-                            authSubmitBtn.disabled = false;
+                            if (authSubmitBtn) {
+                                authSubmitBtn.textContent = "Create Account";
+                                authSubmitBtn.disabled = false;
+                            }
                             isNewUserSignup = false; // Reset flag on error
                         });
                 } else {
@@ -1550,20 +1582,24 @@
                             showAuthSuccess("Signing in...");
                             
                             // Clear form fields
-                            emailInput.value = '';
-                            passwordInput.value = '';
+                            if (emailInput) emailInput.value = '';
+                            if (passwordInput) passwordInput.value = '';
                             
                             // Note: User is automatically signed in by Firebase
                             // The onAuthStateChanged handler will take care of closing modal
                             
-                            authSubmitBtn.textContent = "Sign In";
-                            authSubmitBtn.disabled = false;
+                            if (authSubmitBtn) {
+                                authSubmitBtn.textContent = "Sign In";
+                                authSubmitBtn.disabled = false;
+                            }
                         })
                         .catch((error) => {
                             console.error("Sign In Error:", error);
                             showAuthError(getErrorMessage(error));
-                            authSubmitBtn.textContent = "Sign In";
-                            authSubmitBtn.disabled = false;
+                            if (authSubmitBtn) {
+                                authSubmitBtn.textContent = "Sign In";
+                                authSubmitBtn.disabled = false;
+                            }
                         });
                 }
             });
@@ -1736,9 +1772,11 @@
                 if (!user) {
                     pendingDownloadAction = () => triggerDownload();
                     resetAuthModalToSignIn();
-                    authModal.style.display = 'flex';
-                    authModal.offsetHeight;
-                    setTimeout(() => authModal.classList.add('active'), 10);
+                    if (authModal) {
+                        authModal.style.display = 'flex';
+                        authModal.offsetHeight;
+                        setTimeout(() => authModal.classList.add('active'), 10);
+                    }
                     return;
                 }
                 triggerDownload();
@@ -1928,15 +1966,19 @@
                     e.preventDefault();
                     const user = firebase.auth().currentUser;
                     if (user) {
-                        profileModal.style.display = 'flex';
-                        profileModal.offsetHeight;
-                        setTimeout(() => profileModal.classList.add('active'), 10);
-                        loadProfileData(user);
+                        if (profileModal) {
+                            profileModal.style.display = 'flex';
+                            profileModal.offsetHeight;
+                            setTimeout(() => profileModal.classList.add('active'), 10);
+                            loadProfileData(user);
+                        }
                     } else {
                         resetAuthModalToSignIn();
-                        authModal.style.display = 'flex';
-                        authModal.offsetHeight;
-                        setTimeout(() => authModal.classList.add('active'), 10);
+                        if (authModal) {
+                            authModal.style.display = 'flex';
+                            authModal.offsetHeight;
+                            setTimeout(() => authModal.classList.add('active'), 10);
+                        }
                     }
                 });
             });
@@ -1949,15 +1991,19 @@
                 navProfileBtn.addEventListener('click', () => {
                     const user = firebase.auth().currentUser;
                     if (user) {
-                        profileModal.style.display = 'flex';
-                        profileModal.offsetHeight;
-                        setTimeout(() => profileModal.classList.add('active'), 10);
-                        loadProfileData(user);
+                        if (profileModal) {
+                            profileModal.style.display = 'flex';
+                            profileModal.offsetHeight;
+                            setTimeout(() => profileModal.classList.add('active'), 10);
+                            loadProfileData(user);
+                        }
                     } else {
                         resetAuthModalToSignIn();
-                        authModal.style.display = 'flex';
-                        authModal.offsetHeight;
-                        setTimeout(() => authModal.classList.add('active'), 10);
+                        if (authModal) {
+                            authModal.style.display = 'flex';
+                            authModal.offsetHeight;
+                            setTimeout(() => authModal.classList.add('active'), 10);
+                        }
                     }
                 });
             }
@@ -1966,15 +2012,19 @@
                 mobileNavProfileBtn.addEventListener('click', () => {
                     const user = firebase.auth().currentUser;
                     if (user) {
-                        profileModal.style.display = 'flex';
-                        profileModal.offsetHeight;
-                        setTimeout(() => profileModal.classList.add('active'), 10);
-                        loadProfileData(user);
+                        if (profileModal) {
+                            profileModal.style.display = 'flex';
+                            profileModal.offsetHeight;
+                            setTimeout(() => profileModal.classList.add('active'), 10);
+                            loadProfileData(user);
+                        }
                     } else {
                         resetAuthModalToSignIn();
-                        authModal.style.display = 'flex';
-                        authModal.offsetHeight;
-                        setTimeout(() => authModal.classList.add('active'), 10);
+                        if (authModal) {
+                            authModal.style.display = 'flex';
+                            authModal.offsetHeight;
+                            setTimeout(() => authModal.classList.add('active'), 10);
+                        }
                     }
                 });
             }
@@ -2047,31 +2097,31 @@
             // Edit profile button
             if (editProfileBtn) {
                 editProfileBtn.addEventListener('click', () => {
-                    profileEditForm.style.display = 'block';
-                    changePasswordForm.style.display = 'none';
+                    if (profileEditForm) profileEditForm.style.display = 'block';
+                    if (changePasswordForm) changePasswordForm.style.display = 'none';
                 });
             }
 
             // Change password button
             if (changePasswordBtn) {
                 changePasswordBtn.addEventListener('click', () => {
-                    changePasswordForm.style.display = 'block';
-                    profileEditForm.style.display = 'none';
+                    if (changePasswordForm) changePasswordForm.style.display = 'block';
+                    if (profileEditForm) profileEditForm.style.display = 'none';
                 });
             }
 
             // Cancel edit
             if (cancelEditBtn) {
                 cancelEditBtn.addEventListener('click', () => {
-                    profileEditForm.style.display = 'none';
+                    if (profileEditForm) profileEditForm.style.display = 'none';
                 });
             }
 
             // Cancel password change
             if (cancelPasswordBtn) {
                 cancelPasswordBtn.addEventListener('click', () => {
-                    changePasswordForm.style.display = 'none';
-                    updatePasswordForm.reset();
+                    if (changePasswordForm) changePasswordForm.style.display = 'none';
+                    if (updatePasswordForm) updatePasswordForm.reset();
                 });
             }
 
@@ -2082,11 +2132,22 @@
                     const user = firebase.auth().currentUser;
                     if (!user) return;
 
-                    const displayName = document.getElementById('profile-name').value.trim();
-                    const bio = document.getElementById('profile-bio').value.trim();
-                    const location = document.getElementById('profile-location').value.trim();
-                    const simulator = document.getElementById('profile-simulator-edit').value;
-                    const experience = document.getElementById('profile-experience-edit').value;
+                    const nameEl = document.getElementById('profile-name');
+                    const bioEl = document.getElementById('profile-bio');
+                    const locationEl = document.getElementById('profile-location');
+                    const simulatorEl = document.getElementById('profile-simulator-edit');
+                    const experienceEl = document.getElementById('profile-experience-edit');
+                    
+                    if (!nameEl || !bioEl || !locationEl || !simulatorEl || !experienceEl) {
+                        console.error('Profile form elements not found');
+                        return;
+                    }
+                    
+                    const displayName = nameEl.value.trim();
+                    const bio = bioEl.value.trim();
+                    const location = locationEl.value.trim();
+                    const simulator = simulatorEl.value;
+                    const experience = experienceEl.value;
  
                     try {
                         await db.collection('users').doc(user.uid).update({
@@ -2102,7 +2163,7 @@
                             await user.updateProfile({ displayName: displayName });
                         }
 
-                        profileEditForm.style.display = 'none';
+                        if (profileEditForm) profileEditForm.style.display = 'none';
                         await loadProfileData(user);
                         alert('Profile updated successfully!');
                     } catch (error) {
@@ -2119,9 +2180,22 @@
                     const user = firebase.auth().currentUser;
                     if (!user) return;
 
-                    const currentPassword = document.getElementById('current-password').value;
-                    const newPassword = document.getElementById('new-password').value;
-                    const confirmPassword = document.getElementById('confirm-password').value;
+                    const currentPwdEl = document.getElementById('current-password');
+                    const newPwdEl = document.getElementById('new-password');
+                    
+                    if (!currentPwdEl || !newPwdEl) {
+                        console.error('Password form elements not found');
+                        return;
+                    }
+                    
+                    const currentPassword = currentPwdEl.value;
+                    const newPassword = newPwdEl.value;
+                    const confirmPwdEl = document.getElementById('confirm-password');
+                    if (!confirmPwdEl) {
+                        console.error('Confirm password field not found');
+                        return;
+                    }
+                    const confirmPassword = confirmPwdEl.value;
 
                     if (newPassword !== confirmPassword) {
                         alert('New passwords do not match!');
@@ -2143,8 +2217,8 @@
 
                         // Update password
                         await user.updatePassword(newPassword);
-                        updatePasswordForm.reset();
-                        changePasswordForm.style.display = 'none';
+                        if (updatePasswordForm) updatePasswordForm.reset();
+                        if (changePasswordForm) changePasswordForm.style.display = 'none';
                         alert('Password updated successfully!');
                     } catch (error) {
                         console.error('Error updating password:', error);
@@ -2175,8 +2249,10 @@
                             alert("Your account has been successfully deleted.");
                             
                             // 3. UI cleanup
-                            profileModal.classList.remove('active');
-                            setTimeout(() => profileModal.style.display = 'none', 300);
+                            if (profileModal) {
+                                profileModal.classList.remove('active');
+                                setTimeout(() => profileModal.style.display = 'none', 300);
+                            }
                             deleteCookie('userLoggedIn');
                             deleteCookie('userEmail');
                             deleteCookie('userId');
