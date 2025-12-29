@@ -995,6 +995,7 @@
 
             let isSignUp = false;
             let pendingDownloadAction = null;
+            let isNewUserSignup = false; // Track if this is a new user signup
 
             // Helper function to show error
             function showAuthError(message) {
@@ -1111,10 +1112,18 @@
             const onboardingForm = document.getElementById('onboarding-form');
 
             async function checkOnboarding(user, profileResult) {
+                if (!onboardingModal) {
+                    console.warn("Onboarding modal not found");
+                    return;
+                }
+                
                 if (profileResult && profileResult.isNewUser) {
+                    console.log("Showing onboarding modal for new user");
                     onboardingModal.style.display = 'flex';
                     onboardingModal.offsetHeight;
-                    onboardingModal.classList.add('active');
+                    setTimeout(() => {
+                        onboardingModal.classList.add('active');
+                    }, 10);
                 }
             }
 
@@ -1136,14 +1145,37 @@
                             location: location,
                             referral: referral
                         });
+                        
+                        // Close onboarding modal
                         onboardingModal.classList.remove('active');
-                        setTimeout(() => onboardingModal.style.display = 'none', 300);
+                        setTimeout(() => {
+                            onboardingModal.style.display = 'none';
+                            
+                            // Execute pending download action after onboarding completes
+                            if (pendingDownloadAction) {
+                                setTimeout(() => {
+                                    pendingDownloadAction();
+                                    pendingDownloadAction = null;
+                                }, 100);
+                            }
+                        }, 300);
+                        
                         await loadProfileData(user);
                     } catch (error) {
                         console.error('Error saving onboarding data:', error);
                         alert('Failed to save information. You can update it later in your profile.');
                         onboardingModal.classList.remove('active');
-                        setTimeout(() => onboardingModal.style.display = 'none', 300);
+                        setTimeout(() => {
+                            onboardingModal.style.display = 'none';
+                            
+                            // Still execute download action even if onboarding fails
+                            if (pendingDownloadAction) {
+                                setTimeout(() => {
+                                    pendingDownloadAction();
+                                    pendingDownloadAction = null;
+                                }, 100);
+                            }
+                        }, 300);
                     }
                 });
             }
@@ -1214,8 +1246,9 @@
                     setCookie('userId', user.uid || '', 30);
                     
                     // Try to create/update profile, but don't fail if Firestore is offline
+                    let profileResult = null;
                     try {
-                        await createUserProfile(user);
+                        profileResult = await createUserProfile(user);
                     } catch (profileError) {
                         console.error("Profile creation error in auth state change (non-fatal):", profileError);
                     }
@@ -1229,24 +1262,47 @@
                         console.error("Error calling updateUIForLoggedInUser:", error);
                     }
                     
-                    // Close modal immediately if it's open
+                    // Close modal with slight delay to show success message
                     if (authModal) {
                         console.log("Closing modal, active class:", authModal.classList.contains('active'));
-                        // Remove active class to trigger fade out
-                        authModal.classList.remove('active');
-                        // Hide modal after animation
-                        setTimeout(() => {
-                            authModal.style.setProperty('display', 'none', 'important');
-                            console.log("✓ Modal display set to none");
-                        }, 300);
                         
-                        // Execute pending download action or onboarding
-                        if (pendingDownloadAction) {
+                        // Wait a bit longer if it's a new signup to show success message
+                        const delay = isNewUserSignup ? 1500 : 800;
+                        
+                        setTimeout(() => {
+                            // Remove active class to trigger fade out
+                            authModal.classList.remove('active');
+                            // Hide modal after animation
                             setTimeout(() => {
-                                pendingDownloadAction();
-                                pendingDownloadAction = null;
-                            }, 350);
-                        }
+                                authModal.style.setProperty('display', 'none', 'important');
+                                console.log("✓ Modal display set to none");
+                                
+                                // Reset modal to sign-in state
+                                resetAuthModalToSignIn();
+                                
+                                // Check if we need to show onboarding for new users
+                                // Use isNewUserSignup flag OR check if profile was just created
+                                const shouldShowOnboarding = isNewUserSignup || (profileResult && profileResult.isNewUser);
+                                
+                                if (shouldShowOnboarding) {
+                                    console.log("Showing onboarding for new user");
+                                    setTimeout(() => {
+                                        checkOnboarding(user, { isNewUser: true });
+                                    }, 100);
+                                } else {
+                                    // Execute pending download action if not showing onboarding
+                                    if (pendingDownloadAction) {
+                                        setTimeout(() => {
+                                            pendingDownloadAction();
+                                            pendingDownloadAction = null;
+                                        }, 100);
+                                    }
+                                }
+                                
+                                // Reset the flag
+                                isNewUserSignup = false;
+                            }, 300);
+                        }, delay);
                     }
                 } else {
                     console.log("=== User is signed out ===");
@@ -1449,22 +1505,36 @@
                 if (isSignUp) {
                     firebase.auth().createUserWithEmailAndPassword(email, password)
                         .then(async (userCredential) => {
+                            // Mark as new user signup - this will be used in onAuthStateChanged
+                            isNewUserSignup = true;
+                            
                             // Try to create profile, but don't fail sign-up if it errors
                             try {
                                 await createUserProfile(userCredential.user);
                             } catch (profileError) {
                                 console.error("Profile creation error (non-fatal):", profileError);
                             }
-                            showAuthSuccess("Account created successfully!");
+                            
+                            // Show success message
+                            showAuthSuccess("Account created successfully! Logging you in...");
+                            
+                            // Clear form fields
+                            emailInput.value = '';
+                            passwordInput.value = '';
+                            confirmPasswordInput.value = '';
+                            
+                            // Note: User is automatically signed in by Firebase after createUserWithEmailAndPassword
+                            // The onAuthStateChanged handler will take care of closing modal and showing onboarding
+                            
                             authSubmitBtn.textContent = "Create Account";
                             authSubmitBtn.disabled = false;
-                            confirmPasswordInput.value = '';
                         })
                         .catch((error) => {
                             console.error("Sign Up Error:", error);
                             showAuthError(getErrorMessage(error));
                             authSubmitBtn.textContent = "Create Account";
                             authSubmitBtn.disabled = false;
+                            isNewUserSignup = false; // Reset flag on error
                         });
                 } else {
                     firebase.auth().signInWithEmailAndPassword(email, password)
@@ -1475,6 +1545,17 @@
                             } catch (profileError) {
                                 console.error("Profile creation error (non-fatal):", profileError);
                             }
+                            
+                            // Show success message briefly
+                            showAuthSuccess("Signing in...");
+                            
+                            // Clear form fields
+                            emailInput.value = '';
+                            passwordInput.value = '';
+                            
+                            // Note: User is automatically signed in by Firebase
+                            // The onAuthStateChanged handler will take care of closing modal
+                            
                             authSubmitBtn.textContent = "Sign In";
                             authSubmitBtn.disabled = false;
                         })
