@@ -35,9 +35,9 @@ html::-webkit-scrollbar {
 
 body {
     font-family: var(--font-family);
-    background: none;
-    background-image: none;
-    color: rgba(0, 0, 0, 1);
+    background-color: var(--dark-bg);
+    background-image: radial-gradient(circle at 50% 50%, rgba(245, 53, 24, 0.08) 0%, rgba(0, 0, 0, 1) 50%);
+    color: var(--text-color);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
 
