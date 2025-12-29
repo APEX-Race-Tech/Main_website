@@ -98,6 +98,7 @@
             <div class="nav-right">
                 <ul class="nav-links">
                     <li><a href="https://docs.apexracetech.in" target="_blank" rel="noopener noreferrer">Docs</a></li>
+                    <li><a href="#" id="nav-signin-btn" class="nav-signin-link">Sign In</a></li>
                 </ul>
                 <div class="header-action-item">
                     <button id="nav-profile-btn" class="btn-profile-icon" aria-label="Profile" title="Profile" style="display: none;">
@@ -587,10 +588,10 @@
                 </div>
 
                 <div class="platform-options">
-                    <button class="platform-btn" data-platform="windows"><i class="fab fa-windows"></i> Windows</button>
-                    <button class="platform-btn disabled" data-platform="linux" disabled style="opacity: 0.5; cursor: not-allowed; pointer-events: none;"><i class="fab fa-linux"></i> Linux</button>
-                    <button class="platform-btn disabled" data-platform="apple" disabled style="opacity: 0.5; cursor: not-allowed; pointer-events: none;"><i class="fab fa-apple"></i> Mac</button>
-                    <button class="platform-btn disabled" data-platform="android" disabled style="opacity: 0.5; cursor: not-allowed; pointer-events: none;"><i class="fab fa-android"></i> Android</button>
+                    <button type="button" class="platform-btn" data-platform="windows"><i class="fab fa-windows"></i> Windows</button>
+                    <button type="button" class="platform-btn disabled" data-platform="linux" disabled style="opacity: 0.5; cursor: not-allowed; pointer-events: none;"><i class="fab fa-linux"></i> Linux</button>
+                    <button type="button" class="platform-btn disabled" data-platform="apple" disabled style="opacity: 0.5; cursor: not-allowed; pointer-events: none;"><i class="fab fa-apple"></i> Mac</button>
+                    <button type="button" class="platform-btn disabled" data-platform="android" disabled style="opacity: 0.5; cursor: not-allowed; pointer-events: none;"><i class="fab fa-android"></i> Android</button>
                 </div>
 
                 <div class="action-buttons">
@@ -1259,6 +1260,12 @@
                         console.log("✓ mobileNavProfileBtn shown");
                     }
 
+                    // Hide Sign In button when logged in
+                    const navSignInBtn = document.getElementById('nav-signin-btn');
+                    if (navSignInBtn) {
+                        navSignInBtn.style.setProperty('display', 'none', 'important');
+                    }
+
                     // Update download button text
                     downloadBtns.forEach(btn => {
                         btn.textContent = "Download";
@@ -1394,6 +1401,12 @@
                 }
                 if (mobileNavProfileBtn) {
                     mobileNavProfileBtn.style.setProperty('display', 'none', 'important');
+                }
+
+                // Show Sign In button when logged out
+                const navSignInBtn = document.getElementById('nav-signin-btn');
+                if (navSignInBtn) {
+                    navSignInBtn.style.removeProperty('display');
                 }
             }
 
@@ -1813,27 +1826,67 @@
 
             // --- Download Logic ---
             const downloadBtn = document.getElementById('download-btn');
-            const platformBtns = document.querySelectorAll('.platform-btn');
             let selectedPlatform = null;
 
             // Auto-select Windows on page load
             const windowsBtn = document.querySelector('.platform-btn[data-platform="windows"]');
-            if (windowsBtn) {
+            if (windowsBtn && !windowsBtn.disabled && !windowsBtn.classList.contains('disabled')) {
                 windowsBtn.classList.add('selected');
                 selectedPlatform = 'windows';
             }
 
-            platformBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    // Prevent clicking on disabled buttons
-                    if (btn.disabled || btn.classList.contains('disabled')) {
-                        return;
-                    }
-                    platformBtns.forEach(b => b.classList.remove('selected'));
-                    btn.classList.add('selected');
-                    selectedPlatform = btn.dataset.platform;
-                });
-            });
+            // Use event delegation on the platform-options container
+            // Use a flag to prevent duplicate listeners
+            if (!window.platformButtonsInitialized) {
+                window.platformButtonsInitialized = true;
+                
+                const platformOptions = document.querySelector('.platform-options');
+                if (platformOptions) {
+                    platformOptions.addEventListener('click', function(e) {
+                        // Find the clicked button (might be button or icon inside)
+                        const clickedBtn = e.target.closest('.platform-btn');
+                        
+                        if (!clickedBtn) return;
+                        
+                        // Prevent clicking on disabled buttons
+                        if (clickedBtn.disabled || clickedBtn.classList.contains('disabled')) {
+                            return;
+                        }
+                        
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        // Get all platform buttons
+                        const allBtns = document.querySelectorAll('.platform-options .platform-btn');
+                        
+                        // Remove selected class from all buttons first
+                        allBtns.forEach(b => {
+                            if (!b.disabled && !b.classList.contains('disabled')) {
+                                b.classList.remove('selected');
+                                // Clear any inline styles that might interfere
+                                if (b.style) {
+                                    b.style.removeProperty('background');
+                                    b.style.removeProperty('border-color');
+                                    b.style.removeProperty('color');
+                                    b.style.removeProperty('background-color');
+                                }
+                            }
+                        });
+                        
+                        // Add selected class to clicked button
+                        clickedBtn.classList.add('selected');
+                        selectedPlatform = clickedBtn.getAttribute('data-platform');
+                        
+                        // Force reflow to ensure CSS is applied
+                        void clickedBtn.offsetHeight;
+                        
+                        console.log('Platform selected:', selectedPlatform);
+                        console.log('Button element:', clickedBtn);
+                        console.log('Has selected class:', clickedBtn.classList.contains('selected'));
+                        console.log('Computed styles:', window.getComputedStyle(clickedBtn).background);
+                    });
+                }
+            }
 
             downloadBtn.addEventListener('click', () => {
                 if (!selectedPlatform) {
@@ -2054,6 +2107,49 @@
                     }
                 });
             });
+
+            // Sign In button in nav - make it functional
+            const navSignInBtn = document.getElementById('nav-signin-btn');
+            if (navSignInBtn) {
+                navSignInBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    console.log('Sign In button clicked');
+                    
+                    const user = firebase.auth().currentUser;
+                    if (!user) {
+                        // Reset modal to sign-in state
+                        resetAuthModalToSignIn();
+                        
+                        // Show the auth modal (use the authModal variable from scope)
+                        if (authModal) {
+                            authModal.style.display = 'flex';
+                            authModal.offsetHeight; // Force reflow
+                            setTimeout(() => {
+                                authModal.classList.add('active');
+                            }, 10);
+                            console.log('Auth modal opened');
+                        } else {
+                            // Fallback: get modal directly
+                            const authModalEl = document.getElementById('auth-modal');
+                            if (authModalEl) {
+                                authModalEl.style.display = 'flex';
+                                authModalEl.offsetHeight;
+                                setTimeout(() => {
+                                    authModalEl.classList.add('active');
+                                }, 10);
+                            } else {
+                                console.error('Auth modal not found');
+                            }
+                        }
+                    } else {
+                        console.log('User already logged in');
+                    }
+                });
+            } else {
+                console.warn('nav-signin-btn not found');
+            }
 
             // Profile button click handlers
             const navProfileBtn = document.getElementById('nav-profile-btn');
@@ -2388,23 +2484,33 @@
                 });
             }
 
-            // Fade out shrunk-nav-icons-container when scrolled past data-export section
+            // Hide shrunk-nav-icons-container when scrolled past data-export section
             function handleShrunkNavFade() {
                 const shrunkNavContainer = document.querySelector('.shrunk-nav-icons-container');
                 const dataExportSection = document.querySelector('#data-export');
+                const header = document.querySelector('.header');
                 
-                if (!shrunkNavContainer || !dataExportSection) return;
+                if (!shrunkNavContainer || !dataExportSection || !header) return;
+                
+                // Only hide if header is scrolled (shrunk nav is visible)
+                if (!header.classList.contains('scrolled')) return;
                 
                 // Get the bottom of the viewport
                 const viewportBottom = window.scrollY + window.innerHeight;
                 // Get the bottom of the data-export section
                 const dataExportBottom = dataExportSection.offsetTop + dataExportSection.offsetHeight;
                 
-                // If bottom of viewport has passed the bottom of data-export section, fade out
+                // If viewport bottom has scrolled past the bottom of data-export section, hide it
                 if (viewportBottom > dataExportBottom) {
                     shrunkNavContainer.classList.add('faded-out');
+                    shrunkNavContainer.style.setProperty('display', 'none', 'important');
+                    shrunkNavContainer.style.setProperty('opacity', '0', 'important');
+                    shrunkNavContainer.style.setProperty('pointer-events', 'none', 'important');
                 } else {
                     shrunkNavContainer.classList.remove('faded-out');
+                    shrunkNavContainer.style.removeProperty('display');
+                    shrunkNavContainer.style.removeProperty('opacity');
+                    shrunkNavContainer.style.removeProperty('pointer-events');
                 }
             }
 
@@ -2415,8 +2521,11 @@
                 scrollTimeout = setTimeout(() => {
                     updateActiveNavIcon();
                     handleShrunkNavFade();
-                }, 100);
+                }, 10); // Reduced timeout for more responsive updates
             });
+            
+            // Call on initial load
+            handleShrunkNavFade();
 
             // Initial update
             updateActiveNavIcon();
