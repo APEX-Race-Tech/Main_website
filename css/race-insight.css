@@ -1,16 +1,15 @@
+/* Override body background for race-insight page */
+body {
+  background: none !important;
+  background-image: none;
+  background-color: transparent;
+  background-clip: unset;
+  -webkit-background-clip: unset;
+}
+
 :root {
   --primary-color: #00d2ff;
   --primary-gradient: linear-gradient(135deg, #00d2ff 0%, #0078ff 100%);
-  color: #00d2ff;
-  border: 1px solid rgba(0, 210, 255, 0.3);
-  padding: 0.5rem 1rem;
-  border-radius: 50px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-  display: inline-block;
-  align-self: center;
-  /* Prevent stretching in flex column */
 }
 
 #race-insight-hero .tagline {
@@ -589,7 +588,7 @@
 
 /* Ensure the hero section has a transparent background so the fixed gradient shows through */
 #race-insight-hero {
-  background: transparent;
+  background: transparent !important;
 }
 
 /* Responsive adjustments */
@@ -1811,6 +1810,8 @@ select option {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  margin-left: 7px;
+  margin-right: 7px;
 }
 
 .section-header-icon i {

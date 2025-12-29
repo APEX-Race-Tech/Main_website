@@ -7,12 +7,16 @@
     --accent-gradient: var(--primary-gradient);
     --accent-contrast: #ffffff;
     --danger-color: #dc3545;
-    --text-darker-color-secondary: #ac9b9b;
     --dark-bg: #000000;
     --card-bg: #111111;
     --border-color: #2c2c2c;
     --text-color: #FFFFFF;
+    --text-color-secondary: #b0b0b0;
+    --text-color-primary: #FFFFFF;
+    --text-darker-color-secondary: #ac9b9b;
     --text-muted: #999999;
+    --background-color: #000000;
+    --background-color-secondary: #1a1a1a;
 
     /* Animation Colors */
     --track-animation-trail-color: var(--primary-color);

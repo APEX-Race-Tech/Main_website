@@ -97,24 +97,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setupAttributeObserver() {
+        // Start animation immediately on load
+        startAnimation();
+
+        // Optional: Keep observer if other logic depends on sections, but don't stop animation
+        /*
         const observer = new MutationObserver((mutationsList) => {
             for (const mutation of mutationsList) {
                 if (mutation.type === 'attributes' && mutation.attributeName === 'data-section') {
                     const currentSection = document.body.getAttribute('data-section');
-                    if (currentSection !== 'home') {
-                        startAnimation();
-                    } else {
-                        stopAnimation();
-                    }
+                    // Removed logic that stops animation on home section
+                    // Animation now runs continuously
                 }
             }
         });
         observer.observe(document.body, { attributes: true });
-
-        // Initial check on page load
-        if (document.body.getAttribute('data-section') !== 'home') {
-            startAnimation();
-        }
+        */
     }
 
     // --- Data Loading & Parsing ---
