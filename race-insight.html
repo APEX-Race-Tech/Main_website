@@ -558,7 +558,6 @@
                     <button class="platform-btn" data-platform="windows"><i class="fab fa-windows"></i> Windows</button>
                     <button class="platform-btn disabled" data-platform="linux" disabled style="opacity: 0.5; cursor: not-allowed; pointer-events: none;"><i class="fab fa-linux"></i> Linux</button>
                     <button class="platform-btn disabled" data-platform="apple" disabled style="opacity: 0.5; cursor: not-allowed; pointer-events: none;"><i class="fab fa-apple"></i> Mac</button>
-                    <button class="platform-btn disabled" data-platform="android" disabled style="opacity: 0.5; cursor: not-allowed; pointer-events: none;"><i class="fab fa-android"></i> Android</button>
                 </div>
 
                 <div class="action-buttons">
@@ -1803,7 +1802,7 @@
             if (downloadBtn) {
                 downloadBtn.addEventListener('click', () => {
                     if (!selectedPlatform) {
-                        alert('Please select your platform (Windows, Linux, Mac, or Android) first.');
+                        alert('Please select your platform (Windows, Linux, or Mac) first.');
                         return;
                     }
                     const user = firebase.auth().currentUser;
@@ -1843,8 +1842,7 @@
                 const downloadUrls = {
                     'windows': 'https://github.com/YOUR_USERNAME/YOUR_REPO/releases/download/v1.0.0/RaceInsight_Setup_Windows.exe',
                     'linux': 'https://github.com/YOUR_USERNAME/YOUR_REPO/releases/download/v1.0.0/RaceInsight_Setup_Linux.AppImage',
-                    'apple': 'https://github.com/YOUR_USERNAME/YOUR_REPO/releases/download/v1.0.0/RaceInsight_Setup_Mac.dmg',
-                    'android': 'https://github.com/YOUR_USERNAME/YOUR_REPO/releases/download/v1.0.0/RaceInsight_Setup_Android.apk'
+                    'apple': 'https://github.com/YOUR_USERNAME/YOUR_REPO/releases/download/v1.0.0/RaceInsight_Setup_Mac.dmg'
                 };
                 
                 const downloadUrl = downloadUrls[selectedPlatform];
@@ -1877,8 +1875,7 @@
                 const filePatterns = {
                     'windows': /RaceInsight.*\.exe$/i,
                     'linux': /RaceInsight.*\.AppImage$/i,
-                    'apple': /RaceInsight.*\.dmg$/i,
-                    'android': /RaceInsight.*\.apk$/i
+                    'apple': /RaceInsight.*\.dmg$/i
                 };
                 
                 try {
@@ -2783,13 +2780,15 @@
         })();
         // #endregion
     </script>
+    <div style="text-align: right; font-size: 0.85rem; color: #888; margin-bottom: 1.5rem; padding: 0 2rem;">
+        Made with ❤️‍🔥 From 🇮🇳
+    </div>
     <div class="footer-content">
         <p>&copy; 2026 APEX Race Technologies. All rights reserved.</p>
         <div style="margin-top: 1rem; font-size: 0.9rem;">
             <a href="https://docs.apexracetech.in" target="_blank" rel="noopener noreferrer" style="color: #bbb; text-decoration: none; margin-right: 1rem;">Documentation</a>
             <a href="race-insight/eula.html" style="color: #bbb; text-decoration: none; margin-right: 1rem;">EULA</a>
             <a href="race-insight/terms.html" style="color: #bbb; text-decoration: none; margin-right: 1rem;">Terms of Service</a>
-            <a href="race-insight/third-party-licenses.html" style="color: #bbb; text-decoration: none; margin-right: 1rem;">Third-Party Licenses</a>
             <a href="race-insight/privacy-policy.html" style="color: #bbb; text-decoration: none;">Privacy Policy</a>
         </div>
     </div>

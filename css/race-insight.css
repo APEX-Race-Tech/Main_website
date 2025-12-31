@@ -1305,18 +1305,20 @@ select option {
 /* Feedback Section Styling */
 #feedback {
   justify-content: center;
-  align-items: flex-end;
-  height: 849px;
+  align-items: center;
+  min-height: auto;
 }
 
 #feedback .section-content {
-  padding-top: 0px;
-  padding-bottom: 0px;
-  height: 600px;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
   position: static;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(1, 1fr);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 #feedback h2.section-title {
@@ -1324,11 +1326,14 @@ select option {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 600px;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 3rem;
 }
 
 #feedback form.contact-form {
-  height: 600px;
+  width: 100%;
+  max-width: 600px;
 }
 
 /* Feedback Form Styling */
@@ -1855,6 +1860,10 @@ select option {
 .feature-section .section-content {
   max-width: 1200px;
   width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* Section Header Card Style */
@@ -1870,14 +1879,19 @@ select option {
   padding-top: 15px;
   padding-bottom: 15px;
   margin-bottom: 28px;
+  margin-left: auto;
+  margin-right: auto;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 2rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   height: 68px;
   font-family: Inter, sans-serif;
   font-weight: 400;
   font-size: 48px;
+  width: 100%;
+  max-width: 100%;
 }
 
 .section-header-icon {
@@ -1889,8 +1903,8 @@ select option {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  margin-left: 7px;
-  margin-right: 7px;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 .section-header-icon i {
@@ -1899,9 +1913,13 @@ select option {
 }
 
 .section-header-text {
-  flex: 1;
-  position: absolute;
-  margin-left: 70px;
+  flex: 0 1 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
 }
 
 .section-header-label {
@@ -1925,13 +1943,13 @@ select option {
   -webkit-background-clip: unset;
   background-clip: unset;
   -webkit-text-fill-color: var(--text-color);
-  text-align: left;
+  text-align: center;
 }
 
 .feature-section .section-subtitle {
   font-size: 13px;
   color: var(--text-color-secondary);
-  text-align: left;
+  text-align: center;
   margin: 0;
   font-weight: 400;
   line-height: 1.6;
@@ -1944,6 +1962,9 @@ select option {
   border-radius: 16px;
   padding: 3rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
 }
 
 .feature-intro {
@@ -2694,11 +2715,31 @@ select option {
   grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
   padding: 2rem 0;
+  width: 100%;
+  margin: 0 auto;
+  justify-items: center;
+}
+
+/* Layout: All cards in a single row */
+.style-minimal .innovative-card:nth-child(1) {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.style-minimal .innovative-card:nth-child(2) {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.style-minimal .innovative-card:nth-child(3) {
+  grid-column: 3;
+  grid-row: 1;
 }
 
 .style-minimal .innovative-card {
   position: relative;
   width: 100% !important;
+  max-width: 100%;
   min-height: 420px !important;
   background: rgba(20, 20, 20, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -2707,9 +2748,10 @@ select option {
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
-  margin: 0 !important;
+  margin: 0 auto !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   transform: none !important;
+  justify-self: center;
 }
 
 .style-minimal .innovative-card:nth-child(1),
@@ -2892,8 +2934,24 @@ select option {
 /* Responsive for minimal style */
 @media (max-width: 992px) {
   .feature-details.style-minimal {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
+  }
+  
+  /* All cards in a single row at this breakpoint */
+  .style-minimal .innovative-card:nth-child(1) {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .style-minimal .innovative-card:nth-child(2) {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .style-minimal .innovative-card:nth-child(3) {
+    grid-column: 3;
+    grid-row: 1;
   }
 
   .section-header-card {
@@ -2918,6 +2976,14 @@ select option {
   .feature-details.style-minimal {
     grid-template-columns: 1fr;
     gap: 1.5rem;
+  }
+  
+  /* Reset grid positioning for single column layout on mobile */
+  .style-minimal .innovative-card:nth-child(1),
+  .style-minimal .innovative-card:nth-child(2),
+  .style-minimal .innovative-card:nth-child(3) {
+    grid-column: 1;
+    grid-row: auto;
   }
   
   .style-minimal .innovative-card {

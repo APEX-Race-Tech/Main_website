@@ -12,6 +12,9 @@ if (getComputedStyle(el).opacity === '0') {
 }, 1000);
 
 // --- Firebase Configuration ---
+// Security Note: Firebase API keys are meant to be public and are restricted by domain in Firebase Console.
+// However, ensure Firebase Security Rules are properly configured for Firestore and Storage.
+// Consider using environment variables in production builds.
 const firebaseConfig = {
 
     apiKey: "AIzaSyB6pcGMJixpwxz4Zls_ghpCPX8RwKd4F5g",
@@ -40,26 +43,62 @@ if (!firebase.apps.length) {
 const db = firebase.firestore();
 
 // --- Cookie Utility Functions ---
+// Security: Properly encode cookie values and use Secure flag in production
 function setCookie(name, value, days = 30) {
+    // Encode cookie value to prevent XSS
+    const encodedValue = encodeURIComponent(value);
     const date = new Date();
     date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
     const expires = "expires=" + date.toUTCString();
-    document.cookie = name + "=" + value + ";" + expires + ";path=/;SameSite=Lax";
+    // Use Secure flag in HTTPS, SameSite=Lax for CSRF protection
+    const isSecure = window.location.protocol === 'https:';
+    const secureFlag = isSecure ? ';Secure' : '';
+    document.cookie = name + "=" + encodedValue + ";" + expires + ";path=/;SameSite=Lax" + secureFlag;
 }
 
 function getCookie(name) {
-    const nameEQ = name + "=";
+    const nameEQ = encodeURIComponent(name) + "=";
     const ca = document.cookie.split(';');
     for (let i = 0; i < ca.length; i++) {
         let c = ca[i];
         while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+        if (c.indexOf(nameEQ) === 0) {
+            const value = c.substring(nameEQ.length, c.length);
+            return decodeURIComponent(value);
+        }
     }
     return null;
 }
 
 function deleteCookie(name) {
-    document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
+    const isSecure = window.location.protocol === 'https:';
+    const secureFlag = isSecure ? ';Secure' : '';
+    document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;SameSite=Lax" + secureFlag;
+}
+
+// --- Input Validation & Sanitization Functions ---
+// Security: Validate and sanitize user inputs to prevent XSS and injection attacks
+function validateEmail(email) {
+    if (!email || typeof email !== 'string') return false;
+    // RFC 5322 compliant email regex (simplified)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email.trim()) && email.length <= 254; // Max email length
+}
+
+function sanitizeInput(input, maxLength = 1000) {
+    if (!input || typeof input !== 'string') return '';
+    // Remove potentially dangerous characters and limit length
+    return input.trim().slice(0, maxLength).replace(/[<>\"']/g, '');
+}
+
+function validatePassword(password) {
+    if (!password || typeof password !== 'string') return { valid: false, message: 'Password is required' };
+    if (password.length < 8) return { valid: false, message: 'Password must be at least 8 characters long' };
+    if (password.length > 128) return { valid: false, message: 'Password must be less than 128 characters' };
+    // Check for at least one letter and one number
+    if (!/[a-zA-Z]/.test(password)) return { valid: false, message: 'Password must contain at least one letter' };
+    if (!/[0-9]/.test(password)) return { valid: false, message: 'Password must contain at least one number' };
+    return { valid: true, message: '' };
 }
 
 // --- Auth Logic ---
@@ -619,6 +658,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 showAuthError("Please enter your email address first.");
                 return;
             }
+            // Security: Validate email format
+            if (!validateEmail(email)) {
+                showAuthError("Please enter a valid email address.");
+                return;
+            }
             hideAuthMessages();
             firebase.auth().sendPasswordResetEmail(email)
                 .then(() => {
@@ -626,7 +670,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 })
                 .catch((error) => {
                     console.error("Password Reset Error:", error);
-                    showAuthError("Failed to send password reset email: " + error.message);
+                    // Security: Use sanitized error message
+                    showAuthError(getErrorMessage(error));
                 });
         });
     }
@@ -639,13 +684,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         const password = passwordInput.value;
         const confirmPassword = confirmPasswordInput.value;
 
-        if (!email || !password) {
-            showAuthError("Please fill in all fields.");
+        // Security: Validate email format
+        if (!email) {
+            showAuthError("Please enter your email address.");
+            return;
+        }
+        if (!validateEmail(email)) {
+            showAuthError("Please enter a valid email address.");
             return;
         }
 
-        // Validate password confirmation for signup
+        // Security: Validate password
+        if (!password) {
+            showAuthError("Please enter your password.");
+            return;
+        }
+
+        // Security: Enhanced password validation for signup
         if (isSignUp) {
+            const passwordValidation = validatePassword(password);
+            if (!passwordValidation.valid) {
+                showAuthError(passwordValidation.message);
+                return;
+            }
             if (!confirmPassword) {
                 showAuthError("Please confirm your password.");
                 return;
@@ -736,18 +797,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // Helper function to get user-friendly error messages
+    // Security: Sanitize error messages to prevent information leakage
     function getErrorMessage(error) {
+        // Don't expose internal error details to users
+        if (!error || !error.code) {
+            return 'An error occurred. Please try again.';
+        }
+        
         switch (error.code) {
             case 'auth/email-already-in-use':
                 return 'This email is already registered. Please sign in instead.';
             case 'auth/invalid-email':
-                return 'Invalid email address.';
+                return 'Invalid email address format.';
             case 'auth/operation-not-allowed':
-                return 'This operation is not allowed.';
+                return 'This operation is not allowed. Please contact support.';
             case 'auth/weak-password':
-                return 'Password should be at least 6 characters.';
+                return 'Password must be at least 8 characters and contain both letters and numbers.';
             case 'auth/user-disabled':
-                return 'This account has been disabled.';
+                return 'This account has been disabled. Please contact support.';
             case 'auth/user-not-found':
                 return 'No account found with this email. Please sign up first.';
             case 'auth/wrong-password':
@@ -756,8 +823,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return 'Invalid email or password. Please check your credentials and try again.';
             case 'auth/invalid-credential':
                 return 'Invalid email or password. Please check your credentials and try again.';
+            case 'auth/too-many-requests':
+                return 'Too many failed attempts. Please try again later.';
+            case 'auth/network-request-failed':
+                return 'Network error. Please check your connection and try again.';
             default:
-                return error.message || 'An error occurred. Please try again.';
+                // Security: Don't expose internal error messages
+                return 'An error occurred. Please try again.';
         }
     }
 
@@ -968,7 +1040,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (downloadBtn) {
         downloadBtn.addEventListener('click', () => {
             if (!selectedPlatform) {
-                alert('Please select your platform (Windows, Linux, Mac, or Android) first.');
+                alert('Please select your platform (Windows, Linux, or Mac) first.');
                 return;
             }
             const user = firebase.auth().currentUser;
@@ -1008,8 +1080,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const downloadUrls = {
             'windows': 'https://github.com/YOUR_USERNAME/YOUR_REPO/releases/download/v1.0.0/RaceInsight_Setup_Windows.exe',
             'linux': 'https://github.com/YOUR_USERNAME/YOUR_REPO/releases/download/v1.0.0/RaceInsight_Setup_Linux.AppImage',
-            'apple': 'https://github.com/YOUR_USERNAME/YOUR_REPO/releases/download/v1.0.0/RaceInsight_Setup_Mac.dmg',
-            'android': 'https://github.com/YOUR_USERNAME/YOUR_REPO/releases/download/v1.0.0/RaceInsight_Setup_Android.apk'
+            'apple': 'https://github.com/YOUR_USERNAME/YOUR_REPO/releases/download/v1.0.0/RaceInsight_Setup_Mac.dmg'
         };
         
         const downloadUrl = downloadUrls[selectedPlatform];
@@ -1042,8 +1113,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const filePatterns = {
             'windows': /RaceInsight.*\.exe$/i,
             'linux': /RaceInsight.*\.AppImage$/i,
-            'apple': /RaceInsight.*\.dmg$/i,
-            'android': /RaceInsight.*\.apk$/i
+            'apple': /RaceInsight.*\.dmg$/i
         };
         
         try {
@@ -1347,11 +1417,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
             
-            const displayName = nameEl.value.trim();
-            const bio = bioEl.value.trim();
-            const location = locationEl.value.trim();
-            const simulator = simulatorEl.value;
-            const experience = experienceEl.value;
+            // Security: Sanitize and validate inputs
+            const displayName = sanitizeInput(nameEl.value, 100);
+            const bio = sanitizeInput(bioEl.value, 500);
+            const location = sanitizeInput(locationEl.value, 100);
+            const simulator = sanitizeInput(simulatorEl.value, 50);
+            const experience = sanitizeInput(experienceEl.value, 50);
  
             try {
                 await db.collection('users').doc(user.uid).update({
@@ -1372,7 +1443,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 alert('Profile updated successfully!');
             } catch (error) {
                 console.error('Error updating profile:', error);
-                alert('Failed to update profile: ' + error.message);
+                // Security: Don't expose internal error details
+                alert('Failed to update profile. Please try again.');
             }
         });
     }
@@ -1401,13 +1473,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             const confirmPassword = confirmPwdEl.value;
 
-            if (newPassword !== confirmPassword) {
-                alert('New passwords do not match!');
+            // Security: Enhanced password validation
+            const passwordValidation = validatePassword(newPassword);
+            if (!passwordValidation.valid) {
+                alert(passwordValidation.message);
                 return;
             }
 
-            if (newPassword.length < 6) {
-                alert('Password must be at least 6 characters long!');
+            if (newPassword !== confirmPassword) {
+                alert('New passwords do not match!');
                 return;
             }
 
