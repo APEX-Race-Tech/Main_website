@@ -136,23 +136,28 @@ When you export data (CSV, JSON, PDF), exported files are yours to keep and use.
 
 The Software collects anonymous usage data via PostHog to improve the application. Tracked events include: when you launch the app, when you sign in/out, when you import files, when you use features, and when errors occur.
 
-What is not tracked: your telemetry data files, your analysis results, your personal information (unless you sign in), session recordings (disabled), and automatic click tracking (disabled).
+What is not tracked: your telemetry data files, your analysis results, your personal information (unless you sign in), and automatic click tracking (disabled). Session recording is OPTIONAL and requires explicit opt-in (disabled by default).
 
-### 5.2 Opting Out of Analytics
+### 5.2 Opting Out of Analytics and Session Recording
 
-You can disable all analytics at any time:
+You can disable all analytics and session recording at any time:
 
 1. Open RACE Insight
 2. Go to Settings > Analytics & Privacy
-3. Toggle "Disable Analytics & Telemetry"
+3. Toggle "Disable Analytics & Telemetry" to stop event tracking
+4. Toggle "Disable Session Recording" to stop session recordings (if enabled)
 
-Disabling analytics will stop PostHog event tracking, but Firebase may still log authentication events separately.
+Disabling analytics will stop PostHog event tracking. Disabling session recording will stop new recordings immediately. Previously recorded sessions will be automatically deleted after 14 days. Firebase may still log authentication events separately (essential for sign-in).
 
 ### 5.3 PostHog Configuration
 
-PostHog is configured with session recording disabled, autocapture disabled (manual event tracking only), and default retention of 30 days.
+PostHog is configured with:
+- Session recording: OPTIONAL (opt-in only, disabled by default)
+- Autocapture: disabled (manual event tracking only)
+- Event data retention: 30 days by default
+- Session recording retention: 14 days (if enabled)
 
-See Privacy Policy Section 5.1 for details about PostHog.
+See Privacy Policy Section 5.1 and Section H for details about PostHog and session recording.
 
 ---
 
@@ -375,8 +380,8 @@ For major changes, Developer will notify you via email. For minor changes, we wi
 
 ### 14.3 Version Control
 
-Current Version: 2.0
-Last Updated: December 26, 2025
+Current Version: 2.1
+Last Updated: January 2026
 
 ---
 
@@ -461,4 +466,4 @@ Website: https://www.apexracetech.com
 
 Copyright 2025 APEX Race Technologies. All rights reserved.
 
-This EULA is effective December 26, 2025 – Version 2.0
+This EULA is effective December 26, 2025 – Version 2.1 (Updated January 2026 for Session Recording Support)

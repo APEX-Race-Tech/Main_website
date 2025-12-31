@@ -3,7 +3,7 @@
 RACE Insight – Data Protection & Privacy Notice
 
 Effective Date: December 26, 2025
-Last Updated: December 26, 2025
+Last Updated: January 2026
 
 
 ---
@@ -25,8 +25,9 @@ We are committed to transparency about data. RACE Insight is designed with priva
 
 - Your telemetry data stays completely local on your device
 - We do not upload your project files to our servers
-- We use manual event tracking only (no automatic session recording or autocapture)
-- You can disable analytics completely
+- We use manual event tracking only (no automatic autocapture)
+- Session recording is OPTIONAL and requires explicit opt-in (disabled by default)
+- You can disable analytics and session recording completely
 
 ---
 
@@ -78,7 +79,8 @@ Why: To ensure authentication works correctly and troubleshoot sign-in issues.
 
 We track when you use the application:
 
-- app_launched - Recorded each time you open RACE Insight (includes: app version, provider name)
+- app_launched (also tracked as app_opened) - Recorded each time you open RACE Insight (includes: app version, provider name)
+- session_started - Recorded when a new user session begins
 
 What we do not collect: Your project data, file contents, or personal information.
 
@@ -117,17 +119,77 @@ Why: To understand which file formats users work with and to prioritize format s
 When you use features in the application, we track:
 
 - feature_used - Recorded when you use a feature (with feature name and custom properties)
+  - May include: feature execution duration (time taken to process/complete the feature), not UI interaction time
+  - Does NOT include: time spent viewing or interacting with UI elements
 - screen_viewed - When you navigate to a different screen or section (with screen name)
+- user_action_completed - When you complete a specific action (with action_type)
+- feature_viewed - When you view a feature or section (with feature_name)
 
 Features tracked: Visualization features (charts, graphs, map view), analysis features (lap comparison, sector analysis, delta calculations), export features (CSV, JSON, PDF export), and settings and preferences changes.
 
-What we do not collect: Your actual analysis results or calculations, the data displayed on your screen, file names or project names, your telemetry data values or insights you generated, or screenshots or screen content.
+What we do not collect: Your actual analysis results or calculations, the data displayed on your screen, file names or project names, your telemetry data values or insights you generated, screenshots or screen content, or time spent viewing specific UI elements.
 
-Why: To understand which features are popular and which need improvement.
+Why: To understand which features are popular, which need improvement, and to measure feature performance.
 
 How long we keep it: Feature usage events are retained for 30 days, then deleted or aggregated into anonymous patterns.
 
 Opt-out: You can disable feature tracking in the app: Settings > Analytics & Privacy > Disable Analytics & Telemetry
+
+---
+
+### D.1 VALUE AND CONVERSION SIGNALS
+
+We track value indicators and conversion events to understand user success:
+
+- first_value_achieved - When you first achieve value from using a feature
+- milestone_reached - When you reach a milestone (with milestone_name)
+- goal_completed - When you complete a goal (with goal_type)
+- success_event - When a success event occurs (with success_type)
+- pricing_viewed - When you view pricing information
+- upgrade_clicked - When you click to upgrade
+- limit_reached - When you hit a usage limit (with limit_type)
+- paywall_shown - When a paywall is displayed (with blocked_feature)
+- payment_initiated - When you initiate a payment
+
+What we do not collect: Payment details, credit card information, or financial data (handled by payment processor).
+
+Why: To understand user success, identify conversion opportunities, and improve product-market fit.
+
+Retention: 30 days, then deleted or aggregated.
+
+---
+
+### D.2 COLLABORATION SIGNALS
+
+We track collaboration features (if enabled):
+
+- invite_sent - When you send an invitation
+- team_member_added - When a team member is added
+- content_shared - When you share content
+- collaboration_action - When you perform a collaboration action (with action_type)
+
+What we do not collect: The actual content shared, file contents, or personal information of collaborators beyond what is necessary for the collaboration feature.
+
+Why: To understand collaboration usage and improve team features.
+
+Retention: 30 days, then deleted or aggregated.
+
+---
+
+### D.3 RISK AND ERROR SIGNALS
+
+We track risk indicators and errors:
+
+- error_encountered - When an error occurs (see Section F for details)
+- session_abandoned - When a session is abandoned
+- feature_failed - When a feature fails to execute
+- frustration_detected - When frustration indicators are detected (from session replay if enabled, or from error patterns)
+
+What we do not collect: Your actual data or file contents, personal information, or sensitive details beyond what is necessary to diagnose the issue.
+
+Why: To identify and fix issues, improve reliability, and enhance user experience.
+
+Retention: Error events retained for 30 days. Frustration detection data retained for 14 days (if from session replay).
 
 ---
 
@@ -166,20 +228,56 @@ Why: To identify and fix bugs, improve stability, and prioritize crash fixes.
 
 ---
 
-### G. MANUAL EVENT TRACKING ONLY (Privacy-First Design)
+### G. MANUAL EVENT TRACKING (Privacy-First Design)
 
-We use manual event tracking only. This means:
+We use manual event tracking for most analytics. This means:
 
 - We explicitly code which events to track
 - We do not use automatic click/button tracking (autocapture disabled)
 - We do not record all interactions automatically
-- We do not use session recording
-- We do not track mouse movements or keyboard input
-- We do not track how long you spend on specific UI elements
+- We do not track keyboard input (except for error messages)
+- We do not track how long you spend on specific UI elements (we may track feature execution duration, not UI interaction time)
 
-PostHog Configuration: session_recording disabled, autocapture disabled, tracking mode is manual events only.
+PostHog Configuration: autocapture disabled, tracking mode is manual events only. Session recording is OPTIONAL and requires explicit opt-in (see Section H below).
 
 Why: To minimize data collection and respect your privacy.
+
+---
+
+### H. SESSION RECORDING (OPTIONAL - OPT-IN ONLY)
+
+Session recording is DISABLED by default. You must explicitly opt-in to enable it.
+
+**If you choose to enable session recording** (Settings > Analytics & Privacy > Enable Session Recording), we may record:
+
+- Screen interactions within the RACE Insight application window
+- Mouse movements, clicks, and scrolls
+- Navigation patterns and UI interactions
+- Error states and application behavior
+- Session flow and feature usage patterns
+- Visual representation of your interactions (not actual data content)
+
+**What we do NOT record:**
+
+- Your telemetry data files or file contents
+- Passwords or authentication credentials
+- Personal information displayed on screen (we mask sensitive fields)
+- Data outside the RACE Insight application window
+- Keyboard input (except for error messages and non-sensitive form fields)
+- Your actual analysis results or calculations displayed on screen
+- File names or project names (these are masked in recordings)
+
+**Purpose:** To improve user experience, identify usability issues, troubleshoot errors, and provide better support.
+
+**Retention:** Session recordings are retained for 14 days, then automatically deleted.
+
+**Opt-out:** You can disable session recording at any time in Settings > Analytics & Privacy > Disable Session Recording. Disabling will stop new recordings immediately.
+
+**Default:** Session recording is DISABLED by default. You must explicitly opt-in.
+
+**Data Location:** Session recordings are stored by PostHog (EU or US, depending on PostHog's configuration).
+
+**Privacy:** Recordings are encrypted in transit and at rest. Only authorized APEX Race Technologies staff can access recordings for support and improvement purposes.
 
 ---
 
@@ -252,9 +350,9 @@ Opt-out: You can disable cookies in your browser settings or install the Google 
 - Cloud backup of your project files
 - Remote sync across devices (currently)
 - AI processing of your data
-- Session recordings (disabled in PostHog)
+- Session recordings (OPTIONAL, opt-in only, disabled by default)
 - Automatic click tracking (autocapture disabled)
-- Keystroke logs or screen recording
+- Keystroke logs (except for error messages)
 - Location tracking or GPS data (only your imported telemetry data)
 - Behavioral profiling or behavioral advertising
 - Your real name or email (unless you voluntarily sign in with Google)
@@ -317,12 +415,12 @@ The Software uses the following third-party services.
 
 ### 5.1 PostHog (Analytics and Event Tracking)
 
-- Service: Collects manual events (authentication, features, errors, file imports, settings)
-- Data shared: Anonymous user ID, event names and timestamps, error stack traces (first 500 characters), app version and operating system, file metadata (type and size only, NOT contents), email and display name (only if signed in)
-- Configuration: Session recording disabled, autocapture disabled, manual event tracking only
+- Service: Collects manual events (authentication, features, errors, file imports, settings) and optional session recordings (if you opt-in)
+- Data shared: Anonymous user ID, event names and timestamps, error stack traces (first 500 characters), app version and operating system, file metadata (type and size only, NOT contents), email and display name (only if signed in), session recordings (only if you opt-in)
+- Configuration: Session recording OPTIONAL (opt-in only, disabled by default), autocapture disabled, manual event tracking only
 - Privacy Policy: https://posthog.com/privacy
 - Data location: EU or US (depending on PostHog's configuration)
-- Data retention: 30 days by default
+- Data retention: Event data: 30 days by default. Session recordings: 14 days (if enabled)
 - Contact: support@posthog.com
 
 Data Processing Agreement: PostHog provides a DPA for GDPR compliance.
@@ -405,14 +503,15 @@ Exceptions: We may retain data if required by law (e.g., tax records, legal disp
 
 ### 7.4 Right to Withdraw Consent
 
-If we rely on your consent for analytics or feature tracking:
+If we rely on your consent for analytics, feature tracking, or session recording:
 
 - You can withdraw consent at any time
 - Disable analytics in Settings > Analytics & Privacy > Disable Analytics & Telemetry
-- This will stop all PostHog event tracking (except Firebase authentication, which is essential for sign-in)
+- Disable session recording in Settings > Analytics & Privacy > Disable Session Recording
+- This will stop all PostHog event tracking and session recording (except Firebase authentication, which is essential for sign-in)
 - Stop sending feedback emails or bug reports
 
-Important: Disabling analytics stops new data collection but does not retroactively delete previously collected data.
+Important: Disabling analytics or session recording stops new data collection but does not retroactively delete previously collected data. Session recordings are automatically deleted after 14 days.
 
 ---
 
@@ -454,12 +553,13 @@ We take reasonable steps to protect your data:
 
 - Encryption in transit: Data sent from the app to PostHog uses HTTPS (encrypted)
 - Encryption at rest: PostHog stores data encrypted on their servers
-- Restricted access: Support emails are stored in a password-protected account
-- Automatic deletion: Event logs are automatically deleted after 30 days
+- Restricted access: Support emails are stored in a password-protected account. Session recordings (if enabled) are accessible only to authorized APEX Race Technologies staff
+- Automatic deletion: Event logs are automatically deleted after 30 days. Session recordings are automatically deleted after 14 days
 - Local storage only: Anonymous user IDs are stored locally on your device, not on our servers
-- No session recording: Session replay is disabled in PostHog
+- Session recording: OPTIONAL, opt-in only, disabled by default. If enabled, recordings are encrypted and retained for 14 days only
 - No backup of local data: We do not back up your project files without your explicit consent
 - Temporary file cleanup: Backend deletes temporary parsing files after processing
+- Sensitive data masking: Session recordings automatically mask passwords, personal information, and file contents
 
 ---
 
@@ -467,9 +567,9 @@ We take reasonable steps to protect your data:
 
 - Your project files (stored completely locally)
 - Your telemetry data (never uploaded)
-- Session recordings (disabled)
-- Keystroke logs (disabled)
-- Screen recordings (disabled)
+- Session recordings (OPTIONAL, opt-in only, disabled by default)
+- Keystroke logs (disabled, except for error messages)
+- Screen recordings (OPTIONAL, opt-in only, disabled by default)
 
 ---
 
@@ -670,6 +770,6 @@ Help & Documentation: https://www.apexracetech.com/help
 
 Copyright 2025 APEX Race Technologies. All rights reserved.
 
-Last Updated: December 26, 2025
+Last Updated: January 2026
 
-Version: 2.0 (Beta - Based on Codebase Analysis)
+Version: 2.1 (Beta - Updated for Session Recording Support)
