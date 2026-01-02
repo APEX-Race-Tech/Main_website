@@ -7,6 +7,11 @@ This guide provides step-by-step instructions for testing and monitoring your we
 1. ✅ **Domain URLs Updated**: All meta tags now use `https://apexracetech.in`
 2. ✅ **Sitemap Created**: `sitemap.xml` file created with all pages
 3. ✅ **Robots.txt Created**: `robots.txt` file created for search engine crawlers
+4. ✅ **Structured Data Enhanced**: Added "offers" field to JSON-LD schema
+
+## ⚠️ Critical Issue to Fix
+
+**IMPORTANT**: If Google Search Console shows "noindex detected in X-Robots-Tag http header", see `FIX_NOINDEX_ISSUE.md` for detailed instructions on how to fix this server-level issue.
 
 ---
 
