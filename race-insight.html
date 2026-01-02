@@ -1890,36 +1890,32 @@
             }
 
             async function triggerDownload() {
-                // ===== GitHub Releases API - Automatically fetches latest release =====
-                const GITHUB_OWNER = 'APEX-Race-Tech';
-                const GITHUB_REPO = 'RACE-Insight';
-                
-                // File patterns to match platform-specific assets
-                const filePatterns = {
-                    'windows': /RACE-Insight.*\.exe$/i,
-                    'linux': /RaceInsight.*\.AppImage$/i,
-                    'apple': /RaceInsight.*\.dmg$/i
+                // ===== Direct Download URLs (Works with Private Repositories) =====
+                // For private repos, use direct download URLs from GitHub releases
+                // 
+                // To get the latest release URL:
+                // 1. Go to your GitHub repository: https://github.com/APEX-Race-Tech/RACE-Insight
+                // 2. Click on "Releases" (right sidebar or /releases page)
+                // 3. Find the latest release
+                // 4. Right-click on the asset file (e.g., .exe, .AppImage, .dmg)
+                // 5. Select "Copy link address"
+                // 6. Paste the URL below, replacing the old version
+                //
+                // URL Format: https://github.com/OWNER/REPO/releases/download/TAG/FILENAME
+                //
+                const downloadUrls = {
+                    'windows': 'https://github.com/APEX-Race-Tech/RACE-Insight/releases/download/v0.1.0/RACE-Insight-Setup-0.1.0.exe',
+                    'linux': 'https://github.com/APEX-Race-Tech/RACE-Insight/releases/download/v0.1.0/RaceInsight_Setup_Linux.AppImage',
+                    'apple': 'https://github.com/APEX-Race-Tech/RACE-Insight/releases/download/v0.1.0/RaceInsight_Setup_Mac.dmg'
                 };
                 
+                const downloadUrl = downloadUrls[selectedPlatform];
+                if (!downloadUrl) {
+                    alert('Platform not available yet. Please contact support.');
+                    return;
+                }
+                
                 try {
-                    // Fetch latest release from GitHub API
-                    const response = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`);
-                    
-                    if (!response.ok) {
-                        // Fallback to direct links if API fails (e.g., private repo)
-                        throw new Error(`GitHub API error: ${response.status}. Using fallback URLs.`);
-                    }
-                    
-                    const release = await response.json();
-                    const pattern = filePatterns[selectedPlatform];
-                    
-                    // Find the asset matching the platform
-                    const asset = release.assets.find(asset => pattern.test(asset.name));
-                    
-                    if (!asset) {
-                        throw new Error(`No release file found for ${selectedPlatform} in latest release (${release.tag_name})`);
-                    }
-                    
                     // Increment download count
                     await incrementDownloadCount();
                     
@@ -1937,6 +1933,64 @@
                     
                     // Trigger download
                     const link = document.createElement('a');
+                    link.href = downloadUrl;
+                    link.download = downloadUrl.split('/').pop(); // Extract filename from URL
+                    link.target = '_blank';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    console.log(`Downloading from: ${downloadUrl}`);
+                    
+                    // Show thank you modal
+                    showThankYouModal();
+                    
+                } catch (error) {
+                    console.error('Download error:', error);
+                    alert(`Failed to download: ${error.message}. Please try again or contact support.`);
+                }
+                
+                /* ===== OPTIONAL: GitHub Releases API (Only works for PUBLIC repositories) =====
+                // Uncomment this section if you make your repository public and want automatic latest version detection:
+                
+                const GITHUB_OWNER = 'APEX-Race-Tech';
+                const GITHUB_REPO = 'RACE-Insight';
+                
+                const filePatterns = {
+                    'windows': /RACE-Insight.*\.exe$/i,
+                    'linux': /RaceInsight.*\.AppImage$/i,
+                    'apple': /RaceInsight.*\.dmg$/i
+                };
+                
+                try {
+                    const response = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`GitHub API error: ${response.status}`);
+                    }
+                    
+                    const release = await response.json();
+                    const pattern = filePatterns[selectedPlatform];
+                    const asset = release.assets.find(asset => pattern.test(asset.name));
+                    
+                    if (!asset) {
+                        throw new Error(`No release file found for ${selectedPlatform}`);
+                    }
+                    
+                    await incrementDownloadCount();
+                    
+                    const user = firebase.auth().currentUser;
+                    if (user) {
+                        try {
+                            await db.collection('users').doc(user.uid).update({
+                                downloadCount: firebase.firestore.FieldValue.increment(1)
+                            });
+                        } catch (error) {
+                            console.error('Error updating user download count:', error);
+                        }
+                    }
+                    
+                    const link = document.createElement('a');
                     link.href = asset.browser_download_url;
                     link.download = asset.name;
                     link.target = '_blank';
@@ -1945,53 +1999,13 @@
                     document.body.removeChild(link);
                     
                     console.log(`Downloading ${asset.name} (${release.tag_name}) from GitHub Releases`);
-                    
-                    // Show thank you modal
                     showThankYouModal();
                     
                 } catch (error) {
                     console.error('Download error:', error);
-                    
-                    // Fallback to direct download links if GitHub API fails
-                    const fallbackUrls = {
-                        'windows': 'https://github.com/APEX-Race-Tech/RACE-Insight/releases/download/v0.1.0/RACE-Insight-Setup-0.1.0.exe',
-                        'linux': 'https://github.com/APEX-Race-Tech/RACE-Insight/releases/download/v1.0.0/RaceInsight_Setup_Linux.AppImage',
-                        'apple': 'https://github.com/APEX-Race-Tech/RACE-Insight/releases/download/v1.0.0/RaceInsight_Setup_Mac.dmg'
-                    };
-                    
-                    const fallbackUrl = fallbackUrls[selectedPlatform];
-                    if (fallbackUrl) {
-                        console.warn('Using fallback download URL:', fallbackUrl);
-                        try {
-                            await incrementDownloadCount();
-                            
-                            const user = firebase.auth().currentUser;
-                            if (user) {
-                                try {
-                                    await db.collection('users').doc(user.uid).update({
-                                        downloadCount: firebase.firestore.FieldValue.increment(1)
-                                    });
-                                } catch (error) {
-                                    console.error('Error updating user download count:', error);
-                                }
-                            }
-                            
-                            const link = document.createElement('a');
-                            link.href = fallbackUrl;
-                            link.download = fallbackUrl.split('/').pop();
-                            link.target = '_blank';
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                            
-                            showThankYouModal();
-                        } catch (fallbackError) {
-                            alert(`Failed to download: ${error.message}. Please try again or contact support.`);
-                        }
-                    } else {
-                        alert(`Failed to download: ${error.message}. Please try again or contact support.`);
-                    }
+                    alert(`Failed to download: ${error.message}. Please try again or contact support.`);
                 }
+                */
             }
 
             // --- Thank You Modal Functionality ---
