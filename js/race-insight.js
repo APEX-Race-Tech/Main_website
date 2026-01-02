@@ -649,8 +649,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
     });
 
-    // Forgot Password
-    if (forgotPasswordBtn) {
+    // Forgot Password - DISABLED (email auth removed)
+    if (false && forgotPasswordBtn) { // Disabled - email auth removed
         forgotPasswordBtn.addEventListener('click', (e) => {
             e.preventDefault();
             const email = emailInput ? emailInput.value.trim() : '';
@@ -676,8 +676,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Email Sign In / Sign Up
-    emailForm.addEventListener('submit', (e) => {
+    // Email Sign In / Sign Up - DISABLED (only Google auth enabled)
+    // Email authentication has been disabled. Only Google sign-in is available.
+    if (false && emailForm) { // Disabled - email auth removed
+        emailForm.addEventListener('submit', (e) => {
         e.preventDefault();
         hideAuthMessages();
         const email = emailInput.value.trim();
@@ -794,7 +796,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                 });
         }
-    });
+        });
+    }
 
     // Helper function to get user-friendly error messages
     // Security: Sanitize error messages to prevent information leakage

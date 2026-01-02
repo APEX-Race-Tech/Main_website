@@ -124,13 +124,16 @@
         <div class="slideshow-container">
             <div class="slideshow-wrapper">
                 <div class="slide active">
-                    <img src="assets/images/lap_comparison_ui.png" alt="Lap Comparison" class="slide-image">
+                    <img src="assets/ri_images/Comparision laps.png" alt="Lap Comparison" class="slide-image">
                 </div>
                 <div class="slide">
                     <img src="assets/Lap_compare.gif" alt="Lap Comparison Animation" class="slide-image">
                 </div>
                 <div class="slide">
-                    <img src="assets/images/telemetry_graphs_ui.png" alt="Data Analysis" class="slide-image">
+                    <img src="assets/ri_images/Dataoverview.png" alt="Data Overview" class="slide-image">
+                </div>
+                <div class="slide">
+                    <img src="assets/ri_images/satilite.png" alt="Satellite View" class="slide-image">
                 </div>
             </div>
             
@@ -147,6 +150,7 @@
                 <span class="indicator active" data-slide="0" aria-label="Slide 1"></span>
                 <span class="indicator" data-slide="1" aria-label="Slide 2"></span>
                 <span class="indicator" data-slide="2" aria-label="Slide 3"></span>
+                <span class="indicator" data-slide="3" aria-label="Slide 4"></span>
             </div>
         </div>
     </section>
@@ -712,8 +716,8 @@
     <div id="auth-modal" class="modal-backdrop">
         <div class="modal-content">
             <button id="close-auth-modal" class="modal-close">&times;</button>
-            <h3 id="auth-title">Sign In to Download</h3>
-            <p id="auth-subtitle">Create an account to access downloads and save your preferences.</p>
+            <h3 id="auth-title">Sign In with Google</h3>
+            <p id="auth-subtitle">Sign in with your Google account to access downloads and save your preferences.</p>
 
             <div class="auth-buttons">
                 <button id="google-signin-btn" class="btn-google">
@@ -723,7 +727,8 @@
                 </button>
             </div>
 
-            <div class="divider"><span>OR</span></div>
+            <!-- Email form disabled - only Google sign-in available -->
+            <div class="divider" style="display: none;"><span>OR</span></div>
 
             <!-- Step Indicator -->
             <div id="auth-step-indicator" class="auth-step-indicator" style="display: none; margin-bottom: 2rem;">
@@ -735,7 +740,7 @@
             <div id="auth-error" class="auth-error" style="display: none; background: rgba(255, 0, 0, 0.1); border: 1px solid rgba(255, 0, 0, 0.3); color: #ff6b6b; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem;"></div>
             <div id="auth-success" class="auth-success" style="display: none; background: rgba(0, 255, 0, 0.1); border: 1px solid rgba(0, 255, 0, 0.3); color: #51cf66; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem;"></div>
 
-            <form id="email-auth-form">
+            <form id="email-auth-form" style="display: none;">
                 <!-- Step 1: Credentials -->
                 <div id="auth-step-1" class="auth-step">
                     <div class="form-group" style="position: relative; margin-bottom: 1.25rem;">
@@ -804,7 +809,7 @@
                 </div>
             </form>
 
-            <div class="auth-switch">
+            <div class="auth-switch" style="display: none;">
                 <p id="auth-switch-text">Don't have an account? <a href="#" id="toggle-auth-mode">Sign Up</a></p>
             </div>
         </div>
@@ -961,8 +966,8 @@
                 const confirmPwdGroup = document.getElementById('confirm-password-group');
                 const confirmPwdInput = document.getElementById('auth-confirm-password');
                 
-                if (titleEl) titleEl.textContent = "Sign In to Download";
-                if (subtitleEl) subtitleEl.textContent = "Create an account to access downloads and save your preferences.";
+                if (titleEl) titleEl.textContent = "Sign In with Google";
+                if (subtitleEl) subtitleEl.textContent = "Sign in with your Google account to access downloads and save your preferences.";
                 if (submitBtnEl) submitBtnEl.textContent = "Sign In";
                 if (switchTextEl) switchTextEl.innerHTML = 'Don\'t have an account? <a href="#" id="toggle-auth-mode">Sign Up</a>';
                 if (forgotPwdLinkEl) forgotPwdLinkEl.style.display = 'block';
@@ -1356,8 +1361,8 @@
                             if (confirmPasswordGroup) confirmPasswordGroup.style.display = 'block';
                             if (confirmPasswordInput) confirmPasswordInput.required = true;
                         } else {
-                            if (authTitle) authTitle.textContent = "Sign In to Download";
-                            if (authSubtitle) authSubtitle.textContent = "Create an account to access downloads and save your preferences.";
+                            if (authTitle) authTitle.textContent = "Sign In with Google";
+                            if (authSubtitle) authSubtitle.textContent = "Sign in with your Google account to access downloads and save your preferences.";
                             if (authSubmitBtn) authSubmitBtn.textContent = "Sign In";
                             authSwitchText.innerHTML = 'Don\'t have an account? <a href="#" id="toggle-auth-mode">Sign Up</a>';
                             if (forgotPasswordLink) forgotPasswordLink.style.display = 'block';
@@ -1444,8 +1449,8 @@
                     });
             });
 
-            // Forgot Password
-            if (forgotPasswordBtn) {
+            // Forgot Password - DISABLED (email auth removed)
+            if (false && forgotPasswordBtn) { // Disabled - email auth removed
                 forgotPasswordBtn.addEventListener('click', (e) => {
                     e.preventDefault();
                     const email = emailInput ? emailInput.value.trim() : '';
@@ -1465,109 +1470,112 @@
                 });
             }
 
-            // Email Sign In / Sign Up
-            emailForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                hideAuthMessages();
-                const email = emailInput.value.trim();
-                const password = passwordInput.value;
-                const confirmPassword = confirmPasswordInput.value;
+            // Email Sign In / Sign Up - DISABLED (only Google auth enabled)
+            // Email authentication has been disabled. Only Google sign-in is available.
+            if (false && emailForm) { // Disabled - email auth removed
+                emailForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    hideAuthMessages();
+                    const email = emailInput.value.trim();
+                    const password = passwordInput.value;
+                    const confirmPassword = confirmPasswordInput.value;
 
-                if (!email || !password) {
-                    showAuthError("Please fill in all fields.");
-                    return;
-                }
-
-                // Validate password confirmation for signup
-                if (isSignUp) {
-                    if (!confirmPassword) {
-                        showAuthError("Please confirm your password.");
+                    if (!email || !password) {
+                        showAuthError("Please fill in all fields.");
                         return;
                     }
-                    if (password !== confirmPassword) {
-                        showAuthError("Passwords do not match.");
-                        return;
+
+                    // Validate password confirmation for signup
+                    if (isSignUp) {
+                        if (!confirmPassword) {
+                            showAuthError("Please confirm your password.");
+                            return;
+                        }
+                        if (password !== confirmPassword) {
+                            showAuthError("Passwords do not match.");
+                            return;
+                        }
                     }
-                }
 
-                if (authSubmitBtn) {
-                    authSubmitBtn.disabled = true;
-                    authSubmitBtn.textContent = isSignUp ? "Creating Account..." : "Signing In...";
-                }
+                    if (authSubmitBtn) {
+                        authSubmitBtn.disabled = true;
+                        authSubmitBtn.textContent = isSignUp ? "Creating Account..." : "Signing In...";
+                    }
 
-                if (isSignUp) {
-                    firebase.auth().createUserWithEmailAndPassword(email, password)
-                        .then(async (userCredential) => {
-                            // Mark as new user signup - this will be used in onAuthStateChanged
-                            isNewUserSignup = true;
-                            
-                            // Try to create profile, but don't fail sign-up if it errors
-                            try {
-                                await createUserProfile(userCredential.user);
-                            } catch (profileError) {
-                                console.error("Profile creation error (non-fatal):", profileError);
-                            }
-                            
-                            // Show success message
-                            showAuthSuccess("Account created successfully! Logging you in...");
-                            
-                            // Clear form fields
-                            if (emailInput) emailInput.value = '';
-                            if (passwordInput) passwordInput.value = '';
-                            if (confirmPasswordInput) confirmPasswordInput.value = '';
-                            
-                            // Note: User is automatically signed in by Firebase after createUserWithEmailAndPassword
-                            // The onAuthStateChanged handler will take care of closing modal and showing onboarding
-                            
-                            if (authSubmitBtn) {
-                                authSubmitBtn.textContent = "Create Account";
-                                authSubmitBtn.disabled = false;
-                            }
-                        })
-                        .catch((error) => {
-                            console.error("Sign Up Error:", error);
-                            showAuthError(getErrorMessage(error));
-                            if (authSubmitBtn) {
-                                authSubmitBtn.textContent = "Create Account";
-                                authSubmitBtn.disabled = false;
-                            }
-                            isNewUserSignup = false; // Reset flag on error
-                        });
-                } else {
-                    firebase.auth().signInWithEmailAndPassword(email, password)
-                        .then(async (userCredential) => {
-                            // Try to create/update profile, but don't fail sign-in if it errors
-                            try {
-                                await createUserProfile(userCredential.user);
-                            } catch (profileError) {
-                                console.error("Profile creation error (non-fatal):", profileError);
-                            }
-                            
-                            // Show success message briefly
-                            showAuthSuccess("Signing in...");
-                            
-                            // Clear form fields
-                            if (emailInput) emailInput.value = '';
-                            if (passwordInput) passwordInput.value = '';
-                            
-                            // Note: User is automatically signed in by Firebase
-                            // The onAuthStateChanged handler will take care of closing modal
-                            
-                            if (authSubmitBtn) {
-                                authSubmitBtn.textContent = "Sign In";
-                                authSubmitBtn.disabled = false;
-                            }
-                        })
-                        .catch((error) => {
-                            console.error("Sign In Error:", error);
-                            showAuthError(getErrorMessage(error));
-                            if (authSubmitBtn) {
-                                authSubmitBtn.textContent = "Sign In";
-                                authSubmitBtn.disabled = false;
-                            }
-                        });
-                }
-            });
+                    if (isSignUp) {
+                        firebase.auth().createUserWithEmailAndPassword(email, password)
+                            .then(async (userCredential) => {
+                                // Mark as new user signup - this will be used in onAuthStateChanged
+                                isNewUserSignup = true;
+                                
+                                // Try to create profile, but don't fail sign-up if it errors
+                                try {
+                                    await createUserProfile(userCredential.user);
+                                } catch (profileError) {
+                                    console.error("Profile creation error (non-fatal):", profileError);
+                                }
+                                
+                                // Show success message
+                                showAuthSuccess("Account created successfully! Logging you in...");
+                                
+                                // Clear form fields
+                                if (emailInput) emailInput.value = '';
+                                if (passwordInput) passwordInput.value = '';
+                                if (confirmPasswordInput) confirmPasswordInput.value = '';
+                                
+                                // Note: User is automatically signed in by Firebase after createUserWithEmailAndPassword
+                                // The onAuthStateChanged handler will take care of closing modal and showing onboarding
+                                
+                                if (authSubmitBtn) {
+                                    authSubmitBtn.textContent = "Create Account";
+                                    authSubmitBtn.disabled = false;
+                                }
+                            })
+                            .catch((error) => {
+                                console.error("Sign Up Error:", error);
+                                showAuthError(getErrorMessage(error));
+                                if (authSubmitBtn) {
+                                    authSubmitBtn.textContent = "Create Account";
+                                    authSubmitBtn.disabled = false;
+                                }
+                                isNewUserSignup = false; // Reset flag on error
+                            });
+                    } else {
+                        firebase.auth().signInWithEmailAndPassword(email, password)
+                            .then(async (userCredential) => {
+                                // Try to create/update profile, but don't fail sign-in if it errors
+                                try {
+                                    await createUserProfile(userCredential.user);
+                                } catch (profileError) {
+                                    console.error("Profile creation error (non-fatal):", profileError);
+                                }
+                                
+                                // Show success message briefly
+                                showAuthSuccess("Signing in...");
+                                
+                                // Clear form fields
+                                if (emailInput) emailInput.value = '';
+                                if (passwordInput) passwordInput.value = '';
+                                
+                                // Note: User is automatically signed in by Firebase
+                                // The onAuthStateChanged handler will take care of closing modal
+                                
+                                if (authSubmitBtn) {
+                                    authSubmitBtn.textContent = "Sign In";
+                                    authSubmitBtn.disabled = false;
+                                }
+                            })
+                            .catch((error) => {
+                                console.error("Sign In Error:", error);
+                                showAuthError(getErrorMessage(error));
+                                if (authSubmitBtn) {
+                                    authSubmitBtn.textContent = "Sign In";
+                                    authSubmitBtn.disabled = false;
+                                }
+                            });
+                    }
+                });
+            }
 
             // Helper function to get user-friendly error messages
             function getErrorMessage(error) {
