@@ -15,6 +15,10 @@
     <link rel="icon" type="image/png" href="assets/app_icon.png">
     <link rel="apple-touch-icon" href="assets/app_icon.png">
     
+    <!-- Preload critical resources for faster LCP -->
+    <link rel="preload" as="image" href="assets/app_icon.png" fetchpriority="high">
+    <link rel="preload" as="image" href="assets/ri_images/Comparision laps.png" fetchpriority="high">
+    
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://apexracetech.in/race-insight.html">
@@ -58,22 +62,24 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://www.gstatic.com">
     
     <!-- Font Awesome - load early for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" 
           integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" 
           crossorigin="anonymous" referrerpolicy="no-referrer">
     
-    <!-- Google Fonts -->
+    <!-- Google Fonts with font-display swap for better performance -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Local Stylesheets -->
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/race-insight.css">
-    <!-- Firebase SDKs (Compat) -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase SDKs (Compat) - Deferred to improve initial page load -->
+    <script defer src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <!-- Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-TQNN66RBKN"></script>
     <script>
@@ -172,13 +178,13 @@
         <div class="slideshow-container">
             <div class="slideshow-wrapper">
                 <div class="slide active">
-                    <img src="assets/ri_images/Comparision laps.png" alt="Lap Comparison" class="slide-image">
-                </div>
-                <div class="slide">
-                    <img src="assets/ri_images/Dataoverview.png" alt="Data Overview" class="slide-image">
-                </div>
-                <div class="slide">
-                    <img src="assets/ri_images/satilite.png" alt="Satellite View" class="slide-image">
+                    <img src="assets/ri_images/Comparision laps.png" alt="Lap Comparison" class="slide-image" loading="eager" fetchpriority="high">
+                    </div>
+                    <div class="slide">
+                        <img src="assets/ri_images/Dataoverview.png" alt="Data Overview" class="slide-image" loading="lazy">
+                    </div>
+                    <div class="slide">
+                        <img src="assets/ri_images/satilite.png" alt="Satellite View" class="slide-image" loading="lazy">
                 </div>
             </div>
             
@@ -216,7 +222,7 @@
                     <div class="feature-detail-item innovative-card" data-card="1">
                         <div class="card-glow"></div>
                         <div class="card-image-wrapper">
-                            <img src="assets/images/lap_comparison_ui.png" alt="Universal Format Support" class="card-image" style="display: none;">
+                            <img src="assets/images/lap_comparison_ui.png" alt="Universal Format Support" class="card-image" style="display: none;" loading="lazy">
                             <div class="image-overlay" style="background: #000 !important; opacity: 1 !important; display: flex !important; align-items: center !important; justify-content: center !important;">
                                 <i class="fas fa-globe" style="font-size: 4rem !important; color: #fff !important; opacity: 1 !important; z-index: 10 !important; position: relative !important; display: inline-block !important;"></i>
                             </div>
@@ -230,7 +236,7 @@
                     <div class="feature-detail-item innovative-card" data-card="2">
                         <div class="card-glow"></div>
                         <div class="card-image-wrapper">
-                            <img src="assets/images/telemetry_graphs_ui.png" alt="High-Speed Processing" class="card-image" style="display: none;">
+                            <img src="assets/images/telemetry_graphs_ui.png" alt="High-Speed Processing" class="card-image" style="display: none;" loading="lazy">
                             <div class="image-overlay" style="background: #000 !important; opacity: 1 !important; display: flex !important; align-items: center !important; justify-content: center !important;">
                                 <i class="fas fa-bolt" style="font-size: 4rem !important; color: #fff !important; opacity: 1 !important; z-index: 10 !important; position: relative !important; display: inline-block !important;"></i>
                             </div>
@@ -244,7 +250,7 @@
                     <div class="feature-detail-item innovative-card" data-card="3">
                         <div class="card-glow"></div>
                         <div class="card-image-wrapper">
-                            <img src="assets/images/track_map_ui.png" alt="Offline Reliability" class="card-image" style="display: none;">
+                            <img src="assets/images/track_map_ui.png" alt="Offline Reliability" class="card-image" style="display: none;" loading="lazy">
                             <div class="image-overlay" style="background: #000 !important; opacity: 1 !important; display: flex !important; align-items: center !important; justify-content: center !important;">
                                 <i class="fas fa-laptop" style="font-size: 4rem !important; color: #fff !important; opacity: 1 !important; z-index: 10 !important; position: relative !important; display: inline-block !important;"></i>
                             </div>
@@ -937,9 +943,10 @@
     </div>
 
     <script defer src="https://cdn.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js"></script>
-    <script src="js/main.js"></script>
-    <script type="module" src="js/track-animation.js"></script>
-    <script src="js/race-insight.js"></script>
+    <script defer src="js/main.js"></script>
+    <script type="module" defer src="js/track-animation.js"></script>
+    <!-- race-insight.js loads after Firebase scripts (which are deferred) -->
+    <script defer src="js/race-insight.js"></script>
 
     <script>
         // #region agent log
