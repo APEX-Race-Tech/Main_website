@@ -1097,36 +1097,43 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
         
+        // Open download immediately (synchronously) to avoid popup blocker
+        // This must happen before any async operations to maintain user interaction context
+        console.log(`Opening download URL: ${downloadUrl}`);
+        
+        // Use programmatic link click - more reliable than window.open() for downloads
+        // This avoids popup blockers and works better with private repositories
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Do async operations after opening the download (non-blocking)
         try {
-            // Increment download count
-            await incrementDownloadCount();
+            // Increment download count (fire and forget - don't block download)
+            incrementDownloadCount().catch(error => {
+                console.error('Error incrementing download count:', error);
+            });
             
-            // Increment user download count
+            // Increment user download count (fire and forget)
             const user = firebase.auth().currentUser;
             if (user) {
-                try {
-                    await db.collection('users').doc(user.uid).update({
-                        downloadCount: firebase.firestore.FieldValue.increment(1)
-                    });
-                } catch (error) {
+                db.collection('users').doc(user.uid).update({
+                    downloadCount: firebase.firestore.FieldValue.increment(1)
+                }).catch(error => {
                     console.error('Error updating user download count:', error);
-                }
+                });
             }
-            
-            // For private repos, use window.open() which handles authentication redirects better
-            // If user is not logged into GitHub, they'll be prompted to authenticate
-            // If they have access, the download will start automatically
-            console.log(`Opening download URL: ${downloadUrl}`);
-            
-            // Open in new tab - GitHub will handle authentication if needed
-            window.open(downloadUrl, '_blank');
             
             // Show thank you modal
             showThankYouModal();
             
         } catch (error) {
-            console.error('Download error:', error);
-            alert(`Failed to download: ${error.message}. Please try again or contact support.`);
+            console.error('Download tracking error:', error);
+            // Don't show error to user - download already started
         }
         
         /* ===== OPTIONAL: GitHub Releases API (Only works for PUBLIC repositories) =====
