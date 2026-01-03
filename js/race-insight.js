@@ -39,6 +39,16 @@ if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 
+// Set Firebase Auth persistence to 'local' to keep users signed in across sessions
+// This persists authentication state in IndexedDB, so users stay logged in even after closing the browser
+firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+    .then(() => {
+        console.log("Firebase Auth persistence set to LOCAL - users will stay signed in");
+    })
+    .catch((error) => {
+        console.error("Error setting auth persistence:", error);
+    });
+
 // Initialize Firestore
 const db = firebase.firestore();
 
@@ -104,10 +114,29 @@ function validatePassword(password) {
 // --- Auth Logic ---
 document.addEventListener('DOMContentLoaded', async () => {
     // Check if user was logged in via cookies (quick check before Firebase auth restores)
+    // This allows us to show logged-in UI immediately while Firebase auth is restoring
     const userLoggedIn = getCookie('userLoggedIn');
-    if (userLoggedIn === 'true') {
-        console.log("Cookie indicates user was logged in, waiting for Firebase auth to restore...");
-        // Firebase will restore auth state automatically, we just use cookies as a backup indicator
+    const userEmail = getCookie('userEmail');
+    const userId = getCookie('userId');
+    
+    if (userLoggedIn === 'true' && userEmail && userId) {
+        console.log("Cookie indicates user was logged in, showing logged-in UI while Firebase auth restores...");
+        
+        // Create a temporary user object from cookies to update UI immediately
+        // This provides instant feedback while Firebase auth state is being restored
+        const tempUser = {
+            email: userEmail,
+            uid: userId
+        };
+        
+        // Update UI immediately based on cookies
+        // Firebase will restore the actual auth state shortly and update UI again if needed
+        try {
+            updateUIForLoggedInUser(tempUser);
+            console.log("UI updated from cookies - Firebase auth will restore shortly");
+        } catch (error) {
+            console.error("Error updating UI from cookies:", error);
+        }
     }
     
     const authModal = document.getElementById('auth-modal');
@@ -417,10 +446,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (user) {
             console.log("=== User is signed in:", user.email, "===");
             
-            // Store login state in cookies
+            // Store login state in cookies (30 days expiration)
+            // These cookies help maintain session state and provide quick UI updates on page load
             setCookie('userLoggedIn', 'true', 30);
             setCookie('userEmail', user.email || '', 30);
             setCookie('userId', user.uid || '', 30);
+            
+            console.log("User session saved to cookies - will persist for 30 days");
             
             // Try to create/update profile, but don't fail if Firestore is offline
             let profileResult = null;
@@ -484,10 +516,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
             console.log("=== User is signed out ===");
             
-            // Clear login cookies
+            // Clear login cookies when user signs out
             deleteCookie('userLoggedIn');
             deleteCookie('userEmail');
             deleteCookie('userId');
+            
+            console.log("User session cookies cleared");
             
             updateUIForLoggedOutUser();
             // Ensure modal is hidden when logged out
@@ -853,10 +887,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                         profileModal.classList.remove('active');
                         setTimeout(() => profileModal.style.display = 'none', 300);
                     }
-                    // Clear login cookies
+                    // Clear login cookies on logout
                     deleteCookie('userLoggedIn');
                     deleteCookie('userEmail');
                     deleteCookie('userId');
+                    
+                    console.log("User session cookies cleared on logout");
                 }).catch((error) => {
                     console.error("Sign out error:", error);
                 });
