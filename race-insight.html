@@ -76,6 +76,46 @@
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/race-insight.css">
     
+    <!-- Polyfills for Edge compatibility -->
+    <script>
+        // Polyfill for optional chaining and nullish coalescing for older Edge versions
+        if (!Object.prototype.hasOwnProperty.call(Object.prototype, 'hasOwnProperty')) {
+            Object.defineProperty(Object.prototype, 'hasOwnProperty', {
+                value: function(prop) {
+                    return Object.prototype.hasOwnProperty.call(this, prop);
+                }
+            });
+        }
+        
+        // Ensure Promise and fetch are available (should be in modern Edge, but just in case)
+        if (typeof Promise === 'undefined') {
+            console.warn('Promise not supported - this browser is too old');
+        }
+        
+        // Polyfill for Array.find if needed (should be available in Edge, but adding for safety)
+        if (!Array.prototype.find) {
+            Array.prototype.find = function(predicate) {
+                if (this == null) {
+                    throw new TypeError('Array.prototype.find called on null or undefined');
+                }
+                if (typeof predicate !== 'function') {
+                    throw new TypeError('predicate must be a function');
+                }
+                var list = Object(this);
+                var length = parseInt(list.length) || 0;
+                var thisArg = arguments[1];
+                var value;
+                for (var i = 0; i < length; i++) {
+                    value = list[i];
+                    if (predicate.call(thisArg, value, i, list)) {
+                        return value;
+                    }
+                }
+                return undefined;
+            };
+        }
+    </script>
+    
     <!-- Firebase SDKs (Compat) - Deferred to improve initial page load -->
     <script defer src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script defer src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>

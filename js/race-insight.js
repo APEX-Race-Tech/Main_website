@@ -1136,6 +1136,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function triggerDownload() {
+        // Detect Edge browser
+        const isEdge = /Edg/.test(navigator.userAgent);
+        const isIE = /Trident/.test(navigator.userAgent);
+        const isOldEdge = /Edge/.test(navigator.userAgent) && !isEdge;
+        
         // ===== GitHub Releases API (Primary method for PUBLIC repositories) =====
         // Repository is now public: https://github.com/APEX-Race-Tech/RACE-Insight-Public
         // This method automatically fetches the LATEST release - no manual updates needed!
@@ -1149,6 +1154,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             'linux': /RaceInsight.*\.AppImage$/i,
             'apple': /RaceInsight.*\.dmg$/i
         };
+        
+        let downloadUrl = null;
         
         try {
             const response = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`);
@@ -1166,42 +1173,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 throw new Error(`No release file found for ${selectedPlatform}`);
             }
             
-            // Open download immediately (synchronously) to avoid popup blocker
+            downloadUrl = asset.browser_download_url;
             console.log(`Downloading ${asset.name} (${release.tag_name}) from GitHub Releases`);
-            
-            const link = document.createElement('a');
-            link.href = asset.browser_download_url;
-            link.download = asset.name;
-            link.target = '_blank';
-            link.rel = 'noopener noreferrer';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            // Do async operations after opening the download (non-blocking)
-            try {
-                // Increment download count (fire and forget - don't block download)
-                incrementDownloadCount().catch(error => {
-                    console.error('Error incrementing download count:', error);
-                });
-                
-                // Increment user download count (fire and forget)
-                const user = firebase.auth().currentUser;
-                if (user) {
-                    db.collection('users').doc(user.uid).update({
-                        downloadCount: firebase.firestore.FieldValue.increment(1)
-                    }).catch(error => {
-                        console.error('Error updating user download count:', error);
-                    });
-                }
-                
-                // Show thank you modal
-                showThankYouModal();
-                
-            } catch (error) {
-                console.error('Download tracking error:', error);
-                // Don't show error to user - download already started
-            }
             
         } catch (error) {
             console.error('GitHub API download error:', error);
@@ -1214,43 +1187,67 @@ document.addEventListener('DOMContentLoaded', async () => {
                 'apple': 'https://github.com/APEX-Race-Tech/RACE-Insight-Public/releases/download/v0.1.27/RaceInsight_Setup_Mac.dmg'
             };
             
-            const downloadUrl = downloadUrls[selectedPlatform];
+            downloadUrl = downloadUrls[selectedPlatform];
             if (!downloadUrl) {
                 alert('Platform not available yet. Please contact support.');
                 return;
             }
             
             console.log(`Using fallback download URL: ${downloadUrl}`);
-            
-            // Open download immediately (synchronously) to avoid popup blocker
-            const link = document.createElement('a');
-            link.href = downloadUrl;
-            link.target = '_blank';
-            link.rel = 'noopener noreferrer';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            // Do async operations after opening the download (non-blocking)
+        }
+        
+        // Edge-compatible download method
+        // Edge and IE have issues with programmatic link clicks for cross-origin downloads
+        if (isEdge || isOldEdge || isIE) {
+            // For Edge, use window.location or window.open directly
+            console.log('Using Edge-compatible download method');
+            window.location.href = downloadUrl;
+        } else {
+            // For other browsers, try programmatic link click
             try {
-                incrementDownloadCount().catch(error => {
-                    console.error('Error incrementing download count:', error);
-                });
-                
-                const user = firebase.auth().currentUser;
-                if (user) {
-                    db.collection('users').doc(user.uid).update({
-                        downloadCount: firebase.firestore.FieldValue.increment(1)
-                    }).catch(error => {
-                        console.error('Error updating user download count:', error);
-                    });
-                }
-                
-                showThankYouModal();
-                
-            } catch (trackingError) {
-                console.error('Download tracking error:', trackingError);
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+                // Don't set download attribute for cross-origin - Edge doesn't support it
+                document.body.appendChild(link);
+                link.click();
+                // Remove link after a short delay to ensure click is processed
+                setTimeout(() => {
+                    if (link.parentNode) {
+                        document.body.removeChild(link);
+                    }
+                }, 100);
+            } catch (linkError) {
+                // Fallback for browsers that block programmatic clicks
+                console.warn('Programmatic click failed, using window.location:', linkError);
+                window.location.href = downloadUrl;
             }
+        }
+            
+        // Do async operations after opening the download (non-blocking)
+        try {
+            // Increment download count (fire and forget - don't block download)
+            incrementDownloadCount().catch(error => {
+                console.error('Error incrementing download count:', error);
+            });
+            
+            // Increment user download count (fire and forget)
+            const user = firebase.auth().currentUser;
+            if (user) {
+                db.collection('users').doc(user.uid).update({
+                    downloadCount: firebase.firestore.FieldValue.increment(1)
+                }).catch(error => {
+                    console.error('Error updating user download count:', error);
+                });
+            }
+            
+            // Show thank you modal
+            showThankYouModal();
+            
+        } catch (trackingError) {
+            console.error('Download tracking error:', trackingError);
+            // Don't show error to user - download already started
         }
     }
 
@@ -1400,53 +1397,62 @@ document.addEventListener('DOMContentLoaded', async () => {
             const statDownloads = document.getElementById('stat-downloads');
             const statSessions = document.getElementById('stat-sessions');
 
-            if (displayName) displayName.textContent = profileData?.displayName || user.displayName || user.email.split('@')[0];
+            // Use safe property access for Edge compatibility (avoid optional chaining)
+            const profileDisplayName = profileData && profileData.displayName ? profileData.displayName : null;
+            if (displayName) displayName.textContent = profileDisplayName || user.displayName || user.email.split('@')[0];
             if (profileEmail) profileEmail.textContent = user.email;
-            if (memberSince && profileData?.createdAt) {
+            if (memberSince && profileData && profileData.createdAt) {
                 const date = profileData.createdAt.toDate ? profileData.createdAt.toDate() : new Date(profileData.createdAt);
-                memberSince.textContent = `Member since: ${date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}`;
+                memberSince.textContent = 'Member since: ' + date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
             }
 
             // Avatar
-            if (user.photoURL || profileData?.photoURL) {
-                avatarImg.src = user.photoURL || profileData.photoURL;
+            const profilePhotoURL = profileData && profileData.photoURL ? profileData.photoURL : null;
+            if (user.photoURL || profilePhotoURL) {
+                avatarImg.src = user.photoURL || profilePhotoURL;
                 avatarImg.style.display = 'block';
                 avatarInitials.style.display = 'none';
             } else {
-                const initials = (profileData?.displayName || user.displayName || user.email.split('@')[0])
-                    .split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+                const displayNameForInitials = profileDisplayName || user.displayName || user.email.split('@')[0];
+                const initials = displayNameForInitials
+                    .split(' ').map(function(n) { return n[0]; }).join('').toUpperCase().substring(0, 2);
                 avatarInitials.textContent = initials;
                 avatarInitials.style.display = 'flex';
                 avatarImg.style.display = 'none';
             }
 
             // Stats
-            if (statSessions) statSessions.textContent = profileData?.sessionCount || 0;
+            if (statSessions) statSessions.textContent = (profileData && profileData.sessionCount) ? profileData.sessionCount : 0;
             
             const profileSim = document.getElementById('profile-simulator');
             const profileExp = document.getElementById('profile-experience');
             const profileRef = document.getElementById('profile-referral');
             const profileLoc = document.getElementById('profile-location-display');
-            if (profileSim) profileSim.textContent = profileData?.simulator || 'Not selected';
-            if (profileExp) profileExp.textContent = profileData?.experience || 'Not selected';
-            if (profileRef) profileRef.textContent = profileData?.referral || 'Not selected';
-            if (profileLoc) profileLoc.textContent = profileData?.location || 'Not selected';
+            if (profileSim) profileSim.textContent = (profileData && profileData.simulator) ? profileData.simulator : 'Not selected';
+            if (profileExp) profileExp.textContent = (profileData && profileData.experience) ? profileData.experience : 'Not selected';
+            if (profileRef) profileRef.textContent = (profileData && profileData.referral) ? profileData.referral : 'Not selected';
+            if (profileLoc) profileLoc.textContent = (profileData && profileData.location) ? profileData.location : 'Not selected';
 
             // Pre-fill edit form
-            if (document.getElementById('profile-name')) {
-                document.getElementById('profile-name').value = profileData?.displayName || user.displayName || '';
+            const profileNameEl = document.getElementById('profile-name');
+            if (profileNameEl) {
+                profileNameEl.value = profileDisplayName || user.displayName || '';
             }
-            if (document.getElementById('profile-bio')) {
-                document.getElementById('profile-bio').value = profileData?.bio || '';
+            const profileBioEl = document.getElementById('profile-bio');
+            if (profileBioEl) {
+                profileBioEl.value = (profileData && profileData.bio) ? profileData.bio : '';
             }
-            if (document.getElementById('profile-location')) {
-                document.getElementById('profile-location').value = profileData?.location || '';
+            const profileLocationEl = document.getElementById('profile-location');
+            if (profileLocationEl) {
+                profileLocationEl.value = (profileData && profileData.location) ? profileData.location : '';
             }
-            if (document.getElementById('profile-simulator-edit')) {
-                document.getElementById('profile-simulator-edit').value = profileData?.simulator || '';
+            const profileSimulatorEditEl = document.getElementById('profile-simulator-edit');
+            if (profileSimulatorEditEl) {
+                profileSimulatorEditEl.value = (profileData && profileData.simulator) ? profileData.simulator : '';
             }
-            if (document.getElementById('profile-experience-edit')) {
-                document.getElementById('profile-experience-edit').value = profileData?.experience || '';
+            const profileExperienceEditEl = document.getElementById('profile-experience-edit');
+            if (profileExperienceEditEl) {
+                profileExperienceEditEl.value = (profileData && profileData.experience) ? profileData.experience : '';
             }
         } catch (error) {
             console.error('Error loading profile data:', error);
