@@ -1108,78 +1108,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function triggerDownload() {
-        // ===== Direct Download URLs (Works with Private Repositories) =====
-        // For private repos, use direct download URLs from GitHub releases
-        // 
-        // To get the latest release URL:
-        // 1. Go to your GitHub repository: https://github.com/APEX-Race-Tech/RACE-Insight
-        // 2. Click on "Releases" (right sidebar or /releases page)
-        // 3. Find the latest release
-        // 4. Right-click on the asset file (e.g., .exe, .AppImage, .dmg)
-        // 5. Select "Copy link address"
-        // 6. Paste the URL below, replacing the old version
-        //
-        // URL Format: https://github.com/OWNER/REPO/releases/download/TAG/FILENAME
-        //
-        const downloadUrls = {
-            'windows': 'https://github.com/APEX-Race-Tech/RACE-Insight/releases/download/v0.1.0/RACE-Insight-Setup-0.1.0.exe',
-            'linux': 'https://github.com/APEX-Race-Tech/RACE-Insight/releases/download/v0.1.0/RaceInsight_Setup_Linux.AppImage',
-            'apple': 'https://github.com/APEX-Race-Tech/RACE-Insight/releases/download/v0.1.0/RaceInsight_Setup_Mac.dmg'
-        };
-        
-        const downloadUrl = downloadUrls[selectedPlatform];
-        if (!downloadUrl) {
-            alert('Platform not available yet. Please contact support.');
-            return;
-        }
-        
-        // Open download immediately (synchronously) to avoid popup blocker
-        // This must happen before any async operations to maintain user interaction context
-        console.log(`Opening download URL: ${downloadUrl}`);
-        
-        // Use programmatic link click - more reliable than window.open() for downloads
-        // This avoids popup blockers and works better with private repositories
-        const link = document.createElement('a');
-        link.href = downloadUrl;
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        // Do async operations after opening the download (non-blocking)
-        try {
-            // Increment download count (fire and forget - don't block download)
-            incrementDownloadCount().catch(error => {
-                console.error('Error incrementing download count:', error);
-            });
-            
-            // Increment user download count (fire and forget)
-            const user = firebase.auth().currentUser;
-            if (user) {
-                db.collection('users').doc(user.uid).update({
-                    downloadCount: firebase.firestore.FieldValue.increment(1)
-                }).catch(error => {
-                    console.error('Error updating user download count:', error);
-                });
-            }
-            
-            // Show thank you modal
-            showThankYouModal();
-            
-        } catch (error) {
-            console.error('Download tracking error:', error);
-            // Don't show error to user - download already started
-        }
-        
-        /* ===== OPTIONAL: GitHub Releases API (Only works for PUBLIC repositories) =====
-        // Uncomment this section if you make your repository public and want automatic latest version detection:
+        // ===== GitHub Releases API (Primary method for PUBLIC repositories) =====
+        // Repository is now public: https://github.com/APEX-Race-Tech/RACE-Insight-Public
+        // This method automatically fetches the LATEST release - no manual updates needed!
+        // When you publish a new release on GitHub, it will automatically be used here.
         
         const GITHUB_OWNER = 'APEX-Race-Tech';
-        const GITHUB_REPO = 'RACE-Insight';
+        const GITHUB_REPO = 'RACE-Insight-Public';
         
         const filePatterns = {
-            'windows': /RACE-Insight.*\.exe$/i,
+            'windows': /RACE-Insight.*Setup.*\.exe$/i,
             'linux': /RaceInsight.*\.AppImage$/i,
             'apple': /RaceInsight.*\.dmg$/i
         };
@@ -1196,38 +1134,96 @@ document.addEventListener('DOMContentLoaded', async () => {
             const asset = release.assets.find(asset => pattern.test(asset.name));
             
             if (!asset) {
+                // Fallback to hardcoded URLs if API doesn't find the asset
                 throw new Error(`No release file found for ${selectedPlatform}`);
             }
             
-            await incrementDownloadCount();
-            
-            const user = firebase.auth().currentUser;
-            if (user) {
-                try {
-                    await db.collection('users').doc(user.uid).update({
-                        downloadCount: firebase.firestore.FieldValue.increment(1)
-                    });
-                } catch (error) {
-                    console.error('Error updating user download count:', error);
-                }
-            }
+            // Open download immediately (synchronously) to avoid popup blocker
+            console.log(`Downloading ${asset.name} (${release.tag_name}) from GitHub Releases`);
             
             const link = document.createElement('a');
             link.href = asset.browser_download_url;
             link.download = asset.name;
             link.target = '_blank';
+            link.rel = 'noopener noreferrer';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             
-            console.log(`Downloading ${asset.name} (${release.tag_name}) from GitHub Releases`);
-            showThankYouModal();
+            // Do async operations after opening the download (non-blocking)
+            try {
+                // Increment download count (fire and forget - don't block download)
+                incrementDownloadCount().catch(error => {
+                    console.error('Error incrementing download count:', error);
+                });
+                
+                // Increment user download count (fire and forget)
+                const user = firebase.auth().currentUser;
+                if (user) {
+                    db.collection('users').doc(user.uid).update({
+                        downloadCount: firebase.firestore.FieldValue.increment(1)
+                    }).catch(error => {
+                        console.error('Error updating user download count:', error);
+                    });
+                }
+                
+                // Show thank you modal
+                showThankYouModal();
+                
+            } catch (error) {
+                console.error('Download tracking error:', error);
+                // Don't show error to user - download already started
+            }
             
         } catch (error) {
-            console.error('Download error:', error);
-            alert(`Failed to download: ${error.message}. Please try again or contact support.`);
+            console.error('GitHub API download error:', error);
+            
+            // ===== Fallback: Direct Download URLs =====
+            // Fallback to hardcoded URLs if GitHub API fails
+            const downloadUrls = {
+                'windows': 'https://github.com/APEX-Race-Tech/RACE-Insight-Public/releases/download/v0.1.27/RACE-Insight-Setup-0.1.27.exe',
+                'linux': 'https://github.com/APEX-Race-Tech/RACE-Insight-Public/releases/download/v0.1.27/RaceInsight_Setup_Linux.AppImage',
+                'apple': 'https://github.com/APEX-Race-Tech/RACE-Insight-Public/releases/download/v0.1.27/RaceInsight_Setup_Mac.dmg'
+            };
+            
+            const downloadUrl = downloadUrls[selectedPlatform];
+            if (!downloadUrl) {
+                alert('Platform not available yet. Please contact support.');
+                return;
+            }
+            
+            console.log(`Using fallback download URL: ${downloadUrl}`);
+            
+            // Open download immediately (synchronously) to avoid popup blocker
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Do async operations after opening the download (non-blocking)
+            try {
+                incrementDownloadCount().catch(error => {
+                    console.error('Error incrementing download count:', error);
+                });
+                
+                const user = firebase.auth().currentUser;
+                if (user) {
+                    db.collection('users').doc(user.uid).update({
+                        downloadCount: firebase.firestore.FieldValue.increment(1)
+                    }).catch(error => {
+                        console.error('Error updating user download count:', error);
+                    });
+                }
+                
+                showThankYouModal();
+                
+            } catch (trackingError) {
+                console.error('Download tracking error:', trackingError);
+            }
         }
-        */
     }
 
     // --- Thank You Modal Functionality ---
