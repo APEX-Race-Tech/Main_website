@@ -18,9 +18,9 @@
 
 ## About Race Insight
 
-**Race Insight** is a professional-grade motorsports telemetry analysis application designed for sim racers and motorsport enthusiasts. Analyze your racing data, compare laps, and improve your performance with powerful visualization tools and intelligent data processing.
+**Race Insight** is a professional-grade motorsports data analysis application designed for sim racers and motorsport enthusiasts. Analyze your racing data, compare laps, and improve your performance with powerful visualization tools and intelligent data processing.
 
-Built with a high-performance Rust-powered backend, Race Insight handles large-scale telemetry data with zero lag, making it the perfect tool for serious racers who demand precision and speed.
+Built with a high-performance Rust-powered backend, Race Insight handles large-scale racing data with zero lag, making it the perfect tool for serious racers who demand precision and speed.
 
 ### Current Status: Beta
 
@@ -118,12 +118,12 @@ The documentation includes:
 1. **Download** Race Insight from the [official website](https://apexracetech.in/race-insight.html)
 2. **Install** the application on your system
 3. **Sign in** with your Google account (required for first-time setup)
-4. **Import** your telemetry data files (drag & drop or file browser)
+4. **Import** your racing data files (drag & drop or file browser)
 5. **Analyze** your data with professional-grade visualization tools
 
 ### First Steps
 
-- Import a telemetry file from your favorite racing simulator
+- Import a racing data file from your favorite racing simulator
 - Explore the data overview to see your session statistics
 - Use the analysis tools to compare laps and identify improvement areas
 - Create custom workbooks with AI-powered widgets
@@ -143,7 +143,7 @@ The documentation includes:
 
 Race Insight works mostly offline:
 - ✅ File import and analysis work offline (after initial sign-in)
-- ✅ Telemetry visualization works offline
+- ✅ Data visualization works offline
 - ⚠️ First-time sign-in requires internet (Google authentication)
 - ⚠️ Map tiles (Mapbox/OpenStreetMap) require internet
 
@@ -193,7 +193,7 @@ Race Insight is proprietary software developed by **APEX Race Technologies**. Se
 
 ## Disclaimer
 
-Race Insight is an analysis tool for reviewing historical telemetry data. It is not a predictive system and should not be relied upon for making critical decisions for competition, safety-critical analysis, or warranty or performance claims.
+Race Insight is an analysis tool for reviewing historical racing data. It is not a predictive system and should not be relied upon for making critical decisions for competition, safety-critical analysis, or warranty or performance claims.
 
 Always verify analysis results manually before making decisions based on the Software's output.
 

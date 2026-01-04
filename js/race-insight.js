@@ -316,12 +316,34 @@ document.addEventListener('DOMContentLoaded', async () => {
             const referral = referralEl.value;
 
             try {
-                await db.collection('users').doc(user.uid).update({
+                // Ensure user profile exists first (create if it doesn't)
+                const userRef = db.collection('users').doc(user.uid);
+                const userDoc = await userRef.get();
+                
+                if (!userDoc.exists) {
+                    // Create basic profile if it doesn't exist
+                    const { displayName, email, photoURL } = user;
+                    await userRef.set({
+                        displayName: displayName || email.split('@')[0],
+                        email: email,
+                        photoURL: photoURL || '',
+                        createdAt: new Date(),
+                        bio: '',
+                        downloadCount: 0,
+                        sessionCount: 0,
+                        lastLogin: new Date()
+                    });
+                }
+                
+                // Use set with merge to update onboarding fields
+                await userRef.set({
                     simulator: simulator,
                     experience: experience,
                     location: location,
                     referral: referral
-                });
+                }, { merge: true });
+                
+                console.log('Onboarding data saved successfully');
                 
                 // Close onboarding modal
                 if (onboardingModal) {
@@ -342,7 +364,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await loadProfileData(user);
             } catch (error) {
                 console.error('Error saving onboarding data:', error);
-                alert('Failed to save information. You can update it later in your profile.');
+                // Provide more helpful error message
+                const errorMessage = error.code === 'permission-denied' 
+                    ? 'Permission denied. Please check your account permissions.'
+                    : error.code === 'unavailable'
+                    ? 'Service temporarily unavailable. Please try again later.'
+                    : 'Failed to save information. You can update it later in your profile.';
+                alert(errorMessage);
                 if (onboardingModal) {
                     onboardingModal.classList.remove('active');
                     setTimeout(() => {

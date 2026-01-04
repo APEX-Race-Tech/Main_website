@@ -144,7 +144,7 @@
 
         <p>We are committed to transparency about data. RACE Insight is designed with privacy-first principles:</p>
         <ul>
-            <li>Your telemetry data stays completely local on your device</li>
+            <li>Your racing data stays completely local on your device</li>
             <li>We do not upload your project files to our servers</li>
             <li>We use manual event tracking only (no automatic session recording or autocapture)</li>
             <li>You can disable analytics completely</li>
@@ -159,7 +159,7 @@
 
         <h4>2.1.1 Data That Stays Local (NOT Sent to Us)</h4>
         <ul>
-            <li>Your telemetry project files (all imported race data, lap times, sensor readings, GPS data)</li>
+            <li>Your racing data project files (all imported race data, lap times, sensor readings, GPS data)</li>
             <li>Your saved analyses and reports</li>
             <li>Your exported data (CSV, JSON, PDF files you export)</li>
             <li>Application cache and temporary files</li>
@@ -195,7 +195,7 @@
         <p><strong>Why:</strong> To understand app adoption, version distribution, and usage patterns.</p>
 
         <h4>C. FILE IMPORT EVENTS</h4>
-        <p>When you import telemetry data files into RACE Insight, we track:</p>
+        <p>When you import racing data files into RACE Insight, we track:</p>
         <ul>
             <li>file_imported - Recorded when you successfully import a file</li>
             <li>file_type - The file extension (e.g., ".ibt", ".xrk", ".csv", ".log", ".vbo")</li>
@@ -212,7 +212,7 @@
             <li>Under development: ECUMaster (.adulog), Race Technology (.run), MegaLogViewer (.mlg)</li>
         </ul>
         <p><strong>Maximum file size:</strong> 250MB backend limit. Files up to 1GB may trigger a performance warning but will still be processed.</p>
-        <p><strong>What we do not collect:</strong> The actual file contents or data inside the file, file names or metadata beyond type and size, your telemetry readings (lap times, speeds, G-forces, sensor data), circuit information or driver data from the file, or any personal information in the file.</p>
+        <p><strong>What we do not collect:</strong> The actual file contents or data inside the file, file names or metadata beyond type and size, your racing data readings (lap times, speeds, G-forces, sensor data), circuit information or driver data from the file, or any personal information in the file.</p>
         <p><strong>Why:</strong> To understand which file formats users work with and to prioritize format support.</p>
 
         <h4>D. FEATURE USAGE EVENTS</h4>
@@ -222,10 +222,10 @@
             <li>screen_viewed - When you navigate to a different screen or section (with screen name)</li>
         </ul>
         <p><strong>Features tracked:</strong> Visualization features (charts, graphs, map view), analysis features (lap comparison, sector analysis, delta calculations), export features (CSV, JSON, PDF export), and settings and preferences changes.</p>
-        <p><strong>What we do not collect:</strong> Your actual analysis results or calculations, the data displayed on your screen, file names or project names, your telemetry data values or insights you generated, or screenshots or screen content.</p>
+        <p><strong>What we do not collect:</strong> Your actual analysis results or calculations, the data displayed on your screen, file names or project names, your racing data values or insights you generated, or screenshots or screen content.</p>
         <p><strong>Why:</strong> To understand which features are popular and which need improvement.</p>
         <p><strong>How long we keep it:</strong> Feature usage events are retained for 30 days, then deleted or aggregated into anonymous patterns.</p>
-        <p><strong>Opt-out:</strong> You can disable feature tracking in the app: Settings > Analytics & Privacy > Disable Analytics & Telemetry</p>
+        <p><strong>Opt-out:</strong> You can disable feature tracking in the app: Settings > Analytics & Privacy > Disable Analytics & Tracking</p>
 
         <h4>E. USER SETTINGS AND PREFERENCES</h4>
         <p>We collect data about how you configure the application:</p>
@@ -316,17 +316,17 @@
 
         <h3>2.3 Summary: What We Do Not Collect (Privacy-First Design)</h3>
         <ul>
-            <li>Your telemetry data files (lap times, speeds, sensor readings)</li>
+            <li>Your racing data files (lap times, speeds, sensor readings)</li>
             <li>Cloud backup of your project files</li>
             <li>Remote sync across devices (currently)</li>
             <li>AI processing of your data</li>
             <li>Session recordings (disabled in PostHog)</li>
             <li>Automatic click tracking (autocapture disabled)</li>
             <li>Keystroke logs or screen recording</li>
-            <li>Location tracking or GPS data (only your imported telemetry data)</li>
+            <li>Location tracking or GPS data (only your imported racing data)</li>
             <li>Behavioral profiling or behavioral advertising</li>
             <li>Your real name or email (unless you voluntarily sign in with Google)</li>
-            <li>File contents from your telemetry files</li>
+            <li>File contents from your racing data files</li>
             <li>Financial or payment information (beta is free)</li>
         </ul>
 
@@ -340,7 +340,7 @@
             <li>Authentication and account management - Ensuring your sign-in works correctly and securely</li>
             <li>Feature improvement - Understanding which features are popular and which need work</li>
             <li>Bug fixes and stability - Identifying and fixing crashes</li>
-            <li>File format support - Understanding which telemetry formats to prioritize</li>
+            <li>File format support - Understanding which racing data formats to prioritize</li>
             <li>Service optimization - Improving UI/UX based on user preferences</li>
             <li>Support and communication - Responding to your feedback or issues</li>
             <li>Compliance and legal - Retaining data required by law</li>
@@ -452,7 +452,7 @@
         <p>If we rely on your consent for analytics or feature tracking:</p>
         <ul>
             <li>You can withdraw consent at any time</li>
-            <li>Disable analytics in Settings > Analytics & Privacy > Disable Analytics & Telemetry</li>
+            <li>Disable analytics in Settings > Analytics & Privacy > Disable Analytics & Tracking</li>
             <li>This will stop all PostHog event tracking (except Firebase authentication, which is essential for sign-in)</li>
             <li>Stop sending feedback emails or bug reports</li>
         </ul>
@@ -498,7 +498,7 @@
         <h3>9.2 What We Do Not Have</h3>
         <ul>
             <li>Your project files (stored completely locally)</li>
-            <li>Your telemetry data (never uploaded)</li>
+            <li>Your racing data (never uploaded)</li>
             <li>Session recordings (disabled)</li>
             <li>Keystroke logs (disabled)</li>
             <li>Screen recordings (disabled)</li>
@@ -529,7 +529,7 @@
         <p>RACE Insight works mostly offline:</p>
         <ul>
             <li>File import and analysis work offline (after initial sign-in)</li>
-            <li>Telemetry visualization works offline</li>
+            <li>Data visualization works offline</li>
             <li>First-time sign-in requires internet (Google authentication)</li>
             <li>Map tiles (Mapbox/OpenStreetMap) require internet</li>
             <li>PostHog events are queued locally if offline, sent when online</li>
