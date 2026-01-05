@@ -50,10 +50,10 @@ function waitForFirebaseConfig() {
 }
 
 // Initialize Firebase after config is available
-let firebaseConfig;
+// firebaseConfig is loaded from firebase-config.js via window.firebaseConfig
 waitForFirebaseConfig()
     .then(config => {
-        firebaseConfig = config;
+        const firebaseConfig = config;
         
         // Wait for Firebase SDK to be loaded before initializing
         function waitForFirebaseSDK() {
