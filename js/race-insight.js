@@ -1,56 +1,128 @@
 // Force data-section to avoid 'home' logic from stopping animation initially
-document.body.setAttribute('data-section', 'race-insight-hero');
+// Wait for DOM to be ready before accessing document.body
+if (document.body) {
+    document.body.setAttribute('data-section', 'race-insight-hero');
+} else {
+    document.addEventListener('DOMContentLoaded', () => {
+        document.body.setAttribute('data-section', 'race-insight-hero');
+    });
+}
 
 // Safety: Force content visibility if animation fails
 setTimeout(() => {
     document.querySelectorAll('.animate-on-scroll').forEach(el => {
-if (getComputedStyle(el).opacity === '0') {
-    el.style.opacity = '1';
-    el.style.transform = 'none';
-}
+        if (getComputedStyle(el).opacity === '0') {
+            el.style.opacity = '1';
+            el.style.transform = 'none';
+        }
     });
 }, 1000);
 
 // --- Firebase Configuration ---
 // Security Note: Firebase API keys are meant to be public and are restricted by domain in Firebase Console.
 // However, ensure Firebase Security Rules are properly configured for Firestore and Storage.
-// Consider using environment variables in production builds.
-const firebaseConfig = {
+//
+// Configuration is loaded from js/firebase-config.js which reads from .env file
+// All Firebase keys must be stored in .env file - no hardcoded values in code
 
-    apiKey: "AIzaSyB6pcGMJixpwxz4Zls_ghpCPX8RwKd4F5g",
-  
-    authDomain: "apex-race-insight-auth.firebaseapp.com",
-  
-    projectId: "apex-race-insight-auth",
-  
-    storageBucket: "apex-race-insight-auth.firebasestorage.app",
-  
-    messagingSenderId: "828112911630",
-  
-    appId: "1:828112911630:web:f8364b252c410f21a5eb5f",
-  
-    measurementId: "G-4632V21RSD"
-  
-};
-  
-
-// Initialize Firebase (Compat Syntax)
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
+// Wait for firebaseConfig to be available (loaded from firebase-config.js module)
+function waitForFirebaseConfig() {
+    return new Promise((resolve, reject) => {
+        if (window.firebaseConfig) {
+            resolve(window.firebaseConfig);
+            return;
+        }
+        
+        // Wait up to 5 seconds for config to load
+        let attempts = 0;
+        const maxAttempts = 50; // 50 * 100ms = 5 seconds
+        const checkInterval = setInterval(() => {
+            attempts++;
+            if (window.firebaseConfig) {
+                clearInterval(checkInterval);
+                resolve(window.firebaseConfig);
+            } else if (attempts >= maxAttempts) {
+                clearInterval(checkInterval);
+                reject(new Error('Firebase configuration not found. Make sure js/firebase-config.js is loaded and .env file is configured.'));
+            }
+        }, 100);
+    });
 }
 
-// Set Firebase Auth persistence to 'local' to keep users signed in across sessions
-// This persists authentication state in IndexedDB, so users stay logged in even after closing the browser
-firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-    .then(() => {
-        console.log("Firebase Auth persistence set to LOCAL - users will stay signed in");
+// Initialize Firebase after config is available
+let firebaseConfig;
+waitForFirebaseConfig()
+    .then(config => {
+        firebaseConfig = config;
+        
+        // Wait for Firebase SDK to be loaded before initializing
+        function waitForFirebaseSDK() {
+            return new Promise((resolve) => {
+                if (typeof firebase !== 'undefined' && firebase.apps) {
+                    resolve();
+                    return;
+                }
+                
+                // Wait up to 5 seconds for Firebase SDK to load
+                let attempts = 0;
+                const maxAttempts = 50;
+                const checkInterval = setInterval(() => {
+                    attempts++;
+                    if (typeof firebase !== 'undefined' && firebase.apps) {
+                        clearInterval(checkInterval);
+                        resolve();
+                    } else if (attempts >= maxAttempts) {
+                        clearInterval(checkInterval);
+                        console.warn('Firebase SDK not loaded, but continuing...');
+                        resolve();
+                    }
+                }, 100);
+            });
+        }
+        
+        return waitForFirebaseSDK().then(() => {
+            // Initialize Firebase (Compat Syntax)
+            if (typeof firebase !== 'undefined' && firebase.apps && !firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            
+            // Continue with rest of initialization
+            initializeFirebaseServices();
+        });
     })
-    .catch((error) => {
-        console.error("Error setting auth persistence:", error);
+    .catch(error => {
+        console.error('Firebase initialization error:', error);
     });
 
-// Initialize Firestore
-const db = firebase.firestore();
+// Initialize Firebase services after config is loaded
+function initializeFirebaseServices() {
+    // Set Firebase Auth persistence to 'local' to keep users signed in across sessions
+    // This persists authentication state in IndexedDB, so users stay logged in even after closing the browser
+    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .then(() => {
+            console.log("Firebase Auth persistence set to LOCAL - users will stay signed in");
+        })
+        .catch((error) => {
+            console.error("Error setting auth persistence:", error);
+        });
+
+    // Initialize Firestore
+    const db = firebase.firestore();
+    
+    // Make db available globally for the rest of the script
+    window.db = db;
+    
+    // Trigger any code that was waiting for Firebase to initialize
+    if (window.onFirebaseReady) {
+        window.onFirebaseReady(db);
+    }
+    
+    console.log('Firebase services initialized successfully');
+}
+
+// db will be available after Firebase initializes via window.db
+// For code that needs db immediately, use: window.db or wait for Firebase initialization
+// All existing code using 'db' should be updated to use 'window.db' or wait for initialization
 
 // --- Cookie Utility Functions ---
 // Security: Properly encode cookie values and use Secure flag in production
@@ -113,6 +185,32 @@ function validatePassword(password) {
 
 // --- Auth Logic ---
 document.addEventListener('DOMContentLoaded', async () => {
+    // Wait for Firebase to be fully initialized before proceeding
+    // db will be available via window.db after Firebase initializes
+    if (!window.db) {
+        // Wait a bit for Firebase to initialize
+        await new Promise(resolve => {
+            const checkDb = setInterval(() => {
+                if (window.db) {
+                    clearInterval(checkDb);
+                    resolve();
+                }
+            }, 50);
+            // Timeout after 5 seconds
+            setTimeout(() => {
+                clearInterval(checkDb);
+                resolve();
+            }, 5000);
+        });
+    }
+    
+    // Create local db reference for use in this scope
+    // Wait for db to be available from Firebase initialization
+    const db = window.db;
+    if (!db) {
+        console.error('Firestore database not initialized. Firebase may not be ready yet.');
+        return; // Exit early if Firebase isn't ready
+    }
     // Check if user was logged in via cookies (quick check before Firebase auth restores)
     // This allows us to show logged-in UI immediately while Firebase auth is restoring
     const userLoggedIn = getCookie('userLoggedIn');
@@ -361,10 +459,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }, 300);
                 }
                 
-                await loadProfileData(user);
+                // Try to load profile data, but don't fail if it errors (non-critical)
+                try {
+                    await loadProfileData(user);
+                } catch (loadError) {
+                    // Log but don't show error - data was saved successfully
+                    console.warn('Profile data loaded with warnings (non-fatal):', loadError);
+                }
             } catch (error) {
                 console.error('Error saving onboarding data:', error);
-                // Provide more helpful error message
+                // Provide more helpful error message - only show if save actually failed
                 const errorMessage = error.code === 'permission-denied' 
                     ? 'Permission denied. Please check your account permissions.'
                     : error.code === 'unavailable'

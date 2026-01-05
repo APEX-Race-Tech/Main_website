@@ -985,7 +985,9 @@
     <script defer src="https://cdn.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js"></script>
     <script defer src="js/main.js"></script>
     <script type="module" defer src="js/track-animation.js"></script>
-    <!-- race-insight.js loads after Firebase scripts (which are deferred) -->
+    <!-- Firebase config must load before race-insight.js (as module for Vite env vars) -->
+    <script type="module" src="js/firebase-config.js"></script>
+    <!-- race-insight.js loads after Firebase scripts and config -->
     <script defer src="js/race-insight.js"></script>
 
     <script>
