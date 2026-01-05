@@ -507,6 +507,80 @@ document.addEventListener('DOMContentLoaded', async () => {
         return null;
     }
 
+    // Load and display profile data (defined before use)
+    async function loadProfileData(user) {
+        try {
+            const profileData = await loadUserProfile(user);
+            const displayName = document.getElementById('profile-display-name');
+            const profileEmail = document.getElementById('profile-email');
+            const memberSince = document.getElementById('profile-member-since');
+            const avatarInitials = document.getElementById('profile-avatar-initials');
+            const avatarImg = document.getElementById('profile-avatar-img');
+            const statDownloads = document.getElementById('stat-downloads');
+            const statSessions = document.getElementById('stat-sessions');
+
+            // Use safe property access for Edge compatibility (avoid optional chaining)
+            const profileDisplayName = profileData && profileData.displayName ? profileData.displayName : null;
+            if (displayName) displayName.textContent = profileDisplayName || user.displayName || user.email.split('@')[0];
+            if (profileEmail) profileEmail.textContent = user.email;
+            if (memberSince && profileData && profileData.createdAt) {
+                const date = profileData.createdAt.toDate ? profileData.createdAt.toDate() : new Date(profileData.createdAt);
+                memberSince.textContent = 'Member since: ' + date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+            }
+
+            // Avatar
+            const profilePhotoURL = profileData && profileData.photoURL ? profileData.photoURL : null;
+            if (user.photoURL || profilePhotoURL) {
+                avatarImg.src = user.photoURL || profilePhotoURL;
+                avatarImg.style.display = 'block';
+                avatarInitials.style.display = 'none';
+            } else {
+                const displayNameForInitials = profileDisplayName || user.displayName || user.email.split('@')[0];
+                const initials = displayNameForInitials
+                    .split(' ').map(function(n) { return n[0]; }).join('').toUpperCase().substring(0, 2);
+                avatarInitials.textContent = initials;
+                avatarInitials.style.display = 'flex';
+                avatarImg.style.display = 'none';
+            }
+
+            // Stats
+            if (statSessions) statSessions.textContent = (profileData && profileData.sessionCount) ? profileData.sessionCount : 0;
+            
+            const profileSim = document.getElementById('profile-simulator');
+            const profileExp = document.getElementById('profile-experience');
+            const profileRef = document.getElementById('profile-referral');
+            const profileLoc = document.getElementById('profile-location-display');
+            if (profileSim) profileSim.textContent = (profileData && profileData.simulator) ? profileData.simulator : 'Not selected';
+            if (profileExp) profileExp.textContent = (profileData && profileData.experience) ? profileData.experience : 'Not selected';
+            if (profileRef) profileRef.textContent = (profileData && profileData.referral) ? profileData.referral : 'Not selected';
+            if (profileLoc) profileLoc.textContent = (profileData && profileData.location) ? profileData.location : 'Not selected';
+
+            // Pre-fill edit form
+            const profileNameEl = document.getElementById('profile-name');
+            if (profileNameEl) {
+                profileNameEl.value = profileDisplayName || user.displayName || '';
+            }
+            const profileBioEl = document.getElementById('profile-bio');
+            if (profileBioEl) {
+                profileBioEl.value = (profileData && profileData.bio) ? profileData.bio : '';
+            }
+            const profileLocationEl = document.getElementById('profile-location');
+            if (profileLocationEl) {
+                profileLocationEl.value = (profileData && profileData.location) ? profileData.location : '';
+            }
+            const profileSimulatorEditEl = document.getElementById('profile-simulator-edit');
+            if (profileSimulatorEditEl) {
+                profileSimulatorEditEl.value = (profileData && profileData.simulator) ? profileData.simulator : '';
+            }
+            const profileExperienceEditEl = document.getElementById('profile-experience-edit');
+            if (profileExperienceEditEl) {
+                profileExperienceEditEl.value = (profileData && profileData.experience) ? profileData.experience : '';
+            }
+        } catch (error) {
+            console.error('Error loading profile data:', error);
+        }
+    }
+
     // Update UI for logged in user (defined before use)
     function updateUIForLoggedInUser(user) {
         console.log("=== updateUIForLoggedInUser called ===");
@@ -1487,80 +1561,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
         });
-    }
-
-    // Load and display profile data
-    async function loadProfileData(user) {
-        try {
-            const profileData = await loadUserProfile(user);
-            const displayName = document.getElementById('profile-display-name');
-            const profileEmail = document.getElementById('profile-email');
-            const memberSince = document.getElementById('profile-member-since');
-            const avatarInitials = document.getElementById('profile-avatar-initials');
-            const avatarImg = document.getElementById('profile-avatar-img');
-            const statDownloads = document.getElementById('stat-downloads');
-            const statSessions = document.getElementById('stat-sessions');
-
-            // Use safe property access for Edge compatibility (avoid optional chaining)
-            const profileDisplayName = profileData && profileData.displayName ? profileData.displayName : null;
-            if (displayName) displayName.textContent = profileDisplayName || user.displayName || user.email.split('@')[0];
-            if (profileEmail) profileEmail.textContent = user.email;
-            if (memberSince && profileData && profileData.createdAt) {
-                const date = profileData.createdAt.toDate ? profileData.createdAt.toDate() : new Date(profileData.createdAt);
-                memberSince.textContent = 'Member since: ' + date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
-            }
-
-            // Avatar
-            const profilePhotoURL = profileData && profileData.photoURL ? profileData.photoURL : null;
-            if (user.photoURL || profilePhotoURL) {
-                avatarImg.src = user.photoURL || profilePhotoURL;
-                avatarImg.style.display = 'block';
-                avatarInitials.style.display = 'none';
-            } else {
-                const displayNameForInitials = profileDisplayName || user.displayName || user.email.split('@')[0];
-                const initials = displayNameForInitials
-                    .split(' ').map(function(n) { return n[0]; }).join('').toUpperCase().substring(0, 2);
-                avatarInitials.textContent = initials;
-                avatarInitials.style.display = 'flex';
-                avatarImg.style.display = 'none';
-            }
-
-            // Stats
-            if (statSessions) statSessions.textContent = (profileData && profileData.sessionCount) ? profileData.sessionCount : 0;
-            
-            const profileSim = document.getElementById('profile-simulator');
-            const profileExp = document.getElementById('profile-experience');
-            const profileRef = document.getElementById('profile-referral');
-            const profileLoc = document.getElementById('profile-location-display');
-            if (profileSim) profileSim.textContent = (profileData && profileData.simulator) ? profileData.simulator : 'Not selected';
-            if (profileExp) profileExp.textContent = (profileData && profileData.experience) ? profileData.experience : 'Not selected';
-            if (profileRef) profileRef.textContent = (profileData && profileData.referral) ? profileData.referral : 'Not selected';
-            if (profileLoc) profileLoc.textContent = (profileData && profileData.location) ? profileData.location : 'Not selected';
-
-            // Pre-fill edit form
-            const profileNameEl = document.getElementById('profile-name');
-            if (profileNameEl) {
-                profileNameEl.value = profileDisplayName || user.displayName || '';
-            }
-            const profileBioEl = document.getElementById('profile-bio');
-            if (profileBioEl) {
-                profileBioEl.value = (profileData && profileData.bio) ? profileData.bio : '';
-            }
-            const profileLocationEl = document.getElementById('profile-location');
-            if (profileLocationEl) {
-                profileLocationEl.value = (profileData && profileData.location) ? profileData.location : '';
-            }
-            const profileSimulatorEditEl = document.getElementById('profile-simulator-edit');
-            if (profileSimulatorEditEl) {
-                profileSimulatorEditEl.value = (profileData && profileData.simulator) ? profileData.simulator : '';
-            }
-            const profileExperienceEditEl = document.getElementById('profile-experience-edit');
-            if (profileExperienceEditEl) {
-                profileExperienceEditEl.value = (profileData && profileData.experience) ? profileData.experience : '';
-            }
-        } catch (error) {
-            console.error('Error loading profile data:', error);
-        }
     }
 
     // Edit profile button
