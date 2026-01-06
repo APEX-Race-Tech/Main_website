@@ -375,6 +375,69 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Onboarding Logic
     const onboardingModal = document.getElementById('onboarding-modal');
     const onboardingForm = document.getElementById('onboarding-form');
+    
+    // Prevent closing onboarding modal by clicking outside
+    if (onboardingModal) {
+        onboardingModal.addEventListener('click', (e) => {
+            // Only prevent if clicking the backdrop, not the content
+            if (e.target === onboardingModal) {
+                e.preventDefault();
+                e.stopPropagation();
+                // Show a message that profile completion is required
+                alert('Please complete your profile to continue.');
+            }
+        });
+    }
+    
+    // Handle "Other" option text areas
+    const simulatorSelect = document.getElementById('onboarding-simulator');
+    const simulatorOtherText = document.getElementById('onboarding-simulator-other');
+    const referralSelect = document.getElementById('onboarding-referral');
+    const referralOtherText = document.getElementById('onboarding-referral-other');
+    
+    // Show/hide simulator "Other" text area
+    if (simulatorSelect && simulatorOtherText) {
+        simulatorSelect.addEventListener('change', () => {
+            if (simulatorSelect.value === 'Other') {
+                simulatorOtherText.style.display = 'block';
+                simulatorOtherText.setAttribute('required', 'required');
+            } else {
+                simulatorOtherText.style.display = 'none';
+                simulatorOtherText.removeAttribute('required');
+                simulatorOtherText.value = '';
+            }
+        });
+    }
+    
+    // Show/hide referral "Other" text area
+    if (referralSelect && referralOtherText) {
+        referralSelect.addEventListener('change', () => {
+            if (referralSelect.value === 'Other') {
+                referralOtherText.style.display = 'block';
+                referralOtherText.setAttribute('required', 'required');
+            } else {
+                referralOtherText.style.display = 'none';
+                referralOtherText.removeAttribute('required');
+                referralOtherText.value = '';
+            }
+        });
+    }
+
+    // Check if user has completed onboarding (all required fields filled)
+    async function hasCompletedOnboarding(user) {
+        try {
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (!userDoc.exists) {
+                return false;
+            }
+            const data = userDoc.data();
+            // Check if all required onboarding fields are present and not empty
+            return !!(data.simulator && data.experience && data.location && data.referral);
+        } catch (error) {
+            console.error('Error checking onboarding status:', error);
+            return false;
+        }
+    }
 
     async function checkOnboarding(user, profileResult) {
         if (!onboardingModal) {
@@ -382,8 +445,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
         
-        if (profileResult && profileResult.isNewUser) {
-            console.log("Showing onboarding modal for new user");
+        // Check if user needs onboarding (new user OR existing user who hasn't completed it)
+        const isNewUser = profileResult && profileResult.isNewUser;
+        const hasCompleted = await hasCompletedOnboarding(user);
+        
+        if (isNewUser || !hasCompleted) {
+            console.log("Showing onboarding modal - isNewUser:", isNewUser, "hasCompleted:", hasCompleted);
             onboardingModal.style.display = 'flex';
             onboardingModal.offsetHeight;
             setTimeout(() => {
@@ -402,16 +469,53 @@ document.addEventListener('DOMContentLoaded', async () => {
             const experienceEl = document.getElementById('onboarding-experience');
             const locationEl = document.getElementById('onboarding-location');
             const referralEl = document.getElementById('onboarding-referral');
+            const simulatorOtherEl = document.getElementById('onboarding-simulator-other');
+            const referralOtherEl = document.getElementById('onboarding-referral-other');
             
             if (!simulatorEl || !experienceEl || !locationEl || !referralEl) {
                 console.error('Onboarding form elements not found');
                 return;
             }
 
-            const simulator = simulatorEl.value;
-            const experience = experienceEl.value;
-            const location = locationEl.value;
-            const referral = referralEl.value;
+            let simulator = simulatorEl.value.trim();
+            const experience = experienceEl.value.trim();
+            const location = locationEl.value.trim();
+            let referral = referralEl.value.trim();
+
+            // If "Other" is selected, use the text area value
+            if (simulator === 'Other') {
+                if (simulatorOtherEl) {
+                    const otherValue = simulatorOtherEl.value.trim();
+                    if (!otherValue) {
+                        alert('Please specify your simulator.');
+                        return;
+                    }
+                    simulator = otherValue;
+                } else {
+                    alert('Please specify your simulator.');
+                    return;
+                }
+            }
+            
+            if (referral === 'Other') {
+                if (referralOtherEl) {
+                    const otherValue = referralOtherEl.value.trim();
+                    if (!otherValue) {
+                        alert('Please specify how you heard about us.');
+                        return;
+                    }
+                    referral = otherValue;
+                } else {
+                    alert('Please specify how you heard about us.');
+                    return;
+                }
+            }
+
+            // Validate all fields are filled
+            if (!simulator || !experience || !location || !referral) {
+                alert('Please fill in all fields to complete your profile.');
+                return;
+            }
 
             try {
                 // Ensure user profile exists first (create if it doesn't)
@@ -668,6 +772,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.error("Profile creation error in auth state change (non-fatal):", profileError);
             }
             
+            // Check if onboarding is needed (for both new and existing users)
+            const hasCompleted = await hasCompletedOnboarding(user);
+            if (!hasCompleted) {
+                console.log("User has not completed onboarding, showing modal");
+                setTimeout(() => {
+                    checkOnboarding(user, profileResult);
+                }, 100);
+            }
+            
             // Update UI first
             try {
                 console.log("About to call updateUIForLoggedInUser");
@@ -695,14 +808,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                         // Reset modal to sign-in state
                         resetAuthModalToSignIn();
                         
-                        // Check if we need to show onboarding for new users
-                        // Use isNewUserSignup flag OR check if profile was just created
-                        const shouldShowOnboarding = isNewUserSignup || (profileResult && profileResult.isNewUser);
+                        // Check if we need to show onboarding (new users OR existing users who haven't completed it)
+                        const hasCompleted = await hasCompletedOnboarding(user);
+                        const shouldShowOnboarding = isNewUserSignup || (profileResult && profileResult.isNewUser) || !hasCompleted;
                         
                         if (shouldShowOnboarding) {
-                            console.log("Showing onboarding for new user");
+                            console.log("Showing onboarding - isNewUserSignup:", isNewUserSignup, "isNewUser:", profileResult?.isNewUser, "hasCompleted:", hasCompleted);
                             setTimeout(() => {
-                                checkOnboarding(user, { isNewUser: true });
+                                checkOnboarding(user, profileResult || { isNewUser: isNewUserSignup });
                             }, 100);
                         } else {
                             // Execute pending download action if not showing onboarding

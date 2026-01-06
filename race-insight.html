@@ -906,8 +906,8 @@
     </div>
 
     <!-- Onboarding Modal -->
-    <div id="onboarding-modal" class="modal-backdrop" style="display: none;">
-        <div class="modal-content">
+    <div id="onboarding-modal" class="modal-backdrop" style="display: none;" data-no-close="true">
+        <div class="modal-content" onclick="event.stopPropagation();">
             <h3>Complete Your Profile</h3>
             <p>Tell us a bit more about your racing setup to personalize your experience.</p>
             
@@ -925,6 +925,7 @@
                         <option value="BeamNG.drive">BeamNG.drive</option>
                         <option value="Other">Other</option>
                     </select>
+                    <textarea id="onboarding-simulator-other" name="simulator-other" placeholder="Please specify your simulator" style="width: 100%; padding: 0.75rem; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: white; margin-top: 0.5rem; display: none; min-height: 80px; resize: vertical; font-family: inherit;"></textarea>
                 </div>
                 <div class="form-group">
                     <label for="onboarding-experience">Racing Experience</label>
@@ -944,7 +945,7 @@
                 <div class="form-group">
                     <label for="onboarding-referral">How did you hear about us?</label>
                     <select id="onboarding-referral" name="referral" required style="width: 100%; padding: 0.75rem; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: white;">
-                        <option value="">Select an option</option>
+                        <option value="">How did you hear about us?</option>
                         <option value="Social Media">Social Media</option>
                         <option value="YouTube">YouTube</option>
                         <option value="Discord">Discord</option>
@@ -952,6 +953,7 @@
                         <option value="Search">Search Engine</option>
                         <option value="Other">Other</option>
                     </select>
+                    <textarea id="onboarding-referral-other" name="referral-other" placeholder="Please specify how you heard about us" style="width: 100%; padding: 0.75rem; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: white; margin-top: 0.5rem; display: none; min-height: 80px; resize: vertical; font-family: inherit;"></textarea>
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Finish Setup</button>
             </form>
