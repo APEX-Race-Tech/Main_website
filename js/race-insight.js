@@ -801,7 +801,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // Remove active class to trigger fade out
                     authModal.classList.remove('active');
                     // Hide modal after animation
-                    setTimeout(() => {
+                    setTimeout(async () => {
                         authModal.style.setProperty('display', 'none', 'important');
                         console.log("✓ Modal display set to none");
                         
