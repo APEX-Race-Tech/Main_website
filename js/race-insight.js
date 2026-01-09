@@ -797,7 +797,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Wait a bit longer if it's a new signup to show success message
                 const delay = isNewUserSignup ? 1500 : 800;
                 
-                setTimeout(() => {
+                setTimeout(async () => {
                     // Remove active class to trigger fade out
                     authModal.classList.remove('active');
                     // Hide modal after animation
