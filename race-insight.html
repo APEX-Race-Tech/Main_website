@@ -16,8 +16,8 @@
     <link rel="apple-touch-icon" href="assets/app_icon.webp">
     
     <!-- Preload critical resources for faster LCP -->
-    <link rel="preload" as="image" href="assets/app_icon.webp" fetchpriority="high" crossorigin="anonymous">
-    <link rel="preload" as="image" href="assets/ri_images/Comparision%20laps.webp" fetchpriority="high" crossorigin="anonymous">
+    <link rel="preload" as="image" href="assets/app_icon.webp" fetchpriority="high" crossorigin="anonymous" type="image/webp">
+    <link rel="preload" as="image" href="assets/ri_images/Comparision%20laps.webp" fetchpriority="high" crossorigin="anonymous" type="image/webp">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
@@ -126,7 +126,18 @@
         window.dataLayer = window.dataLayer || [];
         function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
-        gtag('config', 'G-TQNN66RBKN');
+        gtag('config', 'G-TQNN66RBKN', {
+            cookie_flags: 'SameSite=None;Secure'
+        });
+    </script>
+    <!-- Suppress Cloudflare beacon errors (external script) -->
+    <script>
+        window.addEventListener('error', function(e) {
+            if (e.message && e.message.includes('cloudflareinsights.com')) {
+                e.preventDefault();
+                return false;
+            }
+        }, true);
     </script>
 </head>
 
@@ -197,7 +208,7 @@
                 <h1 class="hero-title">Race Insight</h1>
                 <p class="tagline">The Motorsport Data Analysis Platform</p>
                 <blockquote class="hero-quote">
-                    <p>"Without data you're just another person with an option"</p>
+                    <p>"Without data you're just another person with an opinion"</p>
                     <cite>— W. Edward Deming</cite>
                 </blockquote>
                 <div class="hero-content">
@@ -999,6 +1010,13 @@
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             // Check if user was logged in via cookies (quick check before Firebase auth restores)
+            // Wait for race-insight.js to load getCookie function
+            let getCookie = window.getCookie || function(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+                return null;
+            };
             const userLoggedIn = getCookie('userLoggedIn');
             if (userLoggedIn === 'true') {
                 console.log("Cookie indicates user was logged in, waiting for Firebase auth to restore...");

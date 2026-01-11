@@ -185,6 +185,33 @@ function validatePassword(password) {
 
 // --- Auth Logic ---
 document.addEventListener('DOMContentLoaded', async () => {
+    // Unregister any service workers that might be blocking requests
+    if ('serviceWorker' in navigator) {
+        try {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (let registration of registrations) {
+                await registration.unregister();
+                console.log('Service worker unregistered to prevent blocking external requests');
+            }
+        } catch (error) {
+            console.warn('Could not unregister service workers:', error);
+        }
+    }
+    
+    // Check for Google sign-in redirect result
+    try {
+        const result = await firebase.auth().getRedirectResult();
+        if (result.user) {
+            console.log('Google sign-in via redirect successful:', result.user.email);
+            // Profile creation and onboarding will be handled by onAuthStateChanged
+        }
+    } catch (redirectError) {
+        // No redirect result or error - this is normal if user didn't use redirect
+        if (redirectError.code !== 'auth/operation-not-allowed') {
+            console.log('No redirect result or redirect error:', redirectError.message);
+        }
+    }
+    
     // Wait for Firebase to be fully initialized before proceeding
     // db will be available via window.db after Firebase initializes
     if (!window.db) {
@@ -957,6 +984,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, 60000);
         
         const provider = new firebase.auth.GoogleAuthProvider();
+        provider.addScope('profile');
+        provider.addScope('email');
+        
+        // Use signInWithRedirect as fallback if popup fails due to service worker issues
         firebase.auth().signInWithPopup(provider)
             .then(async (result) => {
                 clearTimeout(timeoutId);
@@ -972,7 +1003,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Sign-in succeeded - modal will close via onAuthStateChanged
                 // Button will be reset when modal reopens, so no need to restore here
             })
-            .catch((error) => {
+            .catch(async (error) => {
                 clearTimeout(timeoutId);
                 console.error("Google Sign In Error:", error);
                 
@@ -987,6 +1018,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                         errorMessage = "Sign in was cancelled. Please try again.";
                     } else if (error.code === 'auth/popup-blocked') {
                         errorMessage = "Popup was blocked. Please allow popups for this site and try again.";
+                    } else if (error.code === 'auth/internal-error') {
+                        // Service worker or network issue - try redirect method
+                        console.log("Popup failed, trying redirect method...");
+                        try {
+                            await firebase.auth().signInWithRedirect(provider);
+                            return; // Redirect will happen, don't show error
+                        } catch (redirectError) {
+                            errorMessage = "Sign in failed due to network issues. Please check your connection and try again.";
+                        }
                     } else if (error.code === 'auth/cancelled-popup-request') {
                         errorMessage = "Only one popup request is allowed at a time. Please try again.";
                     } else if (error.code === 'auth/network-request-failed') {
