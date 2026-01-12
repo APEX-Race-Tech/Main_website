@@ -1,7 +1,7 @@
 // Force data-section to avoid 'home' logic from stopping animation initially
 // Wait for DOM to be ready before accessing document.body
 if (document.body) {
-    document.body.setAttribute('data-section', 'race-insight-hero');
+document.body.setAttribute('data-section', 'race-insight-hero');
 } else {
     document.addEventListener('DOMContentLoaded', () => {
         document.body.setAttribute('data-section', 'race-insight-hero');
@@ -11,10 +11,10 @@ if (document.body) {
 // Safety: Force content visibility if animation fails
 setTimeout(() => {
     document.querySelectorAll('.animate-on-scroll').forEach(el => {
-        if (getComputedStyle(el).opacity === '0') {
-            el.style.opacity = '1';
-            el.style.transform = 'none';
-        }
+if (getComputedStyle(el).opacity === '0') {
+    el.style.opacity = '1';
+    el.style.transform = 'none';
+}
     });
 }, 1000);
 
@@ -81,11 +81,11 @@ waitForFirebaseConfig()
         }
         
         return waitForFirebaseSDK().then(() => {
-            // Initialize Firebase (Compat Syntax)
+// Initialize Firebase (Compat Syntax)
             if (typeof firebase !== 'undefined' && firebase.apps && !firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
-            }
-            
+    firebase.initializeApp(firebaseConfig);
+}
+
             // Continue with rest of initialization
             initializeFirebaseServices();
         });
@@ -96,18 +96,18 @@ waitForFirebaseConfig()
 
 // Initialize Firebase services after config is loaded
 function initializeFirebaseServices() {
-    // Set Firebase Auth persistence to 'local' to keep users signed in across sessions
-    // This persists authentication state in IndexedDB, so users stay logged in even after closing the browser
-    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-        .then(() => {
-            console.log("Firebase Auth persistence set to LOCAL - users will stay signed in");
-        })
-        .catch((error) => {
-            console.error("Error setting auth persistence:", error);
-        });
+// Set Firebase Auth persistence to 'local' to keep users signed in across sessions
+// This persists authentication state in IndexedDB, so users stay logged in even after closing the browser
+firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+    .then(() => {
+        console.log("Firebase Auth persistence set to LOCAL - users will stay signed in");
+    })
+    .catch((error) => {
+        console.error("Error setting auth persistence:", error);
+    });
 
-    // Initialize Firestore
-    const db = firebase.firestore();
+// Initialize Firestore
+const db = firebase.firestore();
     
     // Make db available globally for the rest of the script
     window.db = db;
@@ -592,7 +592,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 // Try to load profile data, but don't fail if it errors (non-critical)
                 try {
-                    await loadProfileData(user);
+                await loadProfileData(user);
                 } catch (loadError) {
                     // Log but don't show error - data was saved successfully
                     console.warn('Profile data loaded with warnings (non-fatal):', loadError);
