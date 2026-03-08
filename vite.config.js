@@ -4,7 +4,8 @@ export default {
     rollupOptions: {
       input: {
         main: './race-insight.html',
-        index: './index.html'
+        index: './index.html',
+        kineticsports: './kineticsports.html'
       }
     }
   },
