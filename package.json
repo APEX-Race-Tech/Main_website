@@ -11,10 +11,24 @@
     "delete-originals": "node delete-original-images.js"
   },
   "dependencies": {
+    "acorn": "^8.16.0",
+    "eslint": "^10.0.3",
     "firebase": "^12.6.0"
   },
   "devDependencies": {
     "sharp": "^0.33.5",
     "vite": "^7.3.0"
-  }
+  },
+  "main": "temp.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/APEX-Race-Tech/Main_website.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/APEX-Race-Tech/Main_website/issues"
+  },
+  "homepage": "https://github.com/APEX-Race-Tech/Main_website#readme"
 }

@@ -462,6 +462,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             return !!(data.simulator && data.experience && data.location && data.referral);
         } catch (error) {
             console.error('Error checking onboarding status:', error);
+            // If permission denied or other error, fallback to local storage
+            // or return true to prevent an infinite modal loop for offline/unauthorized users.
+            if (error.code === 'permission-denied') {
+                return localStorage.getItem('onboardingCompleted_' + user.uid) === 'true';
+            }
             return false;
         }
     }
@@ -599,6 +604,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             } catch (error) {
                 console.error('Error saving onboarding data:', error);
+                
+                // Fallback: save to local storage if Firestore fails
+                localStorage.setItem('onboardingCompleted_' + user.uid, 'true');
+                
                 // Provide more helpful error message - only show if save actually failed
                 const errorMessage = error.code === 'permission-denied' 
                     ? 'Permission denied. Please check your account permissions.'
@@ -2316,6 +2325,5 @@ document.addEventListener('DOMContentLoaded', async () => {
         initSlideshow();
     } catch (error) {
         console.error('Error initializing slideshow:', error);
-    }
     }
 });

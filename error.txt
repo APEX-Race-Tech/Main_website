@@ -1,0 +1,8 @@
+D:\Vicky\vicky\APEX Race Tech\website\Main_website\temp.js:1855
+        });
+         ^
+
+SyntaxError: Unexpected token ')'
+    at checkSyntax (node:internal/main/check_syntax:74:5)
+
+Node.js v22.18.0
