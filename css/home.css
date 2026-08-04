@@ -115,7 +115,9 @@ body{
   position:relative;z-index:5;
   padding:0 56px;
   max-width:560px;
+  pointer-events:none;
 }
+.panel__content a{pointer-events:auto;}
 .panel__eyebrow{
   font-size:12px;
   letter-spacing:3.5px;

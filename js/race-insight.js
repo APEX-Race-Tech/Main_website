@@ -1050,6 +1050,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 showAuthError(errorMessage);
             });
     });
+    }
 
     // Forgot Password - DISABLED (email auth removed)
     if (false && forgotPasswordBtn) { // Disabled - email auth removed
