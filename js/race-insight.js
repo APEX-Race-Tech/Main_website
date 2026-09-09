@@ -399,6 +399,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // Log new waitlist signup to Google Sheets (non-blocking, silent on failure)
+    async function logToGoogleSheets(data) {
+        const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyF5hQmZqPspXxigQHb7S7HQFjFUuYefoijlEuUzSzVXnllfWMDomM5Y_bfHtdx5w2Z/exec';
+        try {
+            const formData = new FormData();
+            formData.append('fullname', data.fullname || '');
+            formData.append('email', data.email || '');
+            formData.append('simulator', data.simulator || '');
+            formData.append('experience', data.experience || '');
+            formData.append('location', data.location || '');
+            formData.append('referral', data.referral || '');
+            formData.append('date', data.date || new Date().toLocaleString());
+            formData.append('source', 'Race Insight Sign-Up');
+            await fetch(SHEETS_URL, { method: 'POST', body: formData, mode: 'no-cors' });
+            console.log('Waitlist entry logged to Google Sheets');
+        } catch (err) {
+            // Non-critical — do not interrupt user flow
+            console.warn('Could not log to Google Sheets:', err.message);
+        }
+    }
+
     // Onboarding Logic
     const onboardingModal = document.getElementById('onboarding-modal');
     const onboardingForm = document.getElementById('onboarding-form');
@@ -477,12 +498,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
         
-        // Check if user needs onboarding (new user OR existing user who hasn't completed it)
-        const isNewUser = profileResult && profileResult.isNewUser;
+        // Check if user needs onboarding
         const hasCompleted = await hasCompletedOnboarding(user);
         
-        if (isNewUser || !hasCompleted) {
-            console.log("Showing onboarding modal - isNewUser:", isNewUser, "hasCompleted:", hasCompleted);
+        if (!hasCompleted) {
+            console.log("Showing onboarding modal - hasCompleted:", hasCompleted);
             onboardingModal.style.display = 'flex';
             onboardingModal.offsetHeight;
             setTimeout(() => {
@@ -578,6 +598,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }, { merge: true });
                 
                 console.log('Onboarding data saved successfully');
+
+                // Log signup with date to Google Sheets (best-effort, non-blocking)
+                logToGoogleSheets({
+                    fullname: user.displayName || user.email,
+                    email: user.email,
+                    simulator: simulator,
+                    experience: experience,
+                    location: location,
+                    referral: referral,
+                    date: new Date().toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })
+                });
                 
                 // Close onboarding modal
                 if (onboardingModal) {
@@ -808,15 +839,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.error("Profile creation error in auth state change (non-fatal):", profileError);
             }
             
-            // Check if onboarding is needed (for both new and existing users)
-            const hasCompleted = await hasCompletedOnboarding(user);
-            if (!hasCompleted) {
-                console.log("User has not completed onboarding, showing modal");
-                setTimeout(() => {
-                    checkOnboarding(user, profileResult);
-                }, 100);
-            }
-            
+            // Onboarding is only required at download time, not on page load/browse
             // Update UI first
             try {
                 console.log("About to call updateUIForLoggedInUser");
@@ -844,18 +867,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                         // Reset modal to sign-in state
                         resetAuthModalToSignIn();
                         
-                        // Check if we need to show onboarding (new users OR existing users who haven't completed it)
-                        const hasCompleted = await hasCompletedOnboarding(user);
-                        const shouldShowOnboarding = isNewUserSignup || (profileResult && profileResult.isNewUser) || !hasCompleted;
-                        
-                        if (shouldShowOnboarding) {
-                            console.log("Showing onboarding - isNewUserSignup:", isNewUserSignup, "isNewUser:", profileResult?.isNewUser, "hasCompleted:", hasCompleted);
-                            setTimeout(() => {
-                                checkOnboarding(user, profileResult || { isNewUser: isNewUserSignup });
-                            }, 100);
-                        } else {
-                            // Execute pending download action if not showing onboarding
-                            if (pendingDownloadAction) {
+                        // Execute pending download action after auth (onboarding gate handled inside download handlers)
+                        if (pendingDownloadAction) {
+                            // Check onboarding first if needed
+                            const hasCompleted = await hasCompletedOnboarding(user);
+                            if (!hasCompleted) {
+                                console.log("Download requested but onboarding not complete — showing onboarding modal");
+                                setTimeout(() => {
+                                    checkOnboarding(user, profileResult || { isNewUser: isNewUserSignup });
+                                }, 100);
+                            } else {
                                 setTimeout(() => {
                                     pendingDownloadAction();
                                     pendingDownloadAction = null;
@@ -1402,7 +1423,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // Function to handle download button click (opens modal if not logged in)
-    function handleDownloadClick(e) {
+    async function handleDownloadClick(e) {
         if (e) e.preventDefault();
         const user = firebase.auth().currentUser;
         if (!user) {
@@ -1424,7 +1445,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             return;
         }
-        // If logged in, scroll to download section
+        // Logged in — check onboarding before scrolling to download
+        const hasCompleted = await hasCompletedOnboarding(user);
+        if (!hasCompleted) {
+            pendingDownloadAction = () => {
+                const downloadSection = document.getElementById('download');
+                if (downloadSection) downloadSection.scrollIntoView({ behavior: 'smooth' });
+            };
+            checkOnboarding(user, null);
+            return;
+        }
+        // Fully cleared — scroll to download section
         const downloadSection = document.getElementById('download');
         if (downloadSection) {
             downloadSection.scrollIntoView({ behavior: 'smooth' });
@@ -1446,7 +1477,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     if (downloadBtn) {
-        downloadBtn.addEventListener('click', () => {
+        downloadBtn.addEventListener('click', async () => {
             if (!selectedPlatform) {
                 alert('Please select your platform (Windows, Linux, or Mac) first.');
                 return;
@@ -1460,6 +1491,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                     authModal.offsetHeight;
                     setTimeout(() => authModal.classList.add('active'), 10);
                 }
+                return;
+            }
+            // Logged in — gate on onboarding completion before download
+            const hasCompletedProfile = await hasCompletedOnboarding(user);
+            if (!hasCompletedProfile) {
+                pendingDownloadAction = () => triggerDownload();
+                checkOnboarding(user, null);
                 return;
             }
             triggerDownload();
