@@ -4,32 +4,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Racing Division | APEX Race Technologies</title>
+    <title>Racing Division | APEXRACE Technologies</title>
 
     <!-- SEO Meta Tags -->
     <meta name="description"
-        content="APEX Race Technologies bridges the gap between instinct and insight, empowering racers with cutting-edge data solutions to optimize performance and master their racecraft.">
+        content="APEXRACE Technologies bridges the gap between instinct and insight, empowering racers with cutting-edge data solutions to optimize performance and master their racecraft.">
     <meta name="keywords"
         content="motorsport, data acquisition, race engineering, data analysis, sim racing, iRacing, Assetto Corsa, Race-Insight, Moto-Insight">
-    <meta name="author" content="APEX Race Technologies">
-    <link rel="canonical" href="https://www.apexracetech.in/racing.html">
+    <meta name="author" content="APEXRACE Technologies">
+    <link rel="canonical" href="https://apexracetech.in/racing.html">
+    <link rel="alternate" type="text/markdown" href="/llms.txt" title="llms.txt">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://www.apexracetech.in/racing.html">
-    <meta property="og:title" content="Racing Division | APEX Race Technologies">
+    <meta property="og:url" content="https://apexracetech.in/racing.html">
+    <meta property="og:title" content="Racing Division | APEXRACE Technologies">
     <meta property="og:description"
         content="Empowering racers with cutting-edge data solutions to optimize performance and refine strategy.">
-    <meta property="og:image" content="https://www.apexracetech.in/assets/images/RI_round_logo.webp">
+    <meta property="og:image" content="https://apexracetech.in/assets/images/RI_round_logo.webp">
+    <meta property="og:image:width" content="500">
+    <meta property="og:image:height" content="500">
+    <meta property="og:image:alt" content="APEXRACE Technologies round logo">
     <!-- TODO: Create and replace with an actual OG image (1200x630px) -->
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://www.apexracetech.in/racing.html">
-    <meta property="twitter:title" content="Racing Division | APEX Race Technologies">
+    <meta property="twitter:url" content="https://apexracetech.in/racing.html">
+    <meta property="twitter:title" content="Racing Division | APEXRACE Technologies">
     <meta property="twitter:description"
         content="Empowering racers with cutting-edge data solutions to optimize performance and refine strategy.">
-    <meta property="twitter:image" content="https://www.apexracetech.in/assets/images/RI_round_logo.webp">
+    <meta property="twitter:image" content="https://apexracetech.in/assets/images/RI_round_logo.webp">
     <!-- TODO: Create and replace with an actual OG image (1200x630px) -->
 
     <!-- Structured Data (JSON-LD) -->
@@ -39,12 +43,14 @@
       "@graph": [
         {
           "@type": "Organization",
-          "name": "APEX Race Technologies",
-          "url": "https://www.apexracetech.in/",
-          "logo": "https://www.apexracetech.in/assets/images/apex_orange_Horizontal.svg",
+          "@id": "https://apexracetech.in/#organization",
+          "name": "APEXRACE Technologies",
+          "url": "https://apexracetech.in/",
+          "logo": "https://apexracetech.in/assets/images/apex_orange_Horizontal.svg",
           "sameAs": [
             "https://www.instagram.com/apex.race.tech/",
-            "https://twitter.com/apexracetech"
+            "https://twitter.com/apexracetech",
+            "https://github.com/APEX-Race-Tech"
           ],
           "contactPoint": {
             "@type": "ContactPoint",
@@ -58,36 +64,158 @@
             "addressRegion": "Tamil Nadu",
             "addressCountry": "IN"
           },
-          "description": "APEX Race Technologies bridges the gap between instinct and insight, empowering racers with cutting-edge data solutions to optimize performance, refine strategy, and master their racecraft."
+          "description": "APEXRACE Technologies bridges the gap between instinct and insight, empowering racers with cutting-edge data solutions to optimize performance, refine strategy, and master their racecraft."
         },
         {
-          "@type": "Product",
-          "name": "Moto-Insight",
-          "description": "A robust, customizable CAN-based data acquisition system to capture every crucial vehicle, driver, and track metrics.",
-          "brand": {
-            "@type": "Brand",
-            "name": "APEX Race Technologies"
+          "@type": "WebSite",
+          "@id": "https://apexracetech.in/#website",
+          "name": "APEXRACE Technologies",
+          "url": "https://apexracetech.in/",
+          "publisher": {
+            "@id": "https://apexracetech.in/#organization"
           },
-          "offers": {
-            "@type": "Offer",
-            "availability": "http://schema.org/PreOrder",
-            "price": "0",
-            "priceCurrency": "INR"
+          "inLanguage": "en"
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://apexracetech.in/racing.html#webpage",
+          "url": "https://apexracetech.in/racing.html",
+          "name": "Racing Division | APEXRACE Technologies",
+          "isPartOf": {
+            "@id": "https://apexracetech.in/#website"
           }
         },
         {
           "@type": "Product",
-          "name": "Race-Insight",
-          "description": "Transform raw racing data into a competitive edge with our web-based analysis tool.",
+          "@id": "https://apexracetech.in/racing.html#moto-insight",
+          "name": "Moto-Insight",
+          "description": "A robust, customizable CAN-based data acquisition system to capture every crucial vehicle, driver, and track metrics.",
           "brand": {
             "@type": "Brand",
-            "name": "APEX Race Technologies"
+            "name": "APEXRACE Technologies"
           },
+          "category": "Motorsport Data Acquisition Hardware",
+          "applicationCategory": "DataLogging",
           "offers": {
             "@type": "Offer",
             "availability": "http://schema.org/PreOrder",
             "price": "0",
-            "priceCurrency": "INR"
+            "priceCurrency": "INR",
+            "url": "https://apexracetech.in/racing.html"
+          }
+        },
+        {
+          "@type": "Product",
+          "@id": "https://apexracetech.in/racing.html#moto-insight-mini",
+          "name": "Moto-Insight-Mini",
+          "description": "Portable GNSS lap timer with sensor fusion for grassroots racers and testing programs. GNSS + IMU fusion delivers 1 to 1.5 meter lap-to-lap precision.",
+          "brand": {
+            "@type": "Brand",
+            "name": "APEXRACE Technologies"
+          },
+          "category": "GNSS Lap Timer",
+          "applicationCategory": "DataLogging",
+          "offers": {
+            "@type": "Offer",
+            "availability": "http://schema.org/PreOrder",
+            "price": "0",
+            "priceCurrency": "INR",
+            "url": "https://apexracetech.in/racing.html"
+          }
+        },
+        {
+          "@type": "Product",
+          "@id": "https://apexracetech.in/racing.html#race-insight",
+          "name": "Race-Insight",
+          "description": "Transform raw racing data into a competitive edge with our web-based analysis tool. Import, analyze, compare laps, and export racing telemetry.",
+          "brand": {
+            "@type": "Brand",
+            "name": "APEXRACE Technologies"
+          },
+          "category": "Racing Data Analysis Software",
+          "applicationCategory": "DataAnalysisApplication",
+          "offers": {
+            "@type": "Offer",
+            "availability": "http://schema.org/PreOrder",
+            "price": "0",
+            "priceCurrency": "INR",
+            "url": "https://apexracetech.in/race-insight.html"
+          }
+        }
+      ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://apexracetech.in/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Racing Division",
+          "item": "https://apexracetech.in/racing.html"
+        }
+      ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What does APEXRACE Technologies do?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "APEXRACE Technologies builds accessible motorsport performance technology. The racing division designs CAN-based data acquisition hardware (Moto-Insight) and telemetry software (Race Insight), while the Kinetic Sports division builds wearable sensors for sports biomechanics."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is Race-Insight?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Race-Insight is a web-based racing data analysis platform by APEXRACE Technologies. It lets racers import telemetry from simulators like iRacing and Assetto Corsa, compare laps, and build custom AI-powered analysis dashboards."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is Moto-Insight?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Moto-Insight is a modular, CAN-based data acquisition system by APEXRACE Technologies that captures vehicle, driver, and track metrics from virtually any sensor, with high-rate sampling up to 250 Hz."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is Moto-Insight-Mini?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Moto-Insight-Mini is a portable GNSS lap timer from APEXRACE Technologies that combines GNSS and IMU sensor fusion for 1 to 1.5 meter lap-to-lap precision, aimed at grassroots racers and testing programs."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which racing simulators are supported first?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "APEXRACE Technologies is starting with iRacing and Assetto Corsa in Race-Insight, with more simulators and real-world data integrations to follow."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "When is Race-Insight available?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Race-Insight is currently available as a free beta. Early access users are onboarded in cohorts through the waitlist page on the APEXRACE Technologies website."
           }
         }
       ]
@@ -95,7 +223,7 @@
     </script>
     <link rel="icon" href="assets/images/apex_orange_ONLY LOGO.svg" type="image/svg+xml">
     <!-- Preload hero background image to improve LCP -->
-    <link rel="preload" as="image" href="assets/images/DSCF8247_5000x3333-1.webp">
+    <link rel="preload" as="image" href="assets/images/DSCF8247_5000x3333-1.webp" fetchpriority="high">
     <!-- Preconnect to external resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -158,7 +286,7 @@
 
     <!-- Loading Screen -->
     <div id="loading-screen">
-        <img src="assets/images/ARTV1.gif" alt="Loading APEX Race Technologies...">
+        <img src="assets/images/ARTV1.gif" alt="Loading APEXRACE Technologies...">
     </div>
 
     <!-- Background Animations -->
@@ -171,9 +299,9 @@
     <header class="header">
         <nav class="nav-container">
             <a href="index.html" class="header__logo">
-                <img src="assets/images/apex_orange_Horizontal.svg" alt="APEX Race Technologies Logo" class="logo--full"
+                <img src="assets/images/apex_orange_Horizontal.svg" alt="APEXRACE Technologies Logo" class="logo--full"
                     decoding="async">
-                <img src="assets/images/apex_orange_ONLY LOGO.svg" alt="APEX Race Technologies Icon" class="logo--icon"
+                <img src="assets/images/apex_orange_ONLY LOGO.svg" alt="APEXRACE Technologies Icon" class="logo--icon"
                     decoding="async">
             </a>
             <div class="nav-right">
@@ -219,7 +347,7 @@
             <div class="section-content home-content">
                 <h1 class="animate-on-scroll">Unlock Your True Potential on Track.</h1>
                 <h2 class="tagline">Your Passion, Our System, Your Victory.</h2>
-                <p class="sub-headline">At APEX Race Technologies, we bridge the gap between instinct and insight,
+                <p class="sub-headline">At APEXRACE Technologies, we bridge the gap between instinct and insight,
                     empowering racers with cutting-edge data solutions to optimize performance, refine strategy, and
                     master their racecraft.</p>
                 <div class="hero-cta-group">
@@ -410,14 +538,34 @@
             </div>
         </section>
 
-        <!-- FAQ Section 
+        <!-- FAQ Section -->
         <section id="faq" class="full-page-section">
             <div class="section-content">
                 <h2 class="animate-on-scroll">Frequently Asked Questions</h2>
                 <div class="faq-list">
                     <details>
+                        <summary>What does APEXRACE Technologies do?</summary>
+                        <p>APEXRACE Technologies builds accessible motorsport performance technology. The racing division designs CAN-based data acquisition hardware (Moto-Insight) and telemetry software (Race Insight), while the Kinetic Sports division builds wearable sensors for sports biomechanics.</p>
+                    </details>
+                    <details>
+                        <summary>What is Race-Insight?</summary>
+                        <p>Race-Insight is our web-based racing data analysis platform. Import telemetry from simulators like iRacing and Assetto Corsa, compare laps, and build custom AI-powered analysis dashboards from anywhere.</p>
+                    </details>
+                    <details>
+                        <summary>What is Moto-Insight?</summary>
+                        <p>Moto-Insight is a robust, modular CAN-based data acquisition system that captures vehicle, driver, and track metrics from virtually any sensor — with high-rate sampling up to 250 Hz.</p>
+                    </details>
+                    <details>
+                        <summary>What is Moto-Insight-Mini?</summary>
+                        <p>Moto-Insight-Mini is a portable GNSS lap timer built for grassroots racers and testing programs. GNSS + IMU sensor fusion delivers 1 to 1.5 meter lap-to-lap precision, with Wi-Fi sync to your mobile app.</p>
+                    </details>
+                    <details>
+                        <summary>Which simulators are supported first?</summary>
+                        <p>We are starting with iRacing and Assetto Corsa, with more sims and real-world integrations to follow.</p>
+                    </details>
+                    <details>
                         <summary>When is the launch?</summary>
-                        <p>We're onboarding our early access users in cohorts. Join the waitlist to secure your spot and receive launch updates.</p>
+                        <p>Race-Insight is available now in free beta. We're onboarding early access users in cohorts — join the waitlist to secure your spot and receive launch updates.</p>
                     </details>
                     <details>
                         <summary>What do I get by joining the waitlist?</summary>
@@ -427,17 +575,12 @@
                         <summary>Is there a cost to join?</summary>
                         <p>Joining the waitlist is free. We'll share pricing and offers with early users before public launch.</p>
                     </details>
-                    <details>
-                        <summary>Which simulators are supported first?</summary>
-                        <p>We are starting with iRacing and Assetto Corsa, with more sims and real-world integrations to follow.</p>
-                    </details>
                 </div>
                 <div class="section-cta">
                     <a href="#waitlist" class="btn btn-primary">Join the Waitlist</a>
                 </div>
             </div>
         </section>
-        -->
 
         <!-- Waitlist Section -->
         <section id="waitlist" class="full-page-section">
@@ -687,7 +830,7 @@
         </div>
 
         <!-- Legal & Registered Details -->
-        <div class="footer-legal">
+        <!-- <div class="footer-legal">
             <div class="footer-legal__column">
                 <h4>Find Us</h4>
                 <div class="map-embed">
@@ -701,15 +844,14 @@
             <div class="footer-legal__column">
                 <h4>Entity Details</h4>
                 <ul class="entity-list">
-                    <li><strong>Legal Entity Name:</strong> APEX Race Technologies</li>
+                    <li><strong>Legal Entity Name:</strong> APEXRACE Technologies</li>
                     <li><strong>Support:</strong> <a href="mailto:info@apexracetech.in"
                             class="email-link">info@apexracetech.in</a></li>
                 </ul>
-            </div>
-        </div>
+            </div> -->
 
         <div class="footer-bottom">
-            <p>&copy; 2026 APEX Race Technologies. All rights reserved.</p>
+            <p>&copy; 2026 APEXRACE Technologies. All rights reserved.</p>
         </div>
     </footer>
     <script defer src="https://cdn.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js"></script>

@@ -4,62 +4,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>APEX Race Technologies | Racing Data Tech & Kinetic Sports</title>
+    <title>APEXRACE Technologies | Racing Data Tech & Kinetic Sports</title>
 
     <!-- SEO Meta Tags -->
     <meta name="description"
-        content="APEX Race Technologies — choose your division. Racing: motorsport data acquisition, telemetry, and race engineering. Kinetic Sports: wearable sensors and biomechanics analytics.">
+        content="APEXRACE Technologies — choose your division. Racing: motorsport data acquisition, telemetry, and race engineering. Kinetic Sports: wearable sensors and biomechanics analytics.">
     <meta name="keywords"
-        content="APEX Race Technologies, motorsport data acquisition, race engineering, sim racing, Race-Insight, Kinetic Sports, sports tracker, biomechanics">
-    <meta name="author" content="APEX Race Technologies">
-    <link rel="canonical" href="https://www.apexracetech.in/">
+        content="APEXRACE Technologies, motorsport data acquisition, race engineering, sim racing, Race-Insight, Kinetic Sports, sports tracker, biomechanics">
+    <meta name="author" content="APEXRACE Technologies">
+    <link rel="canonical" href="https://apexracetech.in/">
+    <link rel="alternate" type="text/markdown" href="/llms.txt" title="llms.txt">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://www.apexracetech.in/">
-    <meta property="og:title" content="APEX Race Technologies | Racing Data Tech & Kinetic Sports">
+    <meta property="og:url" content="https://apexracetech.in/">
+    <meta property="og:title" content="APEXRACE Technologies | Racing Data Tech & Kinetic Sports">
     <meta property="og:description"
         content="Choose your division: Racing (motorsport data acquisition & engineering) or Kinetic Sports (wearable performance analytics).">
-    <meta property="og:image" content="https://www.apexracetech.in/assets/images/RI_round_logo.webp">
+    <meta property="og:image" content="https://apexracetech.in/assets/images/RI_round_logo.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://www.apexracetech.in/">
-    <meta property="twitter:title" content="APEX Race Technologies | Racing Data Tech & Kinetic Sports">
+    <meta property="twitter:url" content="https://apexracetech.in/">
+    <meta property="twitter:title" content="APEXRACE Technologies | Racing Data Tech & Kinetic Sports">
     <meta property="twitter:description"
         content="Choose your division: Racing (motorsport data acquisition & engineering) or Kinetic Sports (wearable performance analytics).">
-    <meta property="twitter:image" content="https://www.apexracetech.in/assets/images/RI_round_logo.webp">
+    <meta property="twitter:image" content="https://apexracetech.in/assets/images/RI_round_logo.webp">
+    <meta property="og:image:width" content="500">
+    <meta property="og:image:height" content="500">
+    <meta property="og:image:alt" content="APEXRACE Technologies round logo">
 
     <!-- Structured Data (JSON-LD) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "APEX Race Technologies",
-      "url": "https://www.apexracetech.in/",
-      "logo": "https://www.apexracetech.in/assets/images/apex_orange_Horizontal.svg",
-      "sameAs": [
-        "https://www.instagram.com/apex.race.tech/",
-        "https://twitter.com/apexracetech"
-      ],
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "email": "info@apexracetech.in",
-        "contactType": "customer support"
-      },
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "Sri Sairam Techno Incubator Foundation",
-        "addressLocality": "Chennai",
-        "addressRegion": "Tamil Nadu",
-        "addressCountry": "IN"
-      },
-      "description": "APEX Race Technologies bridges the gap between instinct and insight, empowering racers and athletes with cutting-edge data solutions across two divisions: Racing and Kinetic Sports."
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://apexracetech.in/#organization",
+          "name": "APEXRACE Technologies",
+          "url": "https://apexracetech.in/",
+          "logo": "https://apexracetech.in/assets/images/apex_orange_Horizontal.svg",
+          "sameAs": [
+            "https://www.instagram.com/apex.race.tech/",
+            "https://twitter.com/apexracetech",
+            "https://github.com/APEX-Race-Tech"
+          ],
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "email": "info@apexracetech.in",
+            "contactType": "customer support"
+          },
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Sri Sairam Techno Incubator Foundation",
+            "addressLocality": "Chennai",
+            "addressRegion": "Tamil Nadu",
+            "addressCountry": "IN"
+          },
+          "description": "APEXRACE Technologies bridges the gap between instinct and insight, empowering racers and athletes with cutting-edge data solutions across two divisions: Racing and Kinetic Sports."
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://apexracetech.in/#website",
+          "name": "APEXRACE Technologies",
+          "url": "https://apexracetech.in/",
+          "publisher": {
+            "@id": "https://apexracetech.in/#organization"
+          },
+          "inLanguage": "en",
+          "about": {
+            "@type": "Organization",
+            "name": "APEXRACE Technologies"
+          }
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://apexracetech.in/#webpage",
+          "url": "https://apexracetech.in/",
+          "name": "APEXRACE Technologies | Racing Data Tech & Kinetic Sports",
+          "isPartOf": {
+            "@id": "https://apexracetech.in/#website"
+          }
+        }
+      ]
     }
     </script>
 
     <link rel="icon" href="assets/images/apex_orange_ONLY LOGO.svg" type="image/svg+xml">
     <link rel="preload" as="image" href="assets/images/apex_art_mark.png" fetchpriority="high">
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TQNN66RBKN"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-TQNN66RBKN');
+    </script>
 
     <!-- Local Stylesheet -->
     <link rel="stylesheet" href="css/home.css">
@@ -68,20 +110,20 @@
 <body>
     <div class="stage">
         <div class="mark">
-            <img class="mark__glyph" src="assets/images/apex_art_mark.png" alt="APEX Race Technologies logo">
-            <div class="mark__wordmark">Apex Race Technologies</div>
+            <img class="mark__glyph" src="assets/images/apex_art_mark.png" alt="APEXRACE Technologies logo">
+            <div class="mark__wordmark">APEXRACE Technologies</div>
         </div>
 
         <div class="split">
 
             <div class="panel panel--racing">
-                <a class="panel__stretch" href="racing.html" aria-label="Enter APEX Race Tech, racing division"></a>
+                <a class="panel__stretch" href="racing.html" aria-label="Enter APEXRACE, racing division"></a>
                 <div class="panel__bg" style="background:radial-gradient(120% 140% at 20% 10%, #3a1a08 0%, #0a0908 55%), repeating-linear-gradient(115deg, rgba(255,123,0,0.08) 0 2px, transparent 2px 42px);"></div>
                 <div class="panel__scrim"></div>
                 <div class="panel__seam"></div>
                 <div class="panel__content">
                     <p class="panel__eyebrow">Racing Division</p>
-                    <h1 class="panel__title">APEX<br>Race Tech</h1>
+                    <h1 class="panel__title">APEX<br>RACE</h1>
                     <span class="panel__tap-hint" aria-hidden="true">Tap to explore</span>
                     <p class="panel__desc">CAN-based data acquisition, telemetry hardware, and race engineering — built for teams who live by the tenth of a second.</p>
                     <span class="panel__cta">Enter Racing Division
@@ -95,8 +137,8 @@
             </div>
 
             <div class="mark mark--mobile">
-                <img class="mark__glyph" src="assets/images/apex_art_mark.png" alt="APEX Race Technologies logo">
-                <div class="mark__wordmark">Apex Race Technologies</div>
+                <img class="mark__glyph" src="assets/images/apex_art_mark.png" alt="APEXRACE Technologies logo">
+                <div class="mark__wordmark">APEXRACE Technologies</div>
             </div>
 
             <div class="panel panel--kinetic">

@@ -4,12 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Race Insight | APEX Race Technologies</title>
+    <title>Race Insight | APEXRACE Technologies</title>
     <meta name="description" content="Download Race Insight - The advanced data analysis tool for sim racers. Analyze racing data, compare laps, and improve your racing performance with professional-grade tools.">
-    <meta name="keywords" content="race insight, sim racing, data analysis, lap comparison, racing data, APEX Race Technologies, racing software, data analysis, racing tools">
-    <meta name="author" content="APEX Race Technologies">
+    <meta name="keywords" content="race insight, sim racing, data analysis, lap comparison, racing data, APEXRACE Technologies, racing software, data analysis, racing tools">
+    <meta name="author" content="APEXRACE Technologies">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://apexracetech.in/race-insight.html">
+    <link rel="alternate" type="text/markdown" href="/llms.txt" title="llms.txt">
     
     <!-- Favicon -->
     <link rel="icon" type="image/webp" href="assets/app_icon.webp">
@@ -22,16 +23,19 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://apexracetech.in/race-insight.html">
-    <meta property="og:title" content="Race Insight | APEX Race Technologies">
+    <meta property="og:title" content="Race Insight | APEXRACE Technologies">
     <meta property="og:description" content="Download Race Insight - The advanced data analysis tool for sim racers. Analyze racing data, compare laps, and improve your racing performance.">
     <meta property="og:image" content="https://apexracetech.in/assets/images/RI_round_logo.webp">
-    <meta property="og:site_name" content="APEX Race Technologies">
+    <meta property="og:image:width" content="500">
+    <meta property="og:image:height" content="500">
+    <meta property="og:image:alt" content="APEXRACE Technologies round logo">
+    <meta property="og:site_name" content="APEXRACE Technologies">
     <meta property="fb:app_id" content="YOUR_FACEBOOK_APP_ID">
     
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="https://apexracetech.in/race-insight.html">
-    <meta name="twitter:title" content="Race Insight | APEX Race Technologies">
+    <meta name="twitter:title" content="Race Insight | APEXRACE Technologies">
     <meta name="twitter:description" content="Download Race Insight - The advanced data analysis tool for sim racers. Analyze racing data, compare laps, and improve your racing performance.">
     <meta name="twitter:image" content="https://apexracetech.in/assets/images/RI_round_logo.webp">
     
@@ -39,23 +43,156 @@
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Race Insight",
-        "applicationCategory": "Data Analysis Application",
-        "operatingSystem": "Windows, Linux, macOS",
-        "description": "Advanced data analysis tool for motorsport racers. Analyze racing data, compare laps, and improve your racing performance with professional-grade tools.",
-        "publisher": {
-            "@type": "Organization",
-            "name": "APEX Race Technologies",
-            "url": "https://apexracetech.in"
-        },
-        "screenshot": "https://apexracetech.in/assets/images/lap_comparison_ui.webp",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "availability": "https://schema.org/InStock"
-        }
+        "@graph": [
+            {
+                "@type": "Organization",
+                "@id": "https://apexracetech.in/#organization",
+                "name": "APEXRACE Technologies",
+                "url": "https://apexracetech.in",
+                "logo": "https://apexracetech.in/assets/images/apex_orange_Horizontal.svg",
+                "sameAs": [
+                    "https://www.instagram.com/apex.race.tech/",
+                    "https://twitter.com/apexracetech",
+                    "https://github.com/APEX-Race-Tech"
+                ],
+                "contactPoint": {
+                    "@type": "ContactPoint",
+                    "email": "info@apexracetech.in",
+                    "contactType": "customer support"
+                },
+                "address": {
+                    "@type": "PostalAddress",
+                    "streetAddress": "Sri Sairam Techno Incubator Foundation",
+                    "addressLocality": "Chennai",
+                    "addressRegion": "Tamil Nadu",
+                    "addressCountry": "IN"
+                },
+                "description": "APEXRACE Technologies builds motorsport data acquisition hardware (Moto-Insight) and racing telemetry software (Race Insight), plus wearable sports performance trackers (Kinetic Sports)."
+            },
+            {
+                "@type": "WebSite",
+                "@id": "https://apexracetech.in/#website",
+                "name": "APEXRACE Technologies",
+                "url": "https://apexracetech.in",
+                "publisher": {
+                    "@id": "https://apexracetech.in/#organization"
+                },
+                "inLanguage": "en"
+            },
+            {
+                "@type": "WebPage",
+                "@id": "https://apexracetech.in/race-insight.html#webpage",
+                "url": "https://apexracetech.in/race-insight.html",
+                "name": "Race Insight | APEXRACE Technologies",
+                "description": "Download Race Insight - The advanced data analysis tool for sim racers. Analyze racing data, compare laps, and improve your racing performance.",
+                "isPartOf": {
+                    "@id": "https://apexracetech.in/#website"
+                }
+            },
+            {
+                "@type": "SoftwareApplication",
+                "@id": "https://apexracetech.in/race-insight.html#software",
+                "name": "Race Insight",
+                "applicationCategory": "Data Analysis Application",
+                "operatingSystem": "Windows, Linux, macOS",
+                "description": "Advanced data analysis tool for motorsport racers. Analyze racing data, compare laps, and improve your racing performance with professional-grade tools.",
+                "publisher": {
+                    "@id": "https://apexracetech.in/#organization"
+                },
+                "screenshot": "https://apexracetech.in/assets/images/lap_comparison_ui.webp",
+                "featureList": "Data import (iRacing, MoTeC, AiM, VBOX, CSV, JSON); lap comparison; professional graphing engine; AI-powered custom workbook; CSV/PDF/track map export; offline analysis",
+                "offers": {
+                    "@type": "Offer",
+                    "price": "0",
+                    "priceCurrency": "USD",
+                    "availability": "https://schema.org/InStock"
+                }
+            }
+        ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://apexracetech.in/"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Race Insight",
+                "item": "https://apexracetech.in/race-insight.html"
+            }
+        ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What is Race Insight?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Race Insight is a professional-grade motorsport data analysis application by APEXRACE Technologies. It lets sim racers and real-world racers import telemetry data, compare laps side-by-side, analyze speed, throttle, brake and steering channels, and build custom AI-powered dashboards."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Which racing simulators does Race Insight support?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Race Insight currently supports iRacing and Assetto Corsa, with more simulators and real-world data acquisition integrations planned. It also imports session files from MoTeC, AiM, and VBOX systems."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What racing data formats can Race Insight import?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Race Insight accepts the major racing data formats including iRacing (.ibt), MoTeC (.ld, .ldx), AiM (.drk, .xrk), VBOX (.vbo), and custom CSV and JSON files."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Is Race Insight free?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Race Insight is currently available as a free beta. Sign in with your Google account to download and start analyzing your racing data at no cost."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What are the system requirements for Race Insight?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Race Insight is available for Windows, Linux, and macOS. Import and analysis work offline after your first sign-in; map tiles require an internet connection."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I compare laps in Race Insight?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Race Insight lets you compare any laps side-by-side, even when recorded at different sample rates. Laps are automatically aligned so you can see exactly where you gained or lost time."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I export my analysis from Race Insight?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Race Insight supports exporting analyzed data to CSV, generating professional PDF reports, and saving high-quality track maps with lap data overlaid."
+                }
+            }
+        ]
     }
     </script>
     <!-- Preconnect to external resources for faster loading -->
@@ -162,9 +299,9 @@
     <header class="header">
         <nav class="nav-container">
             <a href="index.html" class="header__logo">
-                <img src="assets/images/apex_orange_Horizontal.svg" alt="APEX Race Technologies Logo" class="logo--full"
+                <img src="assets/images/apex_orange_Horizontal.svg" alt="APEXRACE Technologies Logo" class="logo--full"
                     style="filter: hue-rotate(190deg) brightness(1.2);">
-                <img src="assets/images/apex_orange_ONLY LOGO.svg" alt="APEX Race Technologies Icon" class="logo--icon"
+                <img src="assets/images/apex_orange_ONLY LOGO.svg" alt="APEXRACE Technologies Icon" class="logo--icon"
                     style="filter: hue-rotate(190deg) brightness(1.2);">
             </a>
             <div class="nav-right">
@@ -644,6 +781,43 @@
         </div>
     </section>
 
+    <section id="faq" class="full-page-section">
+        <div class="section-content">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <p class="section-subtitle">Quick answers about Race Insight — compatibility, pricing, and features.</p>
+            <div class="faq-list">
+                <details>
+                    <summary>What is Race Insight?</summary>
+                    <p>Race Insight is a professional-grade motorsport data analysis application by APEXRACE Technologies. It lets sim racers and real-world racers import telemetry data, compare laps side-by-side, analyze speed, throttle, brake and steering channels, and build custom AI-powered dashboards.</p>
+                </details>
+                <details>
+                    <summary>Which racing simulators does Race Insight support?</summary>
+                    <p>Race Insight currently supports iRacing and Assetto Corsa, with more simulators and real-world data acquisition integrations planned. It also imports session files from MoTeC, AiM, and VBOX systems.</p>
+                </details>
+                <details>
+                    <summary>What racing data formats can Race Insight import?</summary>
+                    <p>Race Insight accepts the major racing data formats including iRacing (.ibt), MoTeC (.ld, .ldx), AiM (.drk, .xrk), VBOX (.vbo), and custom CSV and JSON files.</p>
+                </details>
+                <details>
+                    <summary>Is Race Insight free?</summary>
+                    <p>Race Insight is currently available as a free beta. Sign in with your Google account to download and start analyzing your racing data at no cost.</p>
+                </details>
+                <details>
+                    <summary>What are the system requirements for Race Insight?</summary>
+                    <p>Race Insight is available for Windows, Linux, and macOS. Import and analysis work offline after your first sign-in; map tiles require an internet connection.</p>
+                </details>
+                <details>
+                    <summary>Can I compare laps in Race Insight?</summary>
+                    <p>Yes. Race Insight lets you compare any laps side-by-side, even when recorded at different sample rates. Laps are automatically aligned so you can see exactly where you gained or lost time.</p>
+                </details>
+                <details>
+                    <summary>Can I export my analysis from Race Insight?</summary>
+                    <p>Yes. Race Insight supports exporting analyzed data to CSV, generating professional PDF reports, and saving high-quality track maps with lap data overlaid.</p>
+                </details>
+            </div>
+        </div>
+    </section>
+
     <section id="download" class="full-page-section">
         <div class="section-content">
             <div class="download-section">
@@ -1073,7 +1247,7 @@
             <!-- Logo Section -->
             <div style="display: flex; align-items: center; justify-content: center;">
                 <img src="assets/images/apex_blue_ONLY_LOGO.svg" alt="APEX Logo" style="height: 35px; width: auto;" loading="lazy" decoding="async">
-                <span style="font-weight: 600; font-size: 1.2rem; margin-left: 0.5rem; letter-spacing: 0.5px;">APEX Race Technologies</span>
+                <span style="font-weight: 600; font-size: 1.2rem; margin-left: 0.5rem; letter-spacing: 0.5px;">APEXRACE Technologies</span>
             </div>
 
             <!-- Social Links -->
@@ -1093,7 +1267,7 @@
             </div>
 
             <!-- Copyright -->
-            <p style="color: #888; font-size: 0.85rem; margin-top: 0.5rem; margin-bottom: 0;">&copy; 2026 APEX Race Technologies. All rights reserved.</p>
+            <p style="color: #888; font-size: 0.85rem; margin-top: 0.5rem; margin-bottom: 0;">&copy; 2026 APEXRACE Technologies. All rights reserved.</p>
         </div>
     </footer>
 </body>

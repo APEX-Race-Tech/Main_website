@@ -5,7 +5,12 @@ export default {
       input: {
         main: './race-insight.html',
         index: './index.html',
-        kineticsports: './kineticsports.html'
+        kineticsports: './kineticsports.html',
+        racing: './racing.html',
+        'race-insight/eula': './race-insight/eula.html',
+        'race-insight/terms': './race-insight/terms.html',
+        'race-insight/privacy-policy': './race-insight/privacy-policy.html',
+        'race-insight/third-party-licenses': './race-insight/third-party-licenses.html'
       }
     }
   },

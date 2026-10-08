@@ -10,7 +10,7 @@ Version: 1.0
 
 ## 1. AGREEMENT OVERVIEW
 
-This Terms of Service ("Agreement" or "Terms") is entered into between APEX Race Technologies ("Company," "We," "Us") and you ("User," "You") regarding your use of the RACE Insight software, website, and related services.
+This Terms of Service ("Agreement" or "Terms") is entered into between APEXRACE Technologies ("Company," "We," "Us") and you ("User," "You") regarding your use of the RACE Insight software, website, and related services.
 
 By accessing, downloading, using, or purchasing RACE Insight, you agree to be bound by all terms in this Agreement. If you do not agree to any part, do not use RACE Insight.
 
@@ -57,7 +57,7 @@ You must be:
 - At least 18 years old (or have parental consent)
 - Located in a country where RACE Insight is legally available
 - Not prohibited by law from using the service
-- Not a direct competitor of APEX Race Technologies
+- Not a direct competitor of APEXRACE Technologies
 
 ### 3.4 Account Termination
 
@@ -370,7 +370,7 @@ If you violate these terms, we may:
 
 ### 12.1 Our IP (Software)
 
-RACE Insight software is owned by APEX Race Technologies:
+RACE Insight software is owned by APEXRACE Technologies:
 
 - We own all code, designs, algorithms, patents, trademarks
 - You receive only a limited license to use (not to own)
@@ -452,7 +452,7 @@ During BETA, you acknowledge:
 
 ### 14.1 No Liability For Damages
 
-IN NO EVENT SHALL APEX RACE TECHNOLOGIES BE LIABLE FOR:
+IN NO EVENT SHALL APEXRACE TECHNOLOGIES BE LIABLE FOR:
 
 - Loss of data, files, or projects
 - Lost profits or revenue
@@ -489,7 +489,7 @@ You assume all risk and responsibility for:
 
 ### 15.1 You Indemnify Us
 
-You agree to defend, indemnify, and hold harmless APEX Race Technologies from:
+You agree to defend, indemnify, and hold harmless APEXRACE Technologies from:
 
 - Claims from your use of RACE Insight
 - Claims from your violation of this Agreement
@@ -665,7 +665,7 @@ If any part of this Agreement is found invalid or unenforceable:
 
 ## 23. ENTIRE AGREEMENT
 
-This Terms of Service, along with the EULA and Privacy Policy, constitutes the entire agreement between you and APEX Race Technologies regarding RACE Insight.
+This Terms of Service, along with the EULA and Privacy Policy, constitutes the entire agreement between you and APEXRACE Technologies regarding RACE Insight.
 
 Previous agreements are superseded and have no effect.
 
@@ -705,7 +705,7 @@ Help & Documentation: https://www.apexracetech.com/help
 
 ---
 
-Copyright 2025 APEX Race Technologies. All rights reserved.
+Copyright 2025 APEXRACE Technologies. All rights reserved.
 
 Last Updated: December 26, 2025
 

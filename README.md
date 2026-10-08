@@ -8,7 +8,7 @@
 
 [![Download](https://img.shields.io/badge/Download-Race%20Insight-blue)](https://apexracetech.in/race-insight.html)
 [![Documentation](https://img.shields.io/badge/Docs-Read%20More-green)](https://docs.apexracetech.in)
-[![Website](https://img.shields.io/badge/Website-APEX%20Race%20Tech-orange)](https://apexracetech.in)
+[![Website](https://img.shields.io/badge/Website-APEXRACE-orange)](https://apexracetech.in)
 
 [Download](#download) • [Documentation](#documentation) • [Features](#features) • [Support](#support)
 
@@ -105,7 +105,7 @@ The documentation includes:
 - **Official Website**: [apexracetech.in](https://apexracetech.in)
 - **Race Insight Page**: [apexracetech.in/race-insight.html](https://apexracetech.in/race-insight.html)
 - **Documentation**: [docs.apexracetech.in](https://docs.apexracetech.in)
-- **APEX Race Technologies**: [apexracetech.in](https://apexracetech.in)
+- **APEXRACE Technologies**: [apexracetech.in](https://apexracetech.in)
 
 ### Social Media
 
@@ -179,13 +179,13 @@ Race Insight is built with:
 
 ## License
 
-Race Insight is proprietary software developed by **APEX Race Technologies**. See the [EULA](https://apexracetech.in/race-insight/eula.html) for full license terms.
+Race Insight is proprietary software developed by **APEXRACE Technologies**. See the [EULA](https://apexracetech.in/race-insight/eula.html) for full license terms.
 
 ---
 
-## About APEX Race Technologies
+## About APEXRACE Technologies
 
-**APEX Race Technologies** is dedicated to providing professional-grade tools for motorsport enthusiasts and sim racers. We're committed to helping you analyze your data, improve your performance, and achieve your racing goals.
+**APEXRACE Technologies** is dedicated to providing professional-grade tools for motorsport enthusiasts and sim racers. We're committed to helping you analyze your data, improve your performance, and achieve your racing goals.
 
 **Made with ❤️‍🔥 From 🇮🇳**
 
@@ -203,6 +203,6 @@ Always verify analysis results manually before making decisions based on the Sof
 
 **[Download Now](https://apexracetech.in/race-insight.html)** • **[Read the Docs](https://docs.apexracetech.in)** • **[Visit Website](https://apexracetech.in)**
 
-© 2026 APEX Race Technologies. All rights reserved.
+© 2026 APEXRACE Technologies. All rights reserved.
 
 </div>

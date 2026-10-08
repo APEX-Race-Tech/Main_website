@@ -1,4 +1,4 @@
-# .htaccess example for APEX Race Technologies
+# .htaccess example for APEXRACE Technologies
 # Copy this to .htaccess if you're using Apache and need to override noindex headers
 
 # Enable mod_headers (usually enabled by default)

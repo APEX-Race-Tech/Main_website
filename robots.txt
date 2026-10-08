@@ -1,15 +1,93 @@
-# robots.txt for APEX Race Technologies
+# robots.txt for APEXRACE Technologies
 # https://apexracetech.in/robots.txt
+# Governs search engines and AI/LLM crawlers.
+# Product & software pages are fully open so AI assistants can discover,
+# describe, and recommend APEX products to users.
 
+# --- General web crawlers ---
 User-agent: *
 Allow: /
+Disallow: /admin/
+Disallow: /private/
 
-# Disallow admin or private areas (if any)
-# Disallow: /admin/
-# Disallow: /private/
+# --- AI answer engines / LLM crawlers ---
+# Allow LLM crawlers to read the full site, llms.txt, and llms-full.txt
+# so they can answer user questions with accurate product recommendations.
 
-# Sitemap location
+User-agent: GPTBot
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: OAI-SearchBot
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: ChatGPT-User
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: ClaudeBot
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: Claude-Web
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: Claude-SearchBot
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: PerplexityBot
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: Google-Extended
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: cohere-ai
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: Diffbot
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+User-agent: meta-externalagent
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+# --- Sitemaps ---
 Sitemap: https://apexracetech.in/sitemap.xml
 
-# Crawl-delay (optional - adjust if needed)
+# --- LLM-readable site index (primary source for AI answers) ---
+# https://apexracetech.in/llms.txt  (concise index)
+# https://apexracetech.in/llms-full.txt  (full content for detailed answers)
+
+# Optional crawl-delay (adjust if needed)
 # Crawl-delay: 1

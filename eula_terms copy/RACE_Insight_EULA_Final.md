@@ -8,7 +8,7 @@ Effective Date: December 26, 2025
 
 ## 1. AGREEMENT OVERVIEW
 
-This End User License Agreement ("Agreement") is entered into between APEX Race Technologies ("Developer") and you ("User") regarding your use of the RACE Insight software application ("Software").
+This End User License Agreement ("Agreement") is entered into between APEXRACE Technologies ("Developer") and you ("User") regarding your use of the RACE Insight software application ("Software").
 
 By downloading, installing, or using RACE Insight, you agree to be bound by all terms of this Agreement. If you do not agree, do not use the Software.
 
@@ -235,7 +235,7 @@ Because RACE Insight is in BETA, you acknowledge that:
 
 ### 8.1 No Liability for Damages
 
-IN NO EVENT SHALL APEX RACE TECHNOLOGIES BE LIABLE FOR:
+IN NO EVENT SHALL APEXRACE TECHNOLOGIES BE LIABLE FOR:
 
 - Loss of data, files, or projects
 - Lost profits or revenue
@@ -258,7 +258,7 @@ You accept full responsibility for how you use the Software, how you interpret t
 
 ### 9.1 Developer's IP
 
-The Software and all materials (code, designs, documentation) are the exclusive property of APEX Race Technologies. All copyrights, patents, and trademarks are reserved. You receive only a limited license to use, not to own. No intellectual property rights transfer to you.
+The Software and all materials (code, designs, documentation) are the exclusive property of APEXRACE Technologies. All copyrights, patents, and trademarks are reserved. You receive only a limited license to use, not to own. No intellectual property rights transfer to you.
 
 ### 9.2 Your IP
 
@@ -464,6 +464,6 @@ Website: https://www.apexracetech.com
 
 ---
 
-Copyright 2025 APEX Race Technologies. All rights reserved.
+Copyright 2025 APEXRACE Technologies. All rights reserved.
 
 This EULA is effective December 26, 2025 – Version 2.1 (Updated January 2026 for Session Recording Support)

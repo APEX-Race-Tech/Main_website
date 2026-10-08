@@ -641,11 +641,11 @@ By using RACE Insight, you acknowledge that:
 2. You understand that RACE Insight incorporates third-party software
 3. You agree to comply with the license terms of all third-party software
 4. You understand that some services are proprietary and subject to separate Terms of Service
-5. You accept that APEX Race Technologies is not responsible for third-party software issues
+5. You accept that APEXRACE Technologies is not responsible for third-party software issues
 
 ---
 
-Copyright 2025 APEX Race Technologies. All rights reserved.
+Copyright 2025 APEXRACE Technologies. All rights reserved.
 
 This Third-Party Licenses document is effective December 26, 2025 – Version 1.0
 

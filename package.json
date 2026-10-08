@@ -1,7 +1,7 @@
 {
   "name": "apex-race-tech-website",
   "version": "1.0.0",
-  "description": "APEX Race Technologies website with Race-Insight app",
+  "description": "APEXRACE Technologies website with Race-Insight app",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -19,7 +19,7 @@
     "sharp": "^0.33.5",
     "vite": "^7.3.0"
   },
-  "main": "temp.js",
+  "main": "index.html",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/APEX-Race-Tech/Main_website.git"

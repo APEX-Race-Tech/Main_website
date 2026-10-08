@@ -10,7 +10,7 @@ Last Updated: January 2026
 
 ## 1. INTRODUCTION AND WHO WE ARE
 
-Data Controller: APEX Race Technologies
+Data Controller: APEXRACE Technologies
 Location: Chennai, Tamil Nadu, India
 Contact Email: info.apexracetech@gmail.com
 Website: https://www.apexracetech.com
@@ -277,7 +277,7 @@ Session recording is DISABLED by default. You must explicitly opt-in to enable i
 
 **Data Location:** Session recordings are stored by PostHog (EU or US, depending on PostHog's configuration).
 
-**Privacy:** Recordings are encrypted in transit and at rest. Only authorized APEX Race Technologies staff can access recordings for support and improvement purposes.
+**Privacy:** Recordings are encrypted in transit and at rest. Only authorized APEXRACE Technologies staff can access recordings for support and improvement purposes.
 
 ---
 
@@ -553,7 +553,7 @@ We take reasonable steps to protect your data:
 
 - Encryption in transit: Data sent from the app to PostHog uses HTTPS (encrypted)
 - Encryption at rest: PostHog stores data encrypted on their servers
-- Restricted access: Support emails are stored in a password-protected account. Session recordings (if enabled) are accessible only to authorized APEX Race Technologies staff
+- Restricted access: Support emails are stored in a password-protected account. Session recordings (if enabled) are accessible only to authorized APEXRACE Technologies staff
 - Automatic deletion: Event logs are automatically deleted after 30 days. Session recordings are automatically deleted after 14 days
 - Local storage only: Anonymous user IDs are stored locally on your device, not on our servers
 - Session recording: OPTIONAL, opt-in only, disabled by default. If enabled, recordings are encrypted and retained for 14 days only
@@ -750,7 +750,7 @@ RACE Insight may contain links to external websites or services (e.g., GitHub, d
 
 ## 17. CHANGES TO THIS PRIVACY POLICY
 
-APEX Race Technologies may update this Policy at any time. Changes will be posted at https://www.apexracetech.com/privacy
+APEXRACE Technologies may update this Policy at any time. Changes will be posted at https://www.apexracetech.com/privacy
 
 - Latest update: December 26, 2025
 - Significant changes will be announced via email (if you signed in) or in-app notification
@@ -768,7 +768,7 @@ Help & Documentation: https://www.apexracetech.com/help
 
 ---
 
-Copyright 2025 APEX Race Technologies. All rights reserved.
+Copyright 2025 APEXRACE Technologies. All rights reserved.
 
 Last Updated: January 2026
 
