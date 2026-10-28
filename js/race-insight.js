@@ -1479,7 +1479,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (downloadBtn) {
         downloadBtn.addEventListener('click', async () => {
             if (!selectedPlatform) {
-                alert('Please select your platform (Windows, Linux, or Mac) first.');
+                alert('Please select your platform first. Windows is available now; Linux and Mac are coming soon.');
                 return;
             }
             const user = firebase.auth().currentUser;
@@ -1504,6 +1504,68 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // ===== GitHub release lookup (shared by the version label and downloads) =====
+    // Repository is public: https://github.com/APEX-Race-Tech/RACE-Insight-Public
+    // The latest release is fetched automatically; publishing a new GitHub
+    // release updates the download and version label with no site change.
+    const GITHUB_OWNER = 'APEX-Race-Tech';
+    const GITHUB_REPO = 'RACE-Insight-Public';
+
+    const RELEASE_FILE_PATTERNS = {
+        'windows': /RACE-Insight.*Setup.*\.exe$/i,
+        'linux': /RACE-?Insight.*\.AppImage$/i,
+        'apple': /RACE-?Insight.*\.dmg$/i
+    };
+
+    const FALLBACK_VERSION = 'v0.1.37';
+    const FALLBACK_DOWNLOAD_URLS = {
+        'windows': `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v0.1.37/RACE-Insight-Setup-0.1.37.exe`
+    };
+
+    let latestReleasePromise = null;
+
+    // Fetch the latest public release once per page load and reuse the result.
+    function fetchLatestRelease() {
+        if (!latestReleasePromise) {
+            latestReleasePromise = fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`GitHub API error: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .catch(error => {
+                    // Allow a later click to retry after a transient failure.
+                    latestReleasePromise = null;
+                    throw error;
+                });
+        }
+        return latestReleasePromise;
+    }
+
+    function findReleaseAsset(release, platform) {
+        const pattern = RELEASE_FILE_PATTERNS[platform];
+        if (!pattern || !release || !Array.isArray(release.assets)) return null;
+        return release.assets.find(asset => pattern.test(asset.name)) || null;
+    }
+
+    // Show the current release version under the platform buttons.
+    const downloadVersionEl = document.getElementById('download-version');
+    if (downloadVersionEl) {
+        fetchLatestRelease()
+            .then(release => {
+                const published = release.published_at
+                    ? new Date(release.published_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+                    : '';
+                downloadVersionEl.textContent = published
+                    ? `Latest version: ${release.tag_name} (${published})`
+                    : `Latest version: ${release.tag_name}`;
+            })
+            .catch(() => {
+                downloadVersionEl.textContent = `Latest version: ${FALLBACK_VERSION}`;
+            });
+    }
+
     // Helper function to show thank you modal
     function showThankYouModal() {
         const thankYouModal = document.getElementById('thank-you-modal');
@@ -1520,33 +1582,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         const isIE = /Trident/.test(navigator.userAgent);
         const isOldEdge = /Edge/.test(navigator.userAgent) && !isEdge;
         
-        // ===== GitHub Releases API (Primary method for PUBLIC repositories) =====
-        // Repository is now public: https://github.com/APEX-Race-Tech/RACE-Insight-Public
-        // This method automatically fetches the LATEST release - no manual updates needed!
-        // When you publish a new release on GitHub, it will automatically be used here.
-        
-        const GITHUB_OWNER = 'APEX-Race-Tech';
-        const GITHUB_REPO = 'RACE-Insight-Public';
-        
-        const filePatterns = {
-            'windows': /RACE-Insight.*Setup.*\.exe$/i,
-            'linux': /RaceInsight.*\.AppImage$/i,
-            'apple': /RaceInsight.*\.dmg$/i
-        };
-        
+        // ===== GitHub Releases API (primary; see fetchLatestRelease above) =====
         let downloadUrl = null;
-        
+
         try {
-            const response = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`);
-            
-            if (!response.ok) {
-                throw new Error(`GitHub API error: ${response.status}`);
-            }
-            
-            const release = await response.json();
-            const pattern = filePatterns[selectedPlatform];
-            const asset = release.assets.find(asset => pattern.test(asset.name));
-            
+            const release = await fetchLatestRelease();
+            const asset = findReleaseAsset(release, selectedPlatform);
+
             if (!asset) {
                 // Fallback to hardcoded URLs if API doesn't find the asset
                 throw new Error(`No release file found for ${selectedPlatform}`);
@@ -1559,16 +1601,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error('GitHub API download error:', error);
             
             // ===== Fallback: Direct Download URLs =====
-            // Fallback to hardcoded URLs if GitHub API fails
-            const downloadUrls = {
-                'windows': 'https://github.com/APEX-Race-Tech/RACE-Insight-Public/releases/download/v0.1.27/RACE-Insight-Setup-0.1.27.exe',
-                'linux': 'https://github.com/APEX-Race-Tech/RACE-Insight-Public/releases/download/v0.1.27/RaceInsight_Setup_Linux.AppImage',
-                'apple': 'https://github.com/APEX-Race-Tech/RACE-Insight-Public/releases/download/v0.1.27/RaceInsight_Setup_Mac.dmg'
-            };
-            
-            downloadUrl = downloadUrls[selectedPlatform];
+            // Used only when the GitHub API is unreachable or the release has no
+            // file for this platform. Keep it in step with the latest public
+            // release. Only Windows installers are published today.
+            downloadUrl = FALLBACK_DOWNLOAD_URLS[selectedPlatform];
             if (!downloadUrl) {
-                alert('Platform not available yet. Please contact support.');
+                alert('Race Insight is not available for this platform yet. Windows is available now; Linux and Mac are coming soon.');
                 return;
             }
             

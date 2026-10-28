@@ -94,13 +94,13 @@
                 "@id": "https://apexracetech.in/race-insight.html#software",
                 "name": "Race Insight",
                 "applicationCategory": "Data Analysis Application",
-                "operatingSystem": "Windows, Linux, macOS",
+                "operatingSystem": "Windows",
                 "description": "Advanced data analysis tool for motorsport racers. Analyze racing data, compare laps, and improve your racing performance with professional-grade tools.",
                 "publisher": {
                     "@id": "https://apexracetech.in/#organization"
                 },
                 "screenshot": "https://apexracetech.in/assets/images/lap_comparison_ui.webp",
-                "featureList": "Data import (iRacing, MoTeC, AiM, VBOX, CSV, JSON); lap comparison; professional graphing engine; AI-powered custom workbook; CSV/PDF/track map export; offline analysis",
+                "featureList": "Data import (iRacing, MoTeC, AiM, VBOX, Autosport Labs, CSV, Excel); lap comparison with delta time; track splits and theoretical best; math channels; custom workbook with lap analysis widgets; session reports; CSV, Parquet, PNG and SVG export; offline analysis",
                 "offers": {
                     "@type": "Offer",
                     "price": "0",
@@ -141,7 +141,7 @@
                 "name": "What is Race Insight?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Race Insight is a professional-grade motorsport data analysis application by APEXRACE Technologies. It lets sim racers and real-world racers import telemetry data, compare laps side-by-side, analyze speed, throttle, brake and steering channels, and build custom AI-powered dashboards."
+                    "text": "Race Insight is a professional-grade motorsport data analysis application by APEXRACE Technologies. It lets sim racers and real-world racers import telemetry data, compare laps side-by-side, analyze speed, throttle, brake and steering channels, and build custom workbooks with lap analysis widgets."
                 }
             },
             {
@@ -149,7 +149,7 @@
                 "name": "Which racing simulators does Race Insight support?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Race Insight currently supports iRacing and Assetto Corsa, with more simulators and real-world data acquisition integrations planned. It also imports session files from MoTeC, AiM, and VBOX systems."
+                    "text": "Race Insight currently supports iRacing telemetry (.ibt), with more simulators planned. It also imports session files from real-world data loggers: MoTeC, AiM, VBOX and Autosport Labs."
                 }
             },
             {
@@ -157,7 +157,7 @@
                 "name": "What racing data formats can Race Insight import?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Race Insight accepts the major racing data formats including iRacing (.ibt), MoTeC (.ld, .ldx), AiM (.drk, .xrk), VBOX (.vbo), and custom CSV and JSON files."
+                    "text": "Race Insight imports iRacing (.ibt), MoTeC (.ld, .ldx), AiM (.xrk), VBOX (.vbo, .vbb), Autosport Labs (.log), CSV, and Excel or OpenDocument spreadsheets (.xlsx, .xls, .ods)."
                 }
             },
             {
@@ -173,7 +173,7 @@
                 "name": "What are the system requirements for Race Insight?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Race Insight is available for Windows, Linux, and macOS. Import and analysis work offline after your first sign-in; map tiles require an internet connection."
+                    "text": "Race Insight is available for Windows. Linux and macOS versions are coming soon. Import and analysis work offline after your first sign-in; map tiles require an internet connection."
                 }
             },
             {
@@ -189,7 +189,7 @@
                 "name": "Can I export my analysis from Race Insight?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Yes. Race Insight supports exporting analyzed data to CSV, generating professional PDF reports, and saving high-quality track maps with lap data overlaid."
+                    "text": "Yes. Race Insight exports your data to CSV. The next release adds lossless native CSV, Parquet, HTML session reports, Summary JSON, PNG graph images and SVG track maps."
                 }
             }
         ]
@@ -346,7 +346,7 @@
                 <p class="tagline">The Motorsport Data Analysis Platform</p>
                 <blockquote class="hero-quote">
                     <p>"Without data you're just another person with an opinion"</p>
-                    <cite>ÔÇö W. Edward Deming</cite>
+                    <cite>— W. Edward Deming</cite>
                 </blockquote>
                 <div class="hero-content">
                     <p class="hero-description">Analyze your Data, compare Laps, and improve your Delta with
@@ -417,7 +417,7 @@
                         </div>
                         <div class="card-content">
                             <h4>Universal Format Support</h4>
-                            <p>Works with all the major racing data formats you already use. Whether your data comes from iRacing, MoTeC, AiM, RaceLogic, or custom CSV files, we've got you covered.</p>
+                            <p>Works with the racing data formats you already use: iRacing, MoTeC, AiM, VBOX, Autosport Labs, CSV and Excel files. Missing samples stay visible as gaps, never filled with made-up values.</p>
                         </div>
                         <div class="card-particles"></div>
                     </div>
@@ -445,7 +445,7 @@
                         </div>
                         <div class="card-content">
                             <h4>Works Offline</h4>
-                            <p>Once you've imported your data, you can analyze it anywhereÔÇöeven without internet. Perfect for working on the go or in areas with spotty connectivity.</p>
+                            <p>Once you've imported your data, you can analyze it anywhere—even without internet. Perfect for working on the go or in areas with spotty connectivity.</p>
                         </div>
                         <div class="card-particles"></div>
                     </div>
@@ -491,7 +491,7 @@
                         </div>
                         <div class="card-content">
                             <h4>Instant Performance Stats</h4>
-                            <p>Click any session to see your key metrics at a glanceÔÇöaverage lap times, how consistent you were, and your theoretical best lap.</p>
+                            <p>Click any session to see your key metrics at a glance—average lap times, how consistent you were, and your theoretical best lap.</p>
                         </div>
                         <div class="card-particles"></div>
                     </div>
@@ -536,8 +536,8 @@
                             </div>
                         </div>
                         <div class="card-content">
-                            <h4>Professional Graphing Engine</h4>
-                            <p>Smooth graphs that display your racing data without any lag. Everything responds instantly as you explore your data.</p>
+                            <h4>Professional Graphing Engine <span class="next-release-tag">Next release: math channels</span></h4>
+                            <p>Smooth graphs that display your racing data without any lag. Build your own math channels with derivative, integral, smoothing and lookup functions.</p>
                         </div>
                         <div class="card-particles"></div>
                     </div>
@@ -551,7 +551,7 @@
                         </div>
                         <div class="card-content">
                             <h4>Everything Connected</h4>
-                            <p>Move your cursor on any graph and watch everything update togetherÔÇötrack position, G-forces, and all your gauges move in perfect sync.</p>
+                            <p>Move your cursor on any graph and watch everything update together—track position, G-forces, and all your gauges move in perfect sync.</p>
                         </div>
                         <div class="card-particles"></div>
                     </div>
@@ -564,8 +564,8 @@
                             </div>
                         </div>
                         <div class="card-content">
-                            <h4>Easy Lap Comparison</h4>
-                            <p>Compare any laps side-by-side, even if they were recorded at different rates. The system automatically aligns everything so you can see exactly where you gained or lost time.</p>
+                            <h4>Lap Comparison and Splits <span class="next-release-tag">Next release: splits</span></h4>
+                            <p>Compare any laps side-by-side, even if they were recorded at different rates. See delta time by distance, set your own track splits, and get sector times and a theoretical best lap.</p>
                         </div>
                         <div class="card-particles"></div>
                     </div>
@@ -578,11 +578,11 @@
         <div class="section-content">
             <div class="section-header-card">
                 <div class="section-header-icon">
-                    <i class="fas fa-robot"></i>
+                    <i class="fas fa-th-large"></i>
                 </div>
                 <div class="section-header-text">
                     <h2 class="section-title">Custom workbook</h2>
-                    <p class="section-subtitle">Your Modular Mission Control (AI workbook)</p>
+                    <p class="section-subtitle">Your Modular Mission Control</p>
                 </div>
             </div>
             <div class="feature-content">
@@ -590,14 +590,14 @@
                     <div class="feature-detail-item innovative-card" data-card="1">
                         <div class="card-glow"></div>
                         <div class="card-image-wrapper">
-                            <img src="assets/images/telemetry_graphs_ui.webp" alt="AI-Driven Layout Generation" class="card-image" style="display: none;">
+                            <img src="assets/images/telemetry_graphs_ui.webp" alt="Lap Analysis Widgets" class="card-image" style="display: none;">
                             <div class="image-overlay" style="background: #000 !important; opacity: 1 !important; display: flex !important; align-items: center !important; justify-content: center !important;">
-                                <i class="fas fa-brain" style="font-size: 4rem !important; color: #fff !important; opacity: 1 !important; z-index: 10 !important; position: relative !important; display: inline-block !important;"></i>
+                                <i class="fas fa-route" style="font-size: 4rem !important; color: #fff !important; opacity: 1 !important; z-index: 10 !important; position: relative !important; display: inline-block !important;"></i>
                             </div>
                         </div>
                         <div class="card-content">
-                            <h4>AI-Powered Creation</h4>
-                            <p>Just describe what you want in plain English, and watch as your custom dashboard comes to life. No complex setup required.</p>
+                            <h4>Lap Analysis Widgets <span class="next-release-tag">Next release</span></h4>
+                            <p>Corner Map, Braking and Acceleration Zones, Corner Comparison, Lap Consistency, Sector Analysis, Suspension Velocity and Tyre Grip, all linked to the same cursor.</p>
                         </div>
                         <div class="card-particles"></div>
                     </div>
@@ -611,21 +611,21 @@
                         </div>
                         <div class="card-content">
                             <h4>Drag-and-Drop Design</h4>
-                            <p>Build your perfect workspace by simply dragging, resizing, and arranging widgets exactly where you want them. It's that easy.</p>
+                            <p>Build your perfect workspace by dragging, resizing and arranging graphs, track maps, speed dials, throttle/brake displays, tyre monitors and G-force gauges.</p>
                         </div>
                         <div class="card-particles"></div>
                     </div>
                     <div class="feature-detail-item innovative-card" data-card="3">
                         <div class="card-glow"></div>
                         <div class="card-image-wrapper">
-                            <img src="assets/images/lap_comparison_ui.webp" alt="Modular Library" class="card-image" style="display: none;">
+                            <img src="assets/images/lap_comparison_ui.webp" alt="Reports and Coaching" class="card-image" style="display: none;">
                             <div class="image-overlay" style="background: #000 !important; opacity: 1 !important; display: flex !important; align-items: center !important; justify-content: center !important;">
-                                <i class="fas fa-th-large" style="font-size: 4rem !important; color: #fff !important; opacity: 1 !important; z-index: 10 !important; position: relative !important; display: inline-block !important;"></i>
+                                <i class="fas fa-user-graduate" style="font-size: 4rem !important; color: #fff !important; opacity: 1 !important; z-index: 10 !important; position: relative !important; display: inline-block !important;"></i>
                             </div>
                         </div>
                         <div class="card-content">
-                            <h4>Widget Library</h4>
-                            <p>Choose from professional tools like speed dials, throttle/brake displays, tire monitors, and G-force gauges. Mix and match to create your ideal setup.</p>
+                            <h4>Reports and Coaching <span class="next-release-tag">Next release</span></h4>
+                            <p>A Session Report gathers every lap analysis result in one place. Driver mode and the Coaching card show the corners where you lose the most time, and why.</p>
                         </div>
                         <div class="card-particles"></div>
                     </div>
@@ -656,22 +656,22 @@
                             </div>
                         </div>
                         <div class="card-content">
-                            <h4>Export to CSV</h4>
-                            <p>Save your analyzed data in a clean, easy-to-read format that works with Excel, MATLAB, and other tools you already use.</p>
+                            <h4>Export to CSV and Parquet <span class="next-release-tag">Next release: Parquet</span></h4>
+                            <p>Save your data for Excel, MATLAB, Python and other tools you already use. Native CSV keeps every channel at its own sample rate and imports back without loss.</p>
                         </div>
                         <div class="card-particles"></div>
                     </div>
                     <div class="feature-detail-item innovative-card" data-card="2">
                         <div class="card-glow"></div>
                         <div class="card-image-wrapper">
-                            <img src="assets/images/telemetry_graphs_ui.webp" alt="PDF Report Export" class="card-image" style="display: none;">
+                            <img src="assets/images/telemetry_graphs_ui.webp" alt="Session Report Export" class="card-image" style="display: none;">
                             <div class="image-overlay" style="background: #000 !important; opacity: 1 !important; display: flex !important; align-items: center !important; justify-content: center !important;">
-                                <i class="fas fa-file-pdf" style="font-size: 4rem !important; color: #fff !important; opacity: 1 !important; z-index: 10 !important; position: relative !important; display: inline-block !important;"></i>
+                                <i class="fas fa-file-alt" style="font-size: 4rem !important; color: #fff !important; opacity: 1 !important; z-index: 10 !important; position: relative !important; display: inline-block !important;"></i>
                             </div>
                         </div>
                         <div class="card-content">
-                            <h4>Export PDF Reports</h4>
-                            <p>Generate professional PDF reports with your analysis, graphs, and insightsÔÇöperfect for sharing with your team or keeping records of your performance improvements.</p>
+                            <h4>Session Reports <span class="next-release-tag">Next release</span></h4>
+                            <p>Export a printable HTML report and a Summary JSON with your lap times and best lap, ready to share with your team or keep as a record of your progress.</p>
                         </div>
                         <div class="card-particles"></div>
                     </div>
@@ -684,8 +684,8 @@
                             </div>
                         </div>
                         <div class="card-content">
-                            <h4>Export Track Maps</h4>
-                            <p>Save high-quality track maps with your lap data overlaid, ideal for presentations, documentation, or detailed track analysis.</p>
+                            <h4>Export Graphs and Track Maps <span class="next-release-tag">Next release</span></h4>
+                            <p>Save graphs as PNG images and track maps as SVG files, ideal for presentations, documentation or detailed track analysis.</p>
                         </div>
                         <div class="card-particles"></div>
                     </div>
@@ -719,11 +719,13 @@
                     <h4>Supported File Formats</h4>
                     <p style="padding-bottom: 0.5rem;">Compatible with popular data formats for seamless integration with your workflow.</p>
                     <ul class="file-format-list">
+                        <li>iRacing (.ibt)</li>
                         <li>MoTeC (.ld, .ldx)</li>
+                        <li>AiM (.xrk)</li>
+                        <li>VBOX (.vbo, .vbb)</li>
+                        <li>Autosport Labs (.log)</li>
                         <li>CSV</li>
-                        <li>JSON</li>
-                        <li>VBOX (.vbo)</li>
-                        <li>AIM (.drk, .xrk)</li>                    
+                        <li>Excel / OpenDocument (.xlsx, .xls, .ods)</li>
                     </ul>
                 </div>
                 <div class="advantage-card feature-card">
@@ -749,8 +751,8 @@
                 </div>
                 <div class="update-card">
                     <div class="update-icon"><i class="fas fa-globe"></i></div>
-                    <h4>Cross Platform Support</h4>
-                    <p>Full cross platform support across multiple devices.</p>
+                    <h4>Linux and macOS</h4>
+                    <p>Native Race Insight builds for Linux and macOS, alongside Windows.</p>
                 </div>
                 <div class="update-card">
                     <div class="update-icon"><i class="fas fa-stopwatch-20"></i></div>
@@ -788,15 +790,15 @@
             <div class="faq-list">
                 <details>
                     <summary>What is Race Insight?</summary>
-                    <p>Race Insight is a professional-grade motorsport data analysis application by APEXRACE Technologies. It lets sim racers and real-world racers import telemetry data, compare laps side-by-side, analyze speed, throttle, brake and steering channels, and build custom AI-powered dashboards.</p>
+                    <p>Race Insight is a professional-grade motorsport data analysis application by APEXRACE Technologies. It lets sim racers and real-world racers import telemetry data, compare laps side-by-side, analyze speed, throttle, brake and steering channels, and build custom workbooks with lap analysis widgets.</p>
                 </details>
                 <details>
                     <summary>Which racing simulators does Race Insight support?</summary>
-                    <p>Race Insight currently supports iRacing and Assetto Corsa, with more simulators and real-world data acquisition integrations planned. It also imports session files from MoTeC, AiM, and VBOX systems.</p>
+                    <p>Race Insight currently supports iRacing telemetry (.ibt), with more simulators planned. It also imports session files from real-world data loggers: MoTeC, AiM, VBOX and Autosport Labs.</p>
                 </details>
                 <details>
                     <summary>What racing data formats can Race Insight import?</summary>
-                    <p>Race Insight accepts the major racing data formats including iRacing (.ibt), MoTeC (.ld, .ldx), AiM (.drk, .xrk), VBOX (.vbo), and custom CSV and JSON files.</p>
+                    <p>Race Insight imports iRacing (.ibt), MoTeC (.ld, .ldx), AiM (.xrk), VBOX (.vbo, .vbb), Autosport Labs (.log), CSV, and Excel or OpenDocument spreadsheets (.xlsx, .xls, .ods).</p>
                 </details>
                 <details>
                     <summary>Is Race Insight free?</summary>
@@ -804,7 +806,7 @@
                 </details>
                 <details>
                     <summary>What are the system requirements for Race Insight?</summary>
-                    <p>Race Insight is available for Windows, Linux, and macOS. Import and analysis work offline after your first sign-in; map tiles require an internet connection.</p>
+                    <p>Race Insight is available for Windows. Linux and macOS versions are coming soon. Import and analysis work offline after your first sign-in; map tiles require an internet connection.</p>
                 </details>
                 <details>
                     <summary>Can I compare laps in Race Insight?</summary>
@@ -812,7 +814,7 @@
                 </details>
                 <details>
                     <summary>Can I export my analysis from Race Insight?</summary>
-                    <p>Yes. Race Insight supports exporting analyzed data to CSV, generating professional PDF reports, and saving high-quality track maps with lap data overlaid.</p>
+                    <p>Yes. Race Insight exports your data to CSV. The next release adds lossless native CSV, Parquet, HTML session reports, Summary JSON, PNG graph images and SVG track maps.</p>
                 </details>
             </div>
         </div>
@@ -835,9 +837,10 @@
 
                 <div class="platform-options">
                     <button class="platform-btn" data-platform="windows"><i class="fab fa-windows"></i> Windows</button>
-                    <button class="platform-btn disabled" data-platform="linux" disabled style="opacity: 0.5; cursor: not-allowed; pointer-events: none;"><i class="fab fa-linux"></i> Linux</button>
-                    <button class="platform-btn disabled" data-platform="apple" disabled style="opacity: 0.5; cursor: not-allowed; pointer-events: none;"><i class="fab fa-apple"></i> Mac</button>
+                    <button class="platform-btn disabled" data-platform="linux" disabled title="Coming soon" style="opacity: 0.5; cursor: not-allowed; pointer-events: none;"><i class="fab fa-linux"></i> Linux (coming soon)</button>
+                    <button class="platform-btn disabled" data-platform="apple" disabled title="Coming soon" style="opacity: 0.5; cursor: not-allowed; pointer-events: none;"><i class="fab fa-apple"></i> Mac (coming soon)</button>
                 </div>
+                <p id="download-version" class="download-version" aria-live="polite"></p>
 
                 <div class="action-buttons">
                     <button id="download-btn" class="btn btn-primary">Download</button>
