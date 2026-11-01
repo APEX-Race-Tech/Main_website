@@ -195,7 +195,7 @@
         <h1>PRIVACY POLICY</h1>
         <p><strong>RACE Insight – Data Protection & Privacy Notice</strong></p>
         <p><strong>Effective Date:</strong> December 26, 2025</p>
-        <p><strong>Last Updated:</strong> December 26, 2025</p>
+        <p><strong>Last Updated:</strong> November 1, 2026</p>
 
         <hr>
 
@@ -238,23 +238,23 @@
         <p>We do not automatically copy, sync, backup, or send this data to our servers or cloud storage.</p>
 
         <h4>2.1.2 Data We Collect (Sent From the App)</h4>
-        <p>To improve the Software, we collect anonymous usage events via PostHog.</p>
+        <p>To improve the Software, we collect anonymous usage events via PostHog. This is off by default: nothing is sent unless you turn on "Send anonymous usage statistics" on the first screen or in Settings > Analytics, and you can turn it off at any time.</p>
 
         <h4>A. AUTHENTICATION EVENTS</h4>
-        <p>If you sign in with Google, when you sign in or out, we track:</p>
+        <p>An account is optional. If you opt in to analytics and use an account, when you sign up, sign in or out, we track:</p>
         <ul>
-            <li>user_signed_in - Recorded when you successfully log in with Google (includes: Firebase UID, email, display name)</li>
+            <li>user_signed_in - Recorded when you successfully sign in (includes: your anonymous account ID only)</li>
             <li>user_signed_out - Recorded when you log out</li>
-            <li>sign_in_attempted - When you attempt to sign in (with method: "firebase")</li>
+            <li>sign_in_attempted - When you attempt to sign in (with method: "email_password")</li>
             <li>sign_in_succeeded - When sign-in succeeds</li>
-            <li>sign_in_failed - When sign-in fails (with error message)</li>
-            <li>sign_out_attempted - When you attempt to log out</li>
-            <li>sign_out_succeeded - When logout succeeds</li>
-            <li>sign_out_failed - When logout fails (with error message)</li>
+            <li>sign_in_failed - When sign-in fails (with an error code, not your password)</li>
+            <li>sign_up_attempted, sign_up_succeeded, sign_up_failed - When you create an account</li>
+            <li>sign_out_attempted, sign_out_succeeded, sign_out_failed - When you log out</li>
+            <li>local_mode_selected - When you choose to continue without an account</li>
         </ul>
-        <p><strong>What we do not collect:</strong> Your Google password (never sent to us), your password (only Google handles authentication), your profile picture or other Google profile data, your Google calendar, contacts, or email (we do not access these).</p>
-        <p><strong>Storage:</strong> Firebase UID, email, and display name are stored by Google/Firebase and associated with PostHog analytics.</p>
-        <p><strong>Why:</strong> To ensure authentication works correctly and troubleshoot sign-in issues.</p>
+        <p><strong>What we do not collect in analytics:</strong> your password, your email address or your name. The account ID is a random identifier assigned by AWS Cognito.</p>
+        <p><strong>Storage:</strong> Your email address, name and password verifier are held by Amazon Web Services (AWS Cognito), not by PostHog. Passwords are checked with the Secure Remote Password protocol, so they are not sent to us in readable form.</p>
+        <p><strong>Why:</strong> To ensure account sign-in works correctly and troubleshoot sign-in issues.</p>
 
         <h4>B. APPLICATION LIFECYCLE EVENTS</h4>
         <p>We track when you use the application:</p>
@@ -306,7 +306,7 @@
             <li>Analysis preferences - Your preferred chart types, default units, default views</li>
             <li>Workspace configuration - Dashboard layouts, widget arrangements, custom filters</li>
         </ul>
-        <p><strong>What we do not collect:</strong> Your actual project data or analysis results, file contents or file names, your real name or email (unless you signed in with Google), or data about which files you opened.</p>
+        <p><strong>What we do not collect:</strong> Your actual project data or analysis results, file contents or file names, your real name or email, or data about which files you opened.</p>
         <p><strong>Why:</strong> To understand user preferences and optimize default settings for better UX.</p>
 
         <h4>F. ERROR AND CRASH EVENTS</h4>
@@ -330,21 +330,21 @@
             <li>We explicitly code which events to track</li>
             <li>We do not use automatic click/button tracking (autocapture disabled)</li>
             <li>We do not record all interactions automatically</li>
-            <li>We do not use session recording</li>
+            <li>We do not use session recording unless you separately turn it on</li>
             <li>We do not track mouse movements or keyboard input</li>
             <li>We do not track how long you spend on specific UI elements</li>
         </ul>
-        <p><strong>PostHog Configuration:</strong> session_recording disabled, autocapture disabled, tracking mode is manual events only.</p>
+        <p><strong>PostHog Configuration:</strong> session recording is off unless you separately turn it on in Settings, autocapture is disabled, and tracking mode is manual events only.</p>
         <p><strong>Why:</strong> To minimize data collection and respect your privacy.</p>
 
         <h4>H. ANONYMOUS USER IDENTIFICATION</h4>
         <p>For all events, we generate an anonymous User ID (UUID-style identifier) that:</p>
         <ul>
             <li>Is stored locally on your device (in localStorage)</li>
-            <li>Is not tied to your personal identity unless you sign in with Google</li>
-            <li>If you sign in, it is linked to your Firebase UID and email</li>
+            <li>Is not tied to your personal identity unless you sign in</li>
+            <li>If you sign in, it is replaced by your random account ID (not your email or name)</li>
             <li>Can be reset by clearing your browser data or disabling analytics</li>
-            <li>Does not track your real name or email unless you explicitly sign in</li>
+            <li>Does not track your real name or email</li>
         </ul>
         <p><strong>How it works:</strong></p>
         <ol>
@@ -353,7 +353,7 @@
             <li>All events are tagged with this UUID</li>
             <li>We can group events from the same user without knowing who you are</li>
         </ol>
-        <p><strong>Changing your User ID:</strong> Clearing browser data/localStorage will generate a new UUID. Disabling analytics stops event collection entirely. Signing out removes the association with your Google account.</p>
+        <p><strong>Changing your User ID:</strong> Clearing browser data/localStorage will generate a new UUID. Disabling analytics stops event collection entirely. Signing out removes the association with your account.</p>
         <p><strong>Why:</strong> To group events from the same user session for analysis, without identifying you personally.</p>
 
         <h4>I. IN-APP FEEDBACK AND SUPPORT</h4>
@@ -395,12 +395,23 @@
             <li>Keystroke logs or screen recording</li>
             <li>Location tracking or GPS data (only your imported racing data)</li>
             <li>Behavioral profiling or behavioral advertising</li>
-            <li>Your real name or email (unless you voluntarily sign in with Google)</li>
+            <li>Your real name or email in analytics (account details are held by AWS Cognito, see section 2.4)</li>
             <li>File contents from your racing data files</li>
             <li>Financial or payment information (beta is free)</li>
         </ul>
 
         <hr>
+
+        <h3>2.4 Account and Download Profile</h3>
+        <p>An account is optional for the desktop application. The website requires an account to download the Software.</p>
+        <ul>
+            <li><strong>Account data (app and website):</strong> email address, name (defaults to the first part of your email), password verifier and the date you joined. Stored by AWS Cognito.</li>
+            <li><strong>Download profile (website):</strong> before your first download we ask for your primary simulator, racing experience, location and where you heard about us. You can change these, and add an optional bio, in your profile. Stored as attributes of your Cognito account.</li>
+            <li><strong>Sign-up log (website):</strong> when you complete the download profile, your name, email and those answers are also added to our internal sign-up spreadsheet to help us understand who uses the Software.</li>
+            <li><strong>Download counter (website):</strong> a single public total of downloads, kept in Google Firestore. It contains no personal data.</li>
+        </ul>
+        <p><strong>Why:</strong> To provide your account, gate downloads, and understand our audience.</p>
+        <p><strong>Retention and control:</strong> You can edit your profile or delete your account on the website at any time, which removes your Cognito account and its attributes. Entries already in the internal sign-up spreadsheet are removed on request (see section 6).</p>
 
         <h2>3. HOW WE USE YOUR DATA</h2>
 
@@ -456,8 +467,8 @@
         <h3>5.1 PostHog (Analytics and Event Tracking)</h3>
         <ul>
             <li><strong>Service:</strong> Collects manual events (authentication, features, errors, file imports, settings)</li>
-            <li><strong>Data shared:</strong> Anonymous user ID, event names and timestamps, error stack traces (first 500 characters), app version and operating system, file metadata (type and size only, NOT contents), email and display name (only if signed in)</li>
-            <li><strong>Configuration:</strong> Session recording disabled, autocapture disabled, manual event tracking only</li>
+            <li><strong>Data shared:</strong> Anonymous user ID (or your random account ID if signed in), event names and timestamps, error stack traces (first 500 characters), app version and operating system, file metadata (type and size only, NOT contents). Never your email or name. Sent only if you opt in.</li>
+            <li><strong>Configuration:</strong> Opt-in only, session recording off unless you turn it on, autocapture disabled, manual event tracking only</li>
             <li><strong>Privacy Policy:</strong> <a href="https://posthog.com/privacy" target="_blank" rel="noopener noreferrer">https://posthog.com/privacy</a></li>
             <li><strong>Data location:</strong> EU or US (depending on PostHog's configuration)</li>
             <li><strong>Data retention:</strong> 30 days by default</li>
@@ -465,14 +476,20 @@
         </ul>
         <p><strong>Data Processing Agreement:</strong> PostHog provides a DPA for GDPR compliance.</p>
 
-        <h3>5.2 Google (Firebase Authentication and Website Analytics)</h3>
-        <p><strong>Google Firebase (Authentication):</strong></p>
+        <h3>5.2 Amazon Web Services and Google</h3>
+        <p><strong>Amazon Web Services - AWS Cognito (Accounts):</strong></p>
         <ul>
-            <li><strong>Service:</strong> Handles Google Sign-In authentication</li>
-            <li><strong>Data shared:</strong> Firebase UID, email, display name (only if you sign in)</li>
-            <li><strong>How it works:</strong> When you click "Sign in with Google," Firebase securely connects you to Google's authentication service</li>
+            <li><strong>Service:</strong> Handles account sign-up, sign-in, email verification and password reset</li>
+            <li><strong>Data shared:</strong> email address, name, password (as a verifier), join date and, on the website, your download profile answers</li>
+            <li><strong>How it works:</strong> Verification codes and reset codes are emailed to you. Your password is never sent in readable form.</li>
+            <li><strong>Privacy Policy:</strong> <a href="https://aws.amazon.com/privacy/" target="_blank" rel="noopener noreferrer">https://aws.amazon.com/privacy/</a></li>
+            <li><strong>Data location:</strong> AWS Europe (Frankfurt) region, Germany</li>
+        </ul>
+        <p><strong>Google Firestore (Website Download Counter):</strong></p>
+        <ul>
+            <li><strong>Service:</strong> Stores one public download total</li>
+            <li><strong>Data shared:</strong> none about you</li>
             <li><strong>Privacy Policy:</strong> <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">https://policies.google.com/privacy</a></li>
-            <li><strong>Data location:</strong> Google's servers (primarily US)</li>
         </ul>
         <p><strong>Google Analytics (Website Only):</strong></p>
         <ul>
@@ -497,7 +514,7 @@
         <p>You can request deletion of personal data we hold about you (support emails, authentication records) by contacting:</p>
         <p><strong>Email:</strong> <a href="mailto:info@apexracetech.in">info@apexracetech.in</a><br>
         <strong>Subject:</strong> "Data Deletion Request"</p>
-        <p>Please include your email address (or the one associated with your Google sign-in), approximate date of your last interaction, and what data you want deleted.</p>
+        <p>Please include your email address (the one you used to sign up), approximate date of your last interaction, and what data you want deleted.</p>
         <p><strong>Response time:</strong> We will respond within 30 days and delete your data within a reasonable timeframe (usually within 30-60 days).</p>
 
         <hr>
@@ -523,7 +540,7 @@
         <ul>
             <li>You can withdraw consent at any time</li>
             <li>Disable analytics in Settings > Analytics & Privacy > Disable Analytics & Tracking</li>
-            <li>This will stop all PostHog event tracking (except Firebase authentication, which is essential for sign-in)</li>
+            <li>This will stop all PostHog event tracking (account sign-in with AWS Cognito is separate and is essential if you use an account)</li>
             <li>Stop sending feedback emails or bug reports</li>
         </ul>
         <p><strong>Important:</strong> Disabling analytics stops new data collection but does not retroactively delete previously collected data.</p>
@@ -598,9 +615,9 @@
         <h3>10.1 Offline Capability</h3>
         <p>RACE Insight works mostly offline:</p>
         <ul>
-            <li>File import and analysis work offline (after initial sign-in)</li>
+            <li>File import and analysis work offline, with or without an account</li>
             <li>Data visualization works offline</li>
-            <li>First-time sign-in requires internet (Google authentication)</li>
+            <li>Creating an account and signing in require internet (AWS Cognito)</li>
             <li>Map tiles (Mapbox/OpenStreetMap) require internet</li>
             <li>PostHog events are queued locally if offline, sent when online</li>
         </ul>
@@ -640,7 +657,7 @@
 
         <h3>11.3 How We Will Notify You</h3>
         <ul>
-            <li>Email to the address associated with your Google account (if signed in)</li>
+            <li>Email to the address on your account (if you have one)</li>
             <li>In-app notification on next launch</li>
             <li>Website notice at <a href="https://www.apexracetech.com/privacy" target="_blank" rel="noopener noreferrer">https://www.apexracetech.com/privacy</a> with an "Updated" date</li>
             <li>For major changes, we will provide 30 days' notice before implementation</li>
@@ -653,7 +670,7 @@
         <h3>12.1 Where Your Data Is Stored</h3>
         <p><strong>Desktop/App Data (Local):</strong> Stored on your device, in India or wherever you are located. Not transferred internationally unless you explicitly use future cloud features. Under your complete control.</p>
         <p><strong>PostHog Analytics Event Data:</strong> Processed by PostHog (EU or US, depending on their configuration). May be transferred outside your country.</p>
-        <p><strong>Google Firebase (If You Sign In):</strong> Processed by Google (US servers primarily). Email, display name, and authentication data stored by Google.</p>
+        <p><strong>AWS Cognito (If You Create an Account):</strong> Processed by Amazon Web Services in the Frankfurt (Germany) region. This is a transfer of your account data outside India, to a region under EU data-protection law. Email, name, profile answers and authentication data are stored there.</p>
         <p><strong>Website Analytics:</strong> Processed by Google Analytics (US servers).</p>
 
         <h3>12.2 India-to-EU/US Transfer (GDPR)</h3>
@@ -669,7 +686,7 @@
         <ul>
             <li>Processing of your data in the locations described above</li>
             <li>International transfers as necessary to provide the service</li>
-            <li>If analytics are disabled, only essential authentication data (if signed in) will be processed</li>
+            <li>If analytics are disabled, only essential account data (if you have an account) will be processed</li>
         </ul>
 
         <hr>
@@ -751,7 +768,7 @@
         <hr>
 
         <p>&copy; 2026 APEXRACE Technologies. All rights reserved.</p>
-        <p><strong>Last Updated:</strong> December 26, 2025</p>
+        <p><strong>Last Updated:</strong> November 1, 2026</p>
         <p><strong>Version:</strong> 2.0 (Beta - Based on Codebase Analysis)</p>
 
     </main>

@@ -187,7 +187,7 @@
     <main class="policy-content">
         <h1>END USER LICENSE AGREEMENT</h1>
         <p><strong>RACE Insight – Software License</strong></p>
-        <p><strong>Effective Date:</strong> December 26, 2025</p>
+        <p><strong>Effective Date:</strong> November 1, 2026</p>
 
         <hr>
 
@@ -251,22 +251,21 @@
 
         <h2>3. AUTHENTICATION AND ACCOUNT REQUIREMENTS</h2>
 
-        <h3>3.1 Google Sign-In Required</h3>
-        <p>To use RACE Insight in the production version, you must:</p>
+        <h3>3.1 Accounts Are Optional</h3>
+        <p>You can use RACE Insight without an account by choosing "Continue without an account". Import and analysis then work fully offline. An account is needed to download the Software from the website and for cloud features when they become available. To create an account, you must:</p>
         <ul>
-            <li>Have a Google account</li>
-            <li>Sign in with your Google credentials (Google Sign-In)</li>
-            <li>Accept Google's privacy and terms of service</li>
+            <li>Provide a valid email address and choose a password</li>
+            <li>Confirm your email address with the verification code we send you</li>
         </ul>
-        <p>Skip login is not available in production builds. Google Sign-In is required to access the Software.</p>
+        <p>Accounts are provided through AWS Cognito. Google Sign-In is not used.</p>
 
         <h3>3.2 What Happens During Sign-In</h3>
-        <p>When you sign in with Google, we collect your Firebase UID, email address, and display name. This data is stored only by Google/Firebase, not on our servers. See Privacy Policy Section 2 for details.</p>
+        <p>When you create an account, your email address, name and a password verifier are stored by Amazon Web Services (AWS Cognito, Frankfurt region, Germany), not on our servers. Your password is not sent to us in readable form. See Privacy Policy Section 2 for details.</p>
 
         <h3>3.3 Your Account Responsibility</h3>
         <p>You are responsible for:</p>
         <ul>
-            <li>Keeping your Google account credentials secure</li>
+            <li>Keeping your account password secure</li>
             <li>Protecting your email and account information</li>
             <li>Notifying us if your account is compromised</li>
             <li>All activity under your account</li>
@@ -320,7 +319,7 @@
             <li>Go to Settings > Analytics & Privacy</li>
             <li>Toggle "Disable Analytics & Tracking"</li>
         </ol>
-        <p>Disabling analytics will stop PostHog event tracking, but Firebase may still log authentication events separately.</p>
+        <p>Analytics are off unless you opt in. Disabling analytics will stop PostHog event tracking; account sign-in with AWS Cognito is separate and may log authentication events.</p>
 
         <h3>5.3 PostHog Configuration</h3>
         <p>PostHog is configured with session recording disabled, autocapture disabled (manual event tracking only), and default retention of 30 days.</p>
@@ -403,7 +402,7 @@
             <li>Lost profits or revenue</li>
             <li>Indirect, incidental, or consequential damages</li>
             <li>Damages from incorrect analysis or decisions made based on the Software</li>
-            <li>Damages from third-party software or services (Firebase, PostHog, Mapbox)</li>
+            <li>Damages from third-party software or services (AWS, PostHog, Mapbox)</li>
             <li>Damages from internet outages or server issues</li>
         </ul>
 
@@ -450,7 +449,7 @@
         <p>The app will not automatically stop working on June 30, 2026. We will announce transition details well in advance.</p>
 
         <h3>10.4 Beta Data Handling</h3>
-        <p>Your local project files will transfer to the paid version, your analytics data may be retained (per PostHog policy), and your Google account will still work.</p>
+        <p>Your local project files will transfer to the paid version, your analytics data may be retained (per PostHog policy), and your account will still work.</p>
 
         <hr>
 
@@ -459,14 +458,14 @@
         <h3>11.1 Services RACE Insight Uses</h3>
         <p>The Software relies on these third-party services:</p>
         <ul>
-            <li><strong>Google Firebase (Authentication):</strong> Handles Google Sign-In, stores your Firebase UID, email, display name. Privacy: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">https://policies.google.com/privacy</a></li>
+            <li><strong>Amazon Web Services (Cognito):</strong> Handles account sign-up, sign-in and password reset, stores your email, name and password verifier. Privacy: <a href="https://aws.amazon.com/privacy/" target="_blank" rel="noopener noreferrer">https://aws.amazon.com/privacy/</a></li>
             <li><strong>PostHog (Analytics):</strong> Collects anonymous usage data, does not collect your racing data. Privacy: <a href="https://posthog.com/privacy" target="_blank" rel="noopener noreferrer">https://posthog.com/privacy</a></li>
             <li><strong>Mapbox & OpenStreetMap (Maps):</strong> Provides map tiles for circuit visualization, requires internet connection. Privacy: <a href="https://www.mapbox.com/legal/privacy" target="_blank" rel="noopener noreferrer">https://www.mapbox.com/legal/privacy</a> and <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">https://www.openstreetmap.org/copyright</a></li>
             <li><strong>ECharts, uPlot, Recharts (Charting):</strong> Visualization libraries (run locally), no data sent externally.</li>
         </ul>
 
         <h3>11.2 Third-Party Terms</h3>
-        <p>You agree to comply with the terms of service of Google (Firebase), PostHog, Mapbox, and OpenStreetMap.</p>
+        <p>You agree to comply with the terms of service of Amazon Web Services, PostHog, Mapbox, and OpenStreetMap.</p>
         <p>Developer is not responsible for third-party services. If they change their terms or policies, this Agreement will be updated accordingly.</p>
 
         <h3>11.3 No Endorsement</h3>
@@ -484,7 +483,7 @@
         <p>You may stop using RACE Insight at any time. Simply delete the application.</p>
 
         <h3>12.3 Account Deletion</h3>
-        <p>To delete your account, contact Developer at <a href="mailto:info@apexracetech.in">info@apexracetech.in</a> with subject "Account Deletion Request". Your Google Firebase account will be deleted (handled by Google). Your local data remains on your device until you manually delete it.</p>
+        <p>To delete your account, contact Developer at <a href="mailto:info@apexracetech.in">info@apexracetech.in</a> with subject "Account Deletion Request". Your account and its stored profile will be deleted from AWS Cognito. You can also delete your account yourself from your profile on the website. Your local data remains on your device until you manually delete it.</p>
         <p>Developer does not automatically delete your local project files when you delete your account.</p>
 
         <h3>12.4 After Termination</h3>
@@ -517,7 +516,7 @@
 
         <h3>14.3 Version Control</h3>
         <p><strong>Current Version:</strong> 2.0</p>
-        <p><strong>Last Updated:</strong> December 26, 2025</p>
+        <p><strong>Last Updated:</strong> November 1, 2026</p>
 
         <hr>
 
@@ -590,7 +589,7 @@
         <hr>
 
         <p>&copy; 2026 APEXRACE Technologies. All rights reserved.</p>
-        <p>This EULA is effective December 26, 2025 – Version 2.0</p>
+        <p>This EULA is effective November 1, 2026 – Version 2.0</p>
 
     </main>
 

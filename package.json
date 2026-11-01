@@ -12,8 +12,7 @@
   },
   "dependencies": {
     "acorn": "^8.16.0",
-    "eslint": "^10.0.3",
-    "firebase": "^12.6.0"
+    "eslint": "^10.0.3"
   },
   "devDependencies": {
     "sharp": "^0.33.5",
