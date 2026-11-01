@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const AUTH_MODES = {
         signin:  { title: 'Sign In to Download', subtitle: 'Sign in to access downloads and save your preferences.', submit: 'Sign In' },
-        signup:  { title: 'Create Account', subtitle: 'Join Race Insight to start downloading.', submit: 'Create Account' },
+        signup:  { title: 'Create Account', subtitle: 'Step 1 of 2: your account details.', submit: 'Next' },
         confirm: { title: 'Confirm Your Email', subtitle: 'Enter the verification code we emailed you.', submit: 'Confirm' },
         forgot:  { title: 'Reset Password', subtitle: 'Enter your email and we will send a verification code.', submit: 'Send Code' },
         reset:   { title: 'Set New Password', subtitle: 'Enter the code from your email and a new password.', submit: 'Set Password' }
@@ -179,6 +179,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     function show(id, visible) {
         const el = document.getElementById(id);
         if (el) el.style.display = visible ? 'block' : 'none';
+    }
+
+    let signupStep = 1;
+    let pendingSignupLog = null; // profile answers logged to the sign-up sheet after the first sign-in
+
+    // Sign-up has two steps: account details, then racing profile.
+    function showSignupStep(step) {
+        signupStep = step;
+        const inSignup = authMode === 'signup';
+        const step1 = document.getElementById('auth-step-1');
+        const step2 = document.getElementById('auth-step-2');
+        const indicator = document.getElementById('auth-step-indicator');
+        const subtitleEl = document.getElementById('auth-subtitle');
+        if (step1) step1.style.display = inSignup && step === 2 ? 'none' : 'block';
+        if (step2) step2.style.display = inSignup && step === 2 ? 'block' : 'none';
+        if (indicator) {
+            indicator.style.display = inSignup ? 'flex' : 'none';
+            indicator.querySelectorAll('.step').forEach(el => el.classList.toggle('active', Number(el.dataset.step) <= step));
+        }
+        if (inSignup && subtitleEl) {
+            subtitleEl.textContent = step === 1 ? 'Step 1 of 2: your account details.' : 'Step 2 of 2: tell us about your racing.';
+        }
     }
 
     function setAuthMode(mode) {
@@ -200,6 +222,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         show('auth-password-group', mode === 'signin' || mode === 'signup' || mode === 'reset');
         show('auth-code-group', mode === 'confirm' || mode === 'reset');
         show('confirm-password-group', mode === 'signup');
+        show('auth-name-group', mode === 'signup');
         show('forgot-password-link', mode === 'signin');
         show('auth-resend-link', mode === 'confirm');
 
@@ -219,6 +242,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 : 'Back to <a href="#" id="toggle-auth-mode">Sign In</a>';
         }
         show('auth-switch-row', true);
+        showSignupStep(1);
     }
 
     // Helper function to reset modal to sign-in state
@@ -228,6 +252,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (passwordEl) passwordEl.value = '';
         const codeEl = document.getElementById('auth-code');
         if (codeEl) codeEl.value = '';
+        ['auth-name', 'auth-confirm-password', 'auth-location', 'auth-simulator', 'auth-experience', 'auth-referral',
+         'auth-simulator-other', 'auth-referral-other'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+        ['auth-simulator-other', 'auth-referral-other'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
         setAuthMode('signin');
         hideAuthMessages();
     }
@@ -808,22 +835,50 @@ document.addEventListener('DOMContentLoaded', async () => {
                         throw error;
                     }
                 } else if (authMode === 'signup') {
-                    const passwordValidation = validatePassword(password);
-                    if (!passwordValidation.valid) { showAuthError(passwordValidation.message); return; }
-                    if (!confirmPassword) { showAuthError('Please confirm your password.'); return; }
-                    if (password !== confirmPassword) { showAuthError('Passwords do not match.'); return; }
-                    setSubmitBusy(true, 'Creating Account...');
-                    const result = await RaAuth.signUp(email, password);
-                    isNewUserSignup = true;
-                    pendingCredentials = { email: email, password: password };
-                    if (result.needsConfirmation) {
-                        if (passwordInput) passwordInput.value = '';
-                        if (confirmPasswordInput) confirmPasswordInput.value = '';
-                        setAuthMode('confirm');
-                        showAuthSuccess('We emailed a verification code to ' + email + '.');
-                    } else {
-                        await RaAuth.signIn(email, password);
-                        showAuthSuccess('Account created successfully! Logging you in...');
+                    if (signupStep === 1) {
+                        const fullName = sanitizeInput(document.getElementById('auth-name').value, 100);
+                        if (!fullName) { showAuthError('Please enter your full name.'); return; }
+                        const passwordValidation = validatePassword(password);
+                        if (!passwordValidation.valid) { showAuthError(passwordValidation.message); return; }
+                        if (!confirmPassword) { showAuthError('Please confirm your password.'); return; }
+                        if (password !== confirmPassword) { showAuthError('Passwords do not match.'); return; }
+                        showSignupStep(2);
+                        return;
+                    }
+
+                    // Step 2: racing profile, stored with the account so no later form is needed
+                    const fullName = sanitizeInput(document.getElementById('auth-name').value, 100);
+                    let simulator = document.getElementById('auth-simulator').value.trim();
+                    const experience = document.getElementById('auth-experience').value.trim();
+                    const location = sanitizeInput(document.getElementById('auth-location').value, 150);
+                    let referral = document.getElementById('auth-referral').value.trim();
+                    if (simulator === 'Other') simulator = sanitizeInput(document.getElementById('auth-simulator-other').value, 100);
+                    if (referral === 'Other') referral = sanitizeInput(document.getElementById('auth-referral-other').value, 150);
+                    if (!simulator || !experience || !location || !referral) {
+                        showAuthError('Please fill in all fields to finish creating your account.');
+                        return;
+                    }
+                    const profile = { simulator: simulator, experience: experience, location: location, referral: referral };
+                    const signupSubmit = document.getElementById('auth-signup-submit-btn');
+                    if (signupSubmit) { signupSubmit.disabled = true; signupSubmit.textContent = 'Creating Account...'; }
+                    try {
+                        const result = await RaAuth.signUp(email, password, { name: fullName, profile: profile });
+                        isNewUserSignup = true;
+                        pendingCredentials = { email: email, password: password };
+                        pendingSignupLog = Object.assign({ fullname: fullName, email: email }, profile);
+                        if (result.needsConfirmation) {
+                            if (passwordInput) passwordInput.value = '';
+                            if (confirmPasswordInput) confirmPasswordInput.value = '';
+                            setAuthMode('confirm');
+                            showAuthSuccess('We emailed a verification code to ' + email + '.');
+                        } else {
+                            await RaAuth.signIn(email, password);
+                            showAuthSuccess('Account created successfully! Logging you in...');
+                            logToGoogleSheets(Object.assign({ date: new Date().toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) }, pendingSignupLog));
+                            pendingSignupLog = null;
+                        }
+                    } finally {
+                        if (signupSubmit) { signupSubmit.disabled = false; signupSubmit.textContent = 'Create Account'; }
                     }
                 } else if (authMode === 'confirm') {
                     if (!code) { showAuthError('Please enter the verification code.'); return; }
@@ -834,6 +889,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                         await RaAuth.signIn(credentials.email, credentials.password);
                         showAuthSuccess('Email confirmed. Signing you in...');
                         pendingCredentials = null;
+                        if (pendingSignupLog) {
+                            logToGoogleSheets(Object.assign({ date: new Date().toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) }, pendingSignupLog));
+                            pendingSignupLog = null;
+                        }
                     } else {
                         setAuthMode('signin');
                         showAuthSuccess('Email confirmed. Sign in to continue.');
@@ -1557,63 +1616,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- Shrunk Navigation Icons Functionality ---
     // Removed - shrunk nav icons container has been removed
 
-    // Auth step navigation buttons (for potential two-step signup flow)
-    // Note: These are kept for potential future two-step signup flow
-    // Currently, signup is handled in one step via auth-submit-btn
-    const authNextBtn = document.getElementById('auth-next-btn');
+    // Sign-up step 2: back button and "Other" text boxes
     const authBackBtn = document.getElementById('auth-back-btn');
-    const authSignupSubmitBtn = document.getElementById('auth-signup-submit-btn');
-    const authStep1 = document.getElementById('auth-step-1');
-    const authStep2 = document.getElementById('auth-step-2');
-    const authStepIndicator = document.getElementById('auth-step-indicator');
-
-    if (authNextBtn && authStep1 && authStep2) {
-        authNextBtn.addEventListener('click', () => {
-            // Get input elements
-            const emailInputEl = document.getElementById('auth-email');
-            const passwordInputEl = document.getElementById('auth-password');
-            const confirmPasswordInputEl = document.getElementById('auth-confirm-password');
-            
-            // Validate step 1 fields before proceeding
-            const email = emailInputEl ? emailInputEl.value.trim() : '';
-            const password = passwordInputEl ? passwordInputEl.value : '';
-            const confirmPassword = confirmPasswordInputEl ? confirmPasswordInputEl.value : '';
-            
-            if (!email || !password) {
-                showAuthError("Please fill in email and password.");
-                return;
-            }
-            
-            if (password !== confirmPassword) {
-                showAuthError("Passwords do not match.");
-                return;
-            }
-            
-            // Hide step 1, show step 2
-            if (authStep1) authStep1.style.display = 'none';
-            if (authStep2) authStep2.style.display = 'block';
-            if (authStepIndicator) authStepIndicator.style.display = 'block';
-        });
-    }
-
-    if (authBackBtn && authStep1 && authStep2) {
+    if (authBackBtn) {
         authBackBtn.addEventListener('click', () => {
-            // Go back to step 1
-            if (authStep2) authStep2.style.display = 'none';
-            if (authStep1) authStep1.style.display = 'block';
-            if (authStepIndicator) authStepIndicator.style.display = 'none';
+            hideAuthMessages();
+            showSignupStep(1);
         });
     }
-
-    if (authSignupSubmitBtn && authStep2) {
-        authSignupSubmitBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            // This would handle the second step of signup
-            // Currently, signup is handled in one step via auth-submit-btn
-            // This is kept for potential future two-step flow
-            console.log('Two-step signup submit clicked (not currently active)');
-        });
-    }
+    [['auth-simulator', 'auth-simulator-other'], ['auth-referral', 'auth-referral-other']].forEach(([selectId, otherId]) => {
+        const select = document.getElementById(selectId);
+        const other = document.getElementById(otherId);
+        if (select && other) {
+            select.addEventListener('change', () => {
+                const isOther = select.value === 'Other';
+                other.style.display = isOther ? 'block' : 'none';
+                if (!isOther) other.value = '';
+            });
+        }
+    });
 
     // Innovative Card Functionality (works for all style variations)
     function initInnovativeCards() {

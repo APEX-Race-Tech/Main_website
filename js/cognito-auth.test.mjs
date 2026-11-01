@@ -151,6 +151,22 @@ test('signUp sends email, name and a join date, and asks for confirmation', asyn
     assert.ok(!isNaN(Date.parse(attrs['custom:joined'])));
 });
 
+test('signUp stores the profile answers as custom attributes and skips empty ones', async () => {
+    const { createRaAuth } = loadModule();
+    const { sdk, calls } = makeSdk({ noStoredUser: true });
+    const auth = createRaAuth(sdk, config);
+    await auth.signUp('ada@example.com', 'Passw0rdx', {
+        name: 'Ada L',
+        profile: { simulator: 'iRacing', experience: 'Advanced', location: 'Berlin, Germany', referral: '', bio: undefined },
+    });
+    const attrs = Object.fromEntries(calls.signUp[0].attributes);
+    assert.equal(attrs['custom:simulator'], 'iRacing');
+    assert.equal(attrs['custom:experience'], 'Advanced');
+    assert.equal(attrs['custom:location'], 'Berlin, Germany');
+    assert.ok(!('custom:referral' in attrs));
+    assert.ok(!('custom:bio' in attrs));
+});
+
 test('confirms sign-up and runs the password reset flow', async () => {
     const { createRaAuth } = loadModule();
     const { sdk, calls } = makeSdk({ noStoredUser: true });
