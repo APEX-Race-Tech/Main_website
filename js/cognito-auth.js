@@ -160,6 +160,11 @@
                     new sdk.CognitoUserAttribute({ Name: 'name', Value: name }),
                     new sdk.CognitoUserAttribute({ Name: 'custom:joined', Value: new Date().toISOString() })
                 ];
+                var profile = (options && options.profile) || {};
+                Object.keys(PROFILE_ATTRIBUTES).forEach(function (key) {
+                    var value = profile[key] === undefined || profile[key] === null ? '' : String(profile[key]).trim();
+                    if (value) attributes.push(new sdk.CognitoUserAttribute({ Name: PROFILE_ATTRIBUTES[key], Value: value }));
+                });
                 pool.signUp(username, password, attributes, [], function (err, result) {
                     if (err || !result) reject(err || notConfigured());
                     else resolve({ needsConfirmation: !result.userConfirmed });

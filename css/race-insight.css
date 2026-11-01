@@ -3082,3 +3082,12 @@ select option {
   vertical-align: middle;
   white-space: nowrap;
 }
+
+/* Sign-up step indicator (account details, then racing profile) */
+.auth-step-indicator { align-items: center; justify-content: center; gap: 0.75rem; }
+.auth-step-indicator .step { display: flex; align-items: center; gap: 0.5rem; color: #aaa; font-size: 0.85rem; opacity: 0.5; }
+.auth-step-indicator .step label { margin: 0; }
+.auth-step-indicator .step span { width: 1.6rem; height: 1.6rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-color); font-size: 0.8rem; }
+.auth-step-indicator .step.active { opacity: 1; color: #fff; }
+.auth-step-indicator .step.active span { background: var(--primary-color); border-color: var(--primary-color); color: #000; }
+.auth-step-indicator .step-line { flex: 0 0 2rem; height: 1px; background: var(--border-color); }
