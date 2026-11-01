@@ -408,7 +408,7 @@
             <li><strong>Account data (app and website):</strong> email address, name (defaults to the first part of your email), password verifier and the date you joined. Stored by AWS Cognito.</li>
             <li><strong>Download profile (website):</strong> before your first download we ask for your primary simulator, racing experience, location and where you heard about us. You can change these, and add an optional bio, in your profile. Stored as attributes of your Cognito account.</li>
             <li><strong>Sign-up log (website):</strong> when you complete the download profile, your name, email and those answers are also added to our internal sign-up spreadsheet to help us understand who uses the Software.</li>
-            <li><strong>Download counter (website):</strong> a single public total of downloads, kept in Google Firestore. It contains no personal data.</li>
+            <li><strong>Downloads (website and updates):</strong> installers and update files are delivered through AWS CloudFront from a private AWS storage bucket. AWS records standard delivery details (such as IP address and file requested) to deliver and secure the files; we do not use them to identify you.</li>
         </ul>
         <p><strong>Why:</strong> To provide your account, gate downloads, and understand our audience.</p>
         <p><strong>Retention and control:</strong> You can edit your profile or delete your account on the website at any time, which removes your Cognito account and its attributes. Entries already in the internal sign-up spreadsheet are removed on request (see section 6).</p>
@@ -485,11 +485,12 @@
             <li><strong>Privacy Policy:</strong> <a href="https://aws.amazon.com/privacy/" target="_blank" rel="noopener noreferrer">https://aws.amazon.com/privacy/</a></li>
             <li><strong>Data location:</strong> AWS Europe (Frankfurt) region, Germany</li>
         </ul>
-        <p><strong>Google Firestore (Website Download Counter):</strong></p>
+        <p><strong>Amazon Web Services - CloudFront and S3 (Downloads and Updates):</strong></p>
         <ul>
-            <li><strong>Service:</strong> Stores one public download total</li>
-            <li><strong>Data shared:</strong> none about you</li>
-            <li><strong>Privacy Policy:</strong> <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">https://policies.google.com/privacy</a></li>
+            <li><strong>Service:</strong> Delivers the installer and automatic update files</li>
+            <li><strong>Data shared:</strong> your IP address and the file requested, as part of normal web delivery. No account data.</li>
+            <li><strong>Privacy Policy:</strong> <a href="https://aws.amazon.com/privacy/" target="_blank" rel="noopener noreferrer">https://aws.amazon.com/privacy/</a></li>
+            <li><strong>Data location:</strong> a global content delivery network; files are stored in the AWS Europe (Frankfurt) region</li>
         </ul>
         <p><strong>Google Analytics (Website Only):</strong></p>
         <ul>

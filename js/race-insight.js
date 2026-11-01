@@ -957,88 +957,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // --- Download Counter Logic ---
-    const downloadCountElement = document.getElementById('download-count');
-    
-    // Function to format number with commas
-    function formatNumber(num) {
-        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    }
-    
-    // Function to animate number change
-    function animateCount(element, targetCount) {
-        const currentCount = parseInt(element.textContent.replace(/,/g, '')) || 0;
-        const increment = targetCount > currentCount ? 1 : -1;
-        const duration = 1000; // 1 second
-        const steps = 30;
-        const stepValue = Math.abs(targetCount - currentCount) / steps;
-        const stepDuration = duration / steps;
-        
-        let current = currentCount;
-        const timer = setInterval(() => {
-            current += increment * stepValue;
-            if ((increment > 0 && current >= targetCount) || (increment < 0 && current <= targetCount)) {
-                current = targetCount;
-                clearInterval(timer);
-            }
-            element.textContent = formatNumber(Math.round(current));
-        }, stepDuration);
-    }
-    
-    // Total downloads = GitHub's own download count for the installer files across
-    // all public releases, so the site needs no database or write access.
-    const totalDownloadContainer = document.getElementById('total-download-container');
-    const DOWNLOAD_THRESHOLD = 50; // Big number threshold
-    const COUNT_CACHE_KEY = 'ri_total_downloads';
-    const COUNT_CACHE_MS = 10 * 60 * 1000;
-    const INSTALLER_FILE = /\.(exe|AppImage|dmg)$/i;
-
-    function showDownloadCount(count) {
-        if (!downloadCountElement || !totalDownloadContainer) return;
-        if (count < DOWNLOAD_THRESHOLD) {
-            totalDownloadContainer.style.display = 'none';
-            return;
-        }
-        totalDownloadContainer.style.display = 'block';
-        const currentText = downloadCountElement.textContent.trim();
-        const currentCount = parseInt(currentText.replace(/,/g, '')) || 0;
-        if (currentText === 'Loading...' || currentText === '') {
-            downloadCountElement.textContent = formatNumber(count);
-        } else if (count !== currentCount) {
-            animateCount(downloadCountElement, count);
-        }
-    }
-
-    function countInstallerDownloads(releases) {
-        let total = 0;
-        (releases || []).forEach(release => {
-            (release.assets || []).forEach(asset => {
-                if (INSTALLER_FILE.test(asset.name)) total += asset.download_count || 0;
-            });
-        });
-        return total;
-    }
-
-    async function loadTotalDownloads() {
-        try {
-            const cached = JSON.parse(sessionStorage.getItem(COUNT_CACHE_KEY) || 'null');
-            if (cached && Date.now() - cached.at < COUNT_CACHE_MS) {
-                showDownloadCount(cached.count);
-                return;
-            }
-        } catch (e) { /* storage unavailable or corrupt: fetch fresh */ }
-        try {
-            const response = await fetch('https://api.github.com/repos/APEX-Race-Tech/RACE-Insight-Public/releases?per_page=100');
-            if (!response.ok) throw new Error('GitHub API error: ' + response.status);
-            const count = countInstallerDownloads(await response.json());
-            try { sessionStorage.setItem(COUNT_CACHE_KEY, JSON.stringify({ at: Date.now(), count: count })); } catch (e) { /* ignore */ }
-            showDownloadCount(count);
-        } catch (error) {
-            console.warn('Could not load download count:', error.message);
-            if (totalDownloadContainer) totalDownloadContainer.style.display = 'none';
-        }
-    }
-    loadTotalDownloads();
+    // The public download total is not shown: releases are served from S3/CloudFront, which has no
+    // per-file counter. The container stays hidden (display: none in the page).
 
     // --- Download Logic ---
     const downloadBtn = document.getElementById('download-btn');
@@ -1173,65 +1093,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // ===== GitHub release lookup (shared by the version label and downloads) =====
-    // Repository is public: https://github.com/APEX-Race-Tech/RACE-Insight-Public
-    // The latest release is fetched automatically; publishing a new GitHub
-    // release updates the download and version label with no site change.
-    const GITHUB_OWNER = 'APEX-Race-Tech';
-    const GITHUB_REPO = 'RACE-Insight-Public';
-
-    const RELEASE_FILE_PATTERNS = {
-        'windows': /RACE-Insight.*Setup.*\.exe$/i,
-        'linux': /RACE-?Insight.*\.AppImage$/i,
-        'apple': /RACE-?Insight.*\.dmg$/i
-    };
-
-    const FALLBACK_VERSION = 'v0.1.37';
-    const FALLBACK_DOWNLOAD_URLS = {
-        'windows': `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v0.1.37/RACE-Insight-Setup-0.1.37.exe`
-    };
-
-    let latestReleasePromise = null;
-
-    // Fetch the latest public release once per page load and reuse the result.
-    function fetchLatestRelease() {
-        if (!latestReleasePromise) {
-            latestReleasePromise = fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`GitHub API error: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .catch(error => {
-                    // Allow a later click to retry after a transient failure.
-                    latestReleasePromise = null;
-                    throw error;
-                });
-        }
-        return latestReleasePromise;
-    }
-
-    function findReleaseAsset(release, platform) {
-        const pattern = RELEASE_FILE_PATTERNS[platform];
-        if (!pattern || !release || !Array.isArray(release.assets)) return null;
-        return release.assets.find(asset => pattern.test(asset.name)) || null;
-    }
-
-    // Show the current release version under the platform buttons.
+    // ===== Release feed (shared by the version label and downloads) =====
+    // latest.json on the release CloudFront address is written by the release workflow
+    // (see js/release-feed.js). Publishing a release updates the download and version label with
+    // no site change.
     const downloadVersionEl = document.getElementById('download-version');
     if (downloadVersionEl) {
-        fetchLatestRelease()
-            .then(release => {
-                const published = release.published_at
-                    ? new Date(release.published_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
-                    : '';
-                downloadVersionEl.textContent = published
-                    ? `Latest version: ${release.tag_name} (${published})`
-                    : `Latest version: ${release.tag_name}`;
+        RaRelease.fetchLatest()
+            .then(latest => {
+                downloadVersionEl.textContent = RaRelease.describeVersion(latest, iso =>
+                    new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }));
             })
             .catch(() => {
-                downloadVersionEl.textContent = `Latest version: ${FALLBACK_VERSION}`;
+                downloadVersionEl.textContent = 'Latest version: not available yet';
             });
     }
 
@@ -1251,37 +1125,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         const isIE = /Trident/.test(navigator.userAgent);
         const isOldEdge = /Edge/.test(navigator.userAgent) && !isEdge;
         
-        // ===== GitHub Releases API (primary; see fetchLatestRelease above) =====
+        // ===== Release feed (see js/release-feed.js) =====
         let downloadUrl = null;
 
         try {
-            const release = await fetchLatestRelease();
-            const asset = findReleaseAsset(release, selectedPlatform);
+            const latest = await RaRelease.fetchLatest();
+            const download = RaRelease.pickDownload(latest, selectedPlatform);
 
-            if (!asset) {
-                // Fallback to hardcoded URLs if API doesn't find the asset
-                throw new Error(`No release file found for ${selectedPlatform}`);
-            }
-            
-            downloadUrl = asset.browser_download_url;
-            console.log(`Downloading ${asset.name} (${release.tag_name}) from GitHub Releases`);
-            
-        } catch (error) {
-            console.error('GitHub API download error:', error);
-            
-            // ===== Fallback: Direct Download URLs =====
-            // Used only when the GitHub API is unreachable or the release has no
-            // file for this platform. Keep it in step with the latest public
-            // release. Only Windows installers are published today.
-            downloadUrl = FALLBACK_DOWNLOAD_URLS[selectedPlatform];
-            if (!downloadUrl) {
+            if (!download) {
                 alert('Race Insight is not available for this platform yet. Windows is available now; Linux and Mac are coming soon.');
                 return;
             }
-            
-            console.log(`Using fallback download URL: ${downloadUrl}`);
+
+            downloadUrl = download.url;
+            console.log(`Downloading ${download.file} (v${latest.version})`);
+        } catch (error) {
+            console.error('Release feed error:', error);
+            alert('The download is temporarily unavailable. Please try again in a few minutes, or write to info@apexracetech.in.');
+            return;
         }
-        
+
         // Edge-compatible download method
         // Edge and IE have issues with programmatic link clicks for cross-origin downloads
         if (isEdge || isOldEdge || isIE) {
