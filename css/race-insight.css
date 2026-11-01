@@ -3057,3 +3057,28 @@ select option {
     gap: 1.5rem;
   }
 }
+
+/* Download version label and "next release" feature tags */
+.download-version {
+  margin: -1rem 0 1.5rem;
+  font-size: 0.85rem;
+  color: var(--text-color-secondary);
+  text-align: center;
+  min-height: 1.2em;
+}
+
+.next-release-tag {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.1rem 0.45rem;
+  border: 1px solid rgba(0, 210, 255, 0.5);
+  border-radius: 4px;
+  background: rgba(0, 210, 255, 0.12);
+  color: var(--primary-color);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  vertical-align: middle;
+  white-space: nowrap;
+}

@@ -18,111 +18,7 @@ if (getComputedStyle(el).opacity === '0') {
     });
 }, 1000);
 
-// --- Firebase Configuration ---
-// Security Note: Firebase API keys are meant to be public and are restricted by domain in Firebase Console.
-// However, ensure Firebase Security Rules are properly configured for Firestore and Storage.
-//
-// Configuration is loaded from js/firebase-config.js which reads from .env file
-// All Firebase keys must be stored in .env file - no hardcoded values in code
-
-// Wait for firebaseConfig to be available (loaded from firebase-config.js module)
-function waitForFirebaseConfig() {
-    return new Promise((resolve, reject) => {
-        if (window.firebaseConfig) {
-            resolve(window.firebaseConfig);
-            return;
-        }
-        
-        // Wait up to 5 seconds for config to load
-        let attempts = 0;
-        const maxAttempts = 50; // 50 * 100ms = 5 seconds
-        const checkInterval = setInterval(() => {
-            attempts++;
-            if (window.firebaseConfig) {
-                clearInterval(checkInterval);
-                resolve(window.firebaseConfig);
-            } else if (attempts >= maxAttempts) {
-                clearInterval(checkInterval);
-                reject(new Error('Firebase configuration not found. Make sure js/firebase-config.js is loaded and .env file is configured.'));
-            }
-        }, 100);
-    });
-}
-
-// Initialize Firebase after config is available
-// firebaseConfig is loaded from firebase-config.js via window.firebaseConfig
-waitForFirebaseConfig()
-    .then(config => {
-        const firebaseConfig = config;
-        
-        // Wait for Firebase SDK to be loaded before initializing
-        function waitForFirebaseSDK() {
-            return new Promise((resolve) => {
-                if (typeof firebase !== 'undefined' && firebase.apps) {
-                    resolve();
-                    return;
-                }
-                
-                // Wait up to 5 seconds for Firebase SDK to load
-                let attempts = 0;
-                const maxAttempts = 50;
-                const checkInterval = setInterval(() => {
-                    attempts++;
-                    if (typeof firebase !== 'undefined' && firebase.apps) {
-                        clearInterval(checkInterval);
-                        resolve();
-                    } else if (attempts >= maxAttempts) {
-                        clearInterval(checkInterval);
-                        console.warn('Firebase SDK not loaded, but continuing...');
-                        resolve();
-                    }
-                }, 100);
-            });
-        }
-        
-        return waitForFirebaseSDK().then(() => {
-// Initialize Firebase (Compat Syntax)
-            if (typeof firebase !== 'undefined' && firebase.apps && !firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
-
-            // Continue with rest of initialization
-            initializeFirebaseServices();
-        });
-    })
-    .catch(error => {
-        console.error('Firebase initialization error:', error);
-    });
-
-// Initialize Firebase services after config is loaded
-function initializeFirebaseServices() {
-// Set Firebase Auth persistence to 'local' to keep users signed in across sessions
-// This persists authentication state in IndexedDB, so users stay logged in even after closing the browser
-firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-    .then(() => {
-        console.log("Firebase Auth persistence set to LOCAL - users will stay signed in");
-    })
-    .catch((error) => {
-        console.error("Error setting auth persistence:", error);
-    });
-
-// Initialize Firestore
-const db = firebase.firestore();
-    
-    // Make db available globally for the rest of the script
-    window.db = db;
-    
-    // Trigger any code that was waiting for Firebase to initialize
-    if (window.onFirebaseReady) {
-        window.onFirebaseReady(db);
-    }
-    
-    console.log('Firebase services initialized successfully');
-}
-
-// db will be available after Firebase initializes via window.db
-// For code that needs db immediately, use: window.db or wait for Firebase initialization
-// All existing code using 'db' should be updated to use 'window.db' or wait for initialization
+// --- Sign-in: AWS Cognito (js/cognito-auth.js exposes window.RaAuth) ---
 
 // --- Cookie Utility Functions ---
 // Security: Properly encode cookie values and use Secure flag in production
@@ -198,46 +94,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
     
-    // Check for Google sign-in redirect result
-    try {
-        const result = await firebase.auth().getRedirectResult();
-        if (result.user) {
-            console.log('Google sign-in via redirect successful:', result.user.email);
-            // Profile creation and onboarding will be handled by onAuthStateChanged
-        }
-    } catch (redirectError) {
-        // No redirect result or error - this is normal if user didn't use redirect
-        if (redirectError.code !== 'auth/operation-not-allowed') {
-            console.log('No redirect result or redirect error:', redirectError.message);
-        }
-    }
-    
-    // Wait for Firebase to be fully initialized before proceeding
-    // db will be available via window.db after Firebase initializes
-    if (!window.db) {
-        // Wait a bit for Firebase to initialize
-        await new Promise(resolve => {
-            const checkDb = setInterval(() => {
-                if (window.db) {
-                    clearInterval(checkDb);
-                    resolve();
-                }
-            }, 50);
-            // Timeout after 5 seconds
-            setTimeout(() => {
-                clearInterval(checkDb);
-                resolve();
-            }, 5000);
-        });
-    }
-    
-    // Create local db reference for use in this scope
-    // Wait for db to be available from Firebase initialization
-    const db = window.db;
-    if (!db) {
-        console.error('Firestore database not initialized. Firebase may not be ready yet.');
-        return; // Exit early if Firebase isn't ready
-    }
     // Check if user was logged in via cookies (quick check before Firebase auth restores)
     // This allows us to show logged-in UI immediately while Firebase auth is restoring
     const userLoggedIn = getCookie('userLoggedIn');
@@ -272,7 +128,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Auth modal not found in DOM!');
     }
     const closeAuthModal = document.getElementById('close-auth-modal');
-    const googleBtn = document.getElementById('google-signin-btn');
     const emailForm = document.getElementById('email-auth-form');
     const toggleAuthMode = document.getElementById('toggle-auth-mode');
     const authTitle = document.getElementById('auth-title');
@@ -309,94 +164,72 @@ document.addEventListener('DOMContentLoaded', async () => {
         authSuccess.style.display = 'none';
     }
 
-    // Helper function to reset modal to sign-in state
-    function resetAuthModalToSignIn() {
-        isSignUp = false;
+    // --- Auth modal modes: signin, signup, confirm (email code), forgot, reset ---
+    let authMode = 'signin';
+    let pendingCredentials = null; // email + password kept between sign-up and email confirmation
+
+    const AUTH_MODES = {
+        signin:  { title: 'Sign In to Download', subtitle: 'Sign in to access downloads and save your preferences.', submit: 'Sign In' },
+        signup:  { title: 'Create Account', subtitle: 'Join Race Insight to start downloading.', submit: 'Create Account' },
+        confirm: { title: 'Confirm Your Email', subtitle: 'Enter the verification code we emailed you.', submit: 'Confirm' },
+        forgot:  { title: 'Reset Password', subtitle: 'Enter your email and we will send a verification code.', submit: 'Send Code' },
+        reset:   { title: 'Set New Password', subtitle: 'Enter the code from your email and a new password.', submit: 'Set Password' }
+    };
+
+    function show(id, visible) {
+        const el = document.getElementById(id);
+        if (el) el.style.display = visible ? 'block' : 'none';
+    }
+
+    function setAuthMode(mode) {
+        authMode = mode;
+        isSignUp = mode === 'signup';
+        const copy = AUTH_MODES[mode];
         const titleEl = document.getElementById('auth-title');
         const subtitleEl = document.getElementById('auth-subtitle');
         const submitBtnEl = document.getElementById('auth-submit-btn');
+        const passwordEl = document.getElementById('auth-password');
+        const codeEl = document.getElementById('auth-code');
+        const confirmPwdInputEl = document.getElementById('auth-confirm-password');
         const switchTextEl = document.getElementById('auth-switch-text');
-        const forgotPwdLinkEl = document.getElementById('forgot-password-link');
-        const confirmPwdGroup = document.getElementById('confirm-password-group');
-        const confirmPwdInput = document.getElementById('auth-confirm-password');
-        
-        if (titleEl) titleEl.textContent = "Sign In to Download";
-        if (subtitleEl) subtitleEl.textContent = "Create an account to access downloads and save your preferences.";
-        if (submitBtnEl) submitBtnEl.textContent = "Sign In";
-        if (switchTextEl) switchTextEl.innerHTML = 'Don\'t have an account? <a href="#" id="toggle-auth-mode">Sign Up</a>';
-        if (forgotPwdLinkEl) forgotPwdLinkEl.style.display = 'block';
-        if (confirmPwdGroup) {
-            confirmPwdGroup.style.display = 'none';
-            if (confirmPwdInput) {
-                confirmPwdInput.required = false;
-                confirmPwdInput.value = '';
-            }
+
+        if (titleEl) titleEl.textContent = copy.title;
+        if (subtitleEl) subtitleEl.textContent = copy.subtitle;
+        if (submitBtnEl) { submitBtnEl.textContent = copy.submit; submitBtnEl.disabled = false; }
+
+        show('auth-password-group', mode === 'signin' || mode === 'signup' || mode === 'reset');
+        show('auth-code-group', mode === 'confirm' || mode === 'reset');
+        show('confirm-password-group', mode === 'signup');
+        show('forgot-password-link', mode === 'signin');
+        show('auth-resend-link', mode === 'confirm');
+
+        if (passwordEl) {
+            passwordEl.placeholder = mode === 'reset' ? 'New password' : 'Password';
+            passwordEl.autocomplete = mode === 'signin' ? 'current-password' : 'new-password';
+            passwordEl.required = mode === 'signin' || mode === 'signup' || mode === 'reset';
         }
-        hideAuthMessages();
+        if (codeEl) { codeEl.required = mode === 'confirm' || mode === 'reset'; if (mode !== 'confirm' && mode !== 'reset') codeEl.value = ''; }
+        if (confirmPwdInputEl) {
+            confirmPwdInputEl.required = mode === 'signup';
+            if (mode !== 'signup') confirmPwdInputEl.value = '';
+        }
+        if (switchTextEl) {
+            switchTextEl.innerHTML = mode === 'signin'
+                ? "Don't have an account? <a href=\"#\" id=\"toggle-auth-mode\">Sign Up</a>"
+                : 'Back to <a href="#" id="toggle-auth-mode">Sign In</a>';
+        }
+        show('auth-switch-row', true);
     }
 
-    // Create or update user profile in Firestore
-    // Always resolves successfully, even if Firestore operations fail (offline mode)
-    async function createUserProfile(user, additionalData = {}) {
-        try {
-            const userRef = db.collection('users').doc(user.uid);
-            
-            // Try to get user document, but don't fail if offline or API not enabled
-            let snapshot;
-            try {
-                snapshot = await userRef.get();
-            } catch (getError) {
-                // Handle different error types
-                if (getError.code === 'permission-denied') {
-                    console.warn('Firestore permission denied. Make sure Firestore database is created and security rules allow access:', getError.message);
-                } else if (getError.code === 'failed-precondition') {
-                    console.warn('Firestore API may not be fully enabled yet. Please wait a few minutes:', getError.message);
-                } else {
-                    console.warn('Firestore get() failed (offline/API issue), will attempt to create profile:', getError.message);
-                }
-                snapshot = { exists: false };
-            }
-
-            if (!snapshot.exists) {
-                // Create new user profile
-                const { displayName, email, photoURL } = user;
-                const createdAt = new Date();
-                try {
-                    await userRef.set({
-                        displayName: displayName || email.split('@')[0],
-                        email,
-                        photoURL: photoURL || '',
-                        createdAt,
-                        bio: '',
-                        location: '',
-                        simulator: additionalData.simulator || 'Not selected',
-                        experience: additionalData.experience || 'Not selected',
-                        referral: additionalData.referral || 'Not selected',
-                        downloadCount: 0,
-                        sessionCount: 0,
-                        lastLogin: createdAt,
-                        ...additionalData
-                    });
-                    console.log('User profile created successfully');
-                    return { isNewUser: true };
-                } catch (setError) {
-                    // ... existing catch ...
-                }
-            } else {
-                // Update existing user profile
-                const currentData = snapshot.data();
-                await userRef.update({
-                    lastLogin: new Date(),
-                    sessionCount: (currentData.sessionCount || 0) + 1
-                });
-                console.log('User profile updated successfully');
-                return { isNewUser: false };
-            }
-            return { isNewUser: false };
-        } catch (error) {
-            console.warn('Firestore operation failed (non-fatal):', error.message);
-            return { isNewUser: false };
-        }
+    // Helper function to reset modal to sign-in state
+    function resetAuthModalToSignIn() {
+        pendingCredentials = null;
+        const passwordEl = document.getElementById('auth-password');
+        if (passwordEl) passwordEl.value = '';
+        const codeEl = document.getElementById('auth-code');
+        if (codeEl) codeEl.value = '';
+        setAuthMode('signin');
+        hideAuthMessages();
     }
 
     // Log new waitlist signup to Google Sheets (non-blocking, silent on failure)
@@ -473,23 +306,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Check if user has completed onboarding (all required fields filled)
     async function hasCompletedOnboarding(user) {
-        try {
-            const userDoc = await db.collection('users').doc(user.uid).get();
-            if (!userDoc.exists) {
-                return false;
-            }
-            const data = userDoc.data();
-            // Check if all required onboarding fields are present and not empty
-            return !!(data.simulator && data.experience && data.location && data.referral);
-        } catch (error) {
-            console.error('Error checking onboarding status:', error);
-            // If permission denied or other error, fallback to local storage
-            // or return true to prevent an infinite modal loop for offline/unauthorized users.
-            if (error.code === 'permission-denied') {
-                return localStorage.getItem('onboardingCompleted_' + user.uid) === 'true';
-            }
-            return false;
-        }
+        const profile = (user && user.profile) || {};
+        if (profile.simulator && profile.experience && profile.location && profile.referral) return true;
+        // Fallback when the save failed earlier in this browser.
+        return !!user && localStorage.getItem('onboardingCompleted_' + user.uid) === 'true';
     }
 
     async function checkOnboarding(user, profileResult) {
@@ -514,7 +334,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (onboardingForm) {
         onboardingForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const user = firebase.auth().currentUser;
+            const user = RaAuth.currentUser;
             if (!user) return;
 
             const simulatorEl = document.getElementById('onboarding-simulator');
@@ -570,33 +390,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             try {
-                // Ensure user profile exists first (create if it doesn't)
-                const userRef = db.collection('users').doc(user.uid);
-                const userDoc = await userRef.get();
-                
-                if (!userDoc.exists) {
-                    // Create basic profile if it doesn't exist
-                    const { displayName, email, photoURL } = user;
-                    await userRef.set({
-                        displayName: displayName || email.split('@')[0],
-                        email: email,
-                        photoURL: photoURL || '',
-                        createdAt: new Date(),
-                        bio: '',
-                        downloadCount: 0,
-                        sessionCount: 0,
-                        lastLogin: new Date()
-                    });
-                }
-                
-                // Use set with merge to update onboarding fields
-                await userRef.set({
+                await RaAuth.updateProfile({
                     simulator: simulator,
                     experience: experience,
                     location: location,
                     referral: referral
-                }, { merge: true });
-                
+                });
+
                 console.log('Onboarding data saved successfully');
 
                 // Log signup with date to Google Sheets (best-effort, non-blocking)
@@ -636,15 +436,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             } catch (error) {
                 console.error('Error saving onboarding data:', error);
                 
-                // Fallback: save to local storage if Firestore fails
+                // Fallback: remember completion locally if the save failed
                 localStorage.setItem('onboardingCompleted_' + user.uid, 'true');
                 
                 // Provide more helpful error message - only show if save actually failed
-                const errorMessage = error.code === 'permission-denied' 
-                    ? 'Permission denied. Please check your account permissions.'
-                    : error.code === 'unavailable'
-                    ? 'Service temporarily unavailable. Please try again later.'
-                    : 'Failed to save information. You can update it later in your profile.';
+                const errorMessage = 'Failed to save information. You can update it later in your profile.';
                 alert(errorMessage);
                 if (onboardingModal) {
                     onboardingModal.classList.remove('active');
@@ -665,17 +461,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
 
-    // Load user profile data
+    // Load user profile data (stored as Cognito attributes, loaded at sign-in)
     async function loadUserProfile(user) {
-        try {
-            const userDoc = await db.collection('users').doc(user.uid).get();
-            if (userDoc.exists) {
-                return userDoc.data();
-            }
-        } catch (error) {
-            console.error('Error loading user profile:', error);
-        }
-        return null;
+        return (user && user.profile) || null;
     }
 
     // Load and display profile data (defined before use)
@@ -819,7 +607,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateUIForLoggedOutUser();
 
     // Monitor Auth State
-    firebase.auth().onAuthStateChanged(async (user) => {
+    RaAuth.onAuthStateChanged(async (user) => {
         if (user) {
             console.log("=== User is signed in:", user.email, "===");
             
@@ -831,14 +619,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             console.log("User session saved to cookies - will persist for 30 days");
             
-            // Try to create/update profile, but don't fail if Firestore is offline
-            let profileResult = null;
-            try {
-                profileResult = await createUserProfile(user);
-            } catch (profileError) {
-                console.error("Profile creation error in auth state change (non-fatal):", profileError);
-            }
-            
+            const profileResult = { isNewUser: isNewUserSignup };
+
             // Onboarding is only required at download time, not on page load/browse
             // Update UI first
             try {
@@ -874,7 +656,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             if (!hasCompleted) {
                                 console.log("Download requested but onboarding not complete — showing onboarding modal");
                                 setTimeout(() => {
-                                    checkOnboarding(user, profileResult || { isNewUser: isNewUserSignup });
+                                    checkOnboarding(user, profileResult);
                                 }, 100);
                             } else {
                                 setTimeout(() => {
@@ -911,14 +693,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Close Modal
     if (closeAuthModal) {
         closeAuthModal.addEventListener('click', () => {
-            // Reset Google button state when closing modal
-            if (googleBtn) resetGoogleButton();
-            
-            // Reset confirm password field
-            const confirmPwdInput = document.getElementById('auth-confirm-password');
-            const confirmPwdGroup = document.getElementById('confirm-password-group');
-            if (confirmPwdInput) confirmPwdInput.value = '';
-            if (confirmPwdGroup) confirmPwdGroup.style.display = 'none';
+            resetAuthModalToSignIn();
             
             if (authModal) {
                 authModal.classList.remove('active');
@@ -949,319 +724,152 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Toggle Sign In / Sign Up
-    const confirmPasswordGroup = document.getElementById('confirm-password-group');
+    // Switch between Sign In and Sign Up (and back from confirm / forgot / reset)
     const confirmPasswordInput = document.getElementById('auth-confirm-password');
     const authSwitchText = document.getElementById('auth-switch-text');
-    
-    // Use event delegation on the parent to handle clicks on dynamically updated link
     if (authSwitchText) {
         authSwitchText.addEventListener('click', (e) => {
-            const link = e.target.closest('#toggle-auth-mode') || (e.target.id === 'toggle-auth-mode' ? e.target : null);
-            if (link) {
-                e.preventDefault();
-                hideAuthMessages();
-                isSignUp = !isSignUp;
-                if (isSignUp) {
-                    if (authTitle) authTitle.textContent = "Create Account";
-                    if (authSubtitle) authSubtitle.textContent = "Join Race Insight to start downloading.";
-                    if (authSubmitBtn) authSubmitBtn.textContent = "Create Account";
-                    authSwitchText.innerHTML = 'Already have an account? <a href="#" id="toggle-auth-mode">Sign In</a>';
-                    if (forgotPasswordLink) forgotPasswordLink.style.display = 'none';
-                    if (confirmPasswordGroup) confirmPasswordGroup.style.display = 'block';
-                    if (confirmPasswordInput) confirmPasswordInput.required = true;
-                } else {
-                    if (authTitle) authTitle.textContent = "Sign In to Download";
-                    if (authSubtitle) authSubtitle.textContent = "Create an account to access downloads and save your preferences.";
-                    if (authSubmitBtn) authSubmitBtn.textContent = "Sign In";
-                    authSwitchText.innerHTML = 'Don\'t have an account? <a href="#" id="toggle-auth-mode">Sign Up</a>';
-                    if (forgotPasswordLink) forgotPasswordLink.style.display = 'block';
-                    if (confirmPasswordGroup) confirmPasswordGroup.style.display = 'none';
-                    if (confirmPasswordInput) {
-                        confirmPasswordInput.required = false;
-                        confirmPasswordInput.value = '';
-                    }
-                }
-            }
+            const link = e.target.closest('#toggle-auth-mode');
+            if (!link) return;
+            e.preventDefault();
+            hideAuthMessages();
+            setAuthMode(authMode === 'signin' ? 'signup' : 'signin');
         });
     }
 
-    // Store original Google button HTML
-    const googleBtnOriginalHTML = googleBtn ? googleBtn.innerHTML : '';
-    
-    // Function to reset Google button to original state
-    function resetGoogleButton() {
-        if (googleBtn) {
-            googleBtn.disabled = false;
-            googleBtn.innerHTML = googleBtnOriginalHTML;
-        }
-    }
-    
-    // Google Sign In
-    if (googleBtn) {
-        googleBtn.addEventListener('click', () => {
-        hideAuthMessages();
-        
-        // Disable the Google button to prevent multiple clicks
-        googleBtn.disabled = true;
-        googleBtn.innerHTML = '<span style="opacity: 0.7;">Signing in...</span>';
-        
-        // Set a timeout to restore button if sign-in takes too long (60 seconds)
-        const timeoutId = setTimeout(() => {
-            console.warn("Google sign-in timeout - restoring button");
-            resetGoogleButton();
-            showAuthError("Sign in took too long. Please check if popup was blocked and try again.");
-        }, 60000);
-        
-        const provider = new firebase.auth.GoogleAuthProvider();
-        provider.addScope('profile');
-        provider.addScope('email');
-        
-        // Use signInWithRedirect as fallback if popup fails due to service worker issues
-        firebase.auth().signInWithPopup(provider)
-            .then(async (result) => {
-                clearTimeout(timeoutId);
-                console.log("Google sign-in successful:", result.user.email);
-                const profileResult = await createUserProfile(result.user).catch(() => {
-                    console.warn("Profile creation completed with warnings (non-fatal)");
-                    return { isNewUser: false };
-                });
-                
-                if (profileResult && profileResult.isNewUser) {
-                    await checkOnboarding(result.user, profileResult);
-                }
-                // Sign-in succeeded - modal will close via onAuthStateChanged
-                // Button will be reset when modal reopens, so no need to restore here
-            })
-            .catch(async (error) => {
-                clearTimeout(timeoutId);
-                console.error("Google Sign In Error:", error);
-                
-                // Re-enable the button
-                resetGoogleButton();
-                
-                // Handle different error types
-                let errorMessage = "Sign in failed. Please try again.";
-                
-                if (error.code) {
-                    if (error.code === 'auth/popup-closed-by-user') {
-                        errorMessage = "Sign in was cancelled. Please try again.";
-                    } else if (error.code === 'auth/popup-blocked') {
-                        errorMessage = "Popup was blocked. Please allow popups for this site and try again.";
-                    } else if (error.code === 'auth/internal-error') {
-                        // Service worker or network issue - try redirect method
-                        console.log("Popup failed, trying redirect method...");
-                        try {
-                            await firebase.auth().signInWithRedirect(provider);
-                            return; // Redirect will happen, don't show error
-                        } catch (redirectError) {
-                            errorMessage = "Sign in failed due to network issues. Please check your connection and try again.";
-                        }
-                    } else if (error.code === 'auth/cancelled-popup-request') {
-                        errorMessage = "Only one popup request is allowed at a time. Please try again.";
-                    } else if (error.code === 'auth/network-request-failed') {
-                        errorMessage = "Network error. Please check your connection and try again.";
-                    } else if (error.code.startsWith('auth/')) {
-                        errorMessage = "Authentication error: " + error.message;
-                    } else {
-                        errorMessage = "Sign in error: " + error.message;
-                    }
-                }
-                
-                showAuthError(errorMessage);
-            });
-    });
-    }
-
-    // Forgot Password - DISABLED (email auth removed)
-    if (false && forgotPasswordBtn) { // Disabled - email auth removed
+    if (forgotPasswordBtn) {
         forgotPasswordBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            const email = emailInput ? emailInput.value.trim() : '';
-            if (!email) {
-                showAuthError("Please enter your email address first.");
-                return;
-            }
-            // Security: Validate email format
-            if (!validateEmail(email)) {
-                showAuthError("Please enter a valid email address.");
-                return;
-            }
             hideAuthMessages();
-            firebase.auth().sendPasswordResetEmail(email)
-                .then(() => {
-                    showAuthSuccess("Password reset email sent! Check your inbox.");
-                })
-                .catch((error) => {
-                    console.error("Password Reset Error:", error);
-                    // Security: Use sanitized error message
-                    showAuthError(getErrorMessage(error));
-                });
+            setAuthMode('forgot');
         });
     }
 
-    // Email Sign In / Sign Up - DISABLED (only Google auth enabled)
-    // Email authentication has been disabled. Only Google sign-in is available.
-    if (false && emailForm) { // Disabled - email auth removed
-        emailForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        hideAuthMessages();
-        const email = emailInput.value.trim();
-        const password = passwordInput.value;
-        const confirmPassword = confirmPasswordInput.value;
+    const resendCodeBtn = document.getElementById('auth-resend-btn');
+    if (resendCodeBtn) {
+        resendCodeBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const email = (pendingCredentials && pendingCredentials.email) || (emailInput ? emailInput.value.trim() : '');
+            if (!validateEmail(email)) { showAuthError('Please enter a valid email address.'); return; }
+            try {
+                await RaAuth.resendConfirmationCode(email);
+                showAuthSuccess('A new code is on its way.');
+            } catch (error) {
+                console.error('Resend code error:', error);
+                showAuthError(getErrorMessage(error));
+            }
+        });
+    }
 
-        // Security: Validate email format
-        if (!email) {
-            showAuthError("Please enter your email address.");
-            return;
-        }
-        if (!validateEmail(email)) {
-            showAuthError("Please enter a valid email address.");
-            return;
-        }
+    function setSubmitBusy(busy, label) {
+        if (!authSubmitBtn) return;
+        authSubmitBtn.disabled = busy;
+        authSubmitBtn.textContent = busy ? label : AUTH_MODES[authMode].submit;
+    }
 
-        // Security: Validate password
-        if (!password) {
-            showAuthError("Please enter your password.");
-            return;
-        }
+    // Email + password form: one handler for every mode
+    if (emailForm) {
+        emailForm.style.display = 'block';
+        emailForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideAuthMessages();
+            const codeInput = document.getElementById('auth-code');
+            const email = emailInput ? emailInput.value.trim() : '';
+            const password = passwordInput ? passwordInput.value : '';
+            const confirmPassword = confirmPasswordInput ? confirmPasswordInput.value : '';
+            const code = codeInput ? codeInput.value.trim() : '';
 
-        // Security: Enhanced password validation for signup
-        if (isSignUp) {
-            const passwordValidation = validatePassword(password);
-            if (!passwordValidation.valid) {
-                showAuthError(passwordValidation.message);
+            if (!RaAuth.configured) {
+                showAuthError(RaAuth.friendlyError({ code: 'NotConfigured' }));
                 return;
             }
-            if (!confirmPassword) {
-                showAuthError("Please confirm your password.");
+            if (!validateEmail(email)) {
+                showAuthError(email ? 'Please enter a valid email address.' : 'Please enter your email address.');
                 return;
             }
-            if (password !== confirmPassword) {
-                showAuthError("Passwords do not match.");
-                return;
-            }
-        }
 
-        if (authSubmitBtn) {
-            authSubmitBtn.disabled = true;
-            authSubmitBtn.textContent = isSignUp ? "Creating Account..." : "Signing In...";
-        }
-
-        if (isSignUp) {
-            firebase.auth().createUserWithEmailAndPassword(email, password)
-                .then(async (userCredential) => {
-                    // Mark as new user signup - this will be used in onAuthStateChanged
+            try {
+                if (authMode === 'signin') {
+                    if (!password) { showAuthError('Please enter your password.'); return; }
+                    setSubmitBusy(true, 'Signing In...');
+                    try {
+                        await RaAuth.signIn(email, password);
+                        showAuthSuccess('Signing in...');
+                        if (passwordInput) passwordInput.value = '';
+                        // onAuthStateChanged closes the modal.
+                    } catch (error) {
+                        if (error && error.code === 'UserNotConfirmedException') {
+                            pendingCredentials = { email: email, password: password };
+                            await RaAuth.resendConfirmationCode(email).catch(() => {});
+                            setAuthMode('confirm');
+                            showAuthSuccess('This account is not confirmed yet. We emailed you a new code.');
+                            return;
+                        }
+                        throw error;
+                    }
+                } else if (authMode === 'signup') {
+                    const passwordValidation = validatePassword(password);
+                    if (!passwordValidation.valid) { showAuthError(passwordValidation.message); return; }
+                    if (!confirmPassword) { showAuthError('Please confirm your password.'); return; }
+                    if (password !== confirmPassword) { showAuthError('Passwords do not match.'); return; }
+                    setSubmitBusy(true, 'Creating Account...');
+                    const result = await RaAuth.signUp(email, password);
                     isNewUserSignup = true;
-                    
-                    // Try to create profile, but don't fail sign-up if it errors
-                    try {
-                        await createUserProfile(userCredential.user);
-                    } catch (profileError) {
-                        console.error("Profile creation error (non-fatal):", profileError);
+                    pendingCredentials = { email: email, password: password };
+                    if (result.needsConfirmation) {
+                        if (passwordInput) passwordInput.value = '';
+                        if (confirmPasswordInput) confirmPasswordInput.value = '';
+                        setAuthMode('confirm');
+                        showAuthSuccess('We emailed a verification code to ' + email + '.');
+                    } else {
+                        await RaAuth.signIn(email, password);
+                        showAuthSuccess('Account created successfully! Logging you in...');
                     }
-                    
-                    // Show success message
-                    showAuthSuccess("Account created successfully! Logging you in...");
-                    
-                    // Clear form fields
-                    if (emailInput) emailInput.value = '';
+                } else if (authMode === 'confirm') {
+                    if (!code) { showAuthError('Please enter the verification code.'); return; }
+                    const credentials = pendingCredentials || { email: email, password: '' };
+                    setSubmitBusy(true, 'Confirming...');
+                    await RaAuth.confirmSignUp(credentials.email, code);
+                    if (credentials.password) {
+                        await RaAuth.signIn(credentials.email, credentials.password);
+                        showAuthSuccess('Email confirmed. Signing you in...');
+                        pendingCredentials = null;
+                    } else {
+                        setAuthMode('signin');
+                        showAuthSuccess('Email confirmed. Sign in to continue.');
+                    }
+                } else if (authMode === 'forgot') {
+                    setSubmitBusy(true, 'Sending...');
+                    await RaAuth.requestPasswordReset(email);
+                    setAuthMode('reset');
+                    showAuthSuccess('We emailed a verification code to ' + email + '.');
+                } else if (authMode === 'reset') {
+                    if (!code) { showAuthError('Please enter the verification code.'); return; }
+                    const passwordValidation = validatePassword(password);
+                    if (!passwordValidation.valid) { showAuthError(passwordValidation.message); return; }
+                    setSubmitBusy(true, 'Saving...');
+                    await RaAuth.confirmPasswordReset(email, code, password);
                     if (passwordInput) passwordInput.value = '';
-                    if (confirmPasswordInput) confirmPasswordInput.value = '';
-                    
-                    // Note: User is automatically signed in by Firebase after createUserWithEmailAndPassword
-                    // The onAuthStateChanged handler will take care of closing modal and showing onboarding
-                    
-                    if (authSubmitBtn) {
-                        authSubmitBtn.textContent = "Create Account";
-                        authSubmitBtn.disabled = false;
-                    }
-                })
-                .catch((error) => {
-                    console.error("Sign Up Error:", error);
-                    showAuthError(getErrorMessage(error));
-                    if (authSubmitBtn) {
-                        authSubmitBtn.textContent = "Create Account";
-                        authSubmitBtn.disabled = false;
-                    }
-                    isNewUserSignup = false; // Reset flag on error
-                });
-        } else {
-            firebase.auth().signInWithEmailAndPassword(email, password)
-                .then(async (userCredential) => {
-                    // Try to create/update profile, but don't fail sign-in if it errors
-                    try {
-                        await createUserProfile(userCredential.user);
-                    } catch (profileError) {
-                        console.error("Profile creation error (non-fatal):", profileError);
-                    }
-                    
-                    // Show success message briefly
-                    showAuthSuccess("Signing in...");
-                    
-                    // Clear form fields
-                    if (emailInput) emailInput.value = '';
-                    if (passwordInput) passwordInput.value = '';
-                    
-                    // Note: User is automatically signed in by Firebase
-                    // The onAuthStateChanged handler will take care of closing modal
-                    
-                    if (authSubmitBtn) {
-                        authSubmitBtn.textContent = "Sign In";
-                        authSubmitBtn.disabled = false;
-                    }
-                })
-                .catch((error) => {
-                    console.error("Sign In Error:", error);
-                    showAuthError(getErrorMessage(error));
-                    if (authSubmitBtn) {
-                        authSubmitBtn.textContent = "Sign In";
-                        authSubmitBtn.disabled = false;
-                    }
-                });
-        }
+                    setAuthMode('signin');
+                    showAuthSuccess('Password updated. Sign in with your new password.');
+                }
+            } catch (error) {
+                console.error('Auth error (' + authMode + '):', error);
+                showAuthError(getErrorMessage(error));
+                isNewUserSignup = false;
+            } finally {
+                if (authSubmitBtn) {
+                    authSubmitBtn.disabled = false;
+                    authSubmitBtn.textContent = AUTH_MODES[authMode].submit;
+                }
+            }
         });
     }
 
     // Helper function to get user-friendly error messages
-    // Security: Sanitize error messages to prevent information leakage
     function getErrorMessage(error) {
-        // Don't expose internal error details to users
-        if (!error || !error.code) {
-            return 'An error occurred. Please try again.';
-        }
-        
-        switch (error.code) {
-            case 'auth/email-already-in-use':
-                return 'This email is already registered. Please sign in instead.';
-            case 'auth/invalid-email':
-                return 'Invalid email address format.';
-            case 'auth/operation-not-allowed':
-                return 'This operation is not allowed. Please contact support.';
-            case 'auth/weak-password':
-                return 'Password must be at least 8 characters and contain both letters and numbers.';
-            case 'auth/user-disabled':
-                return 'This account has been disabled. Please contact support.';
-            case 'auth/user-not-found':
-                return 'No account found with this email. Please sign up first.';
-            case 'auth/wrong-password':
-                return 'Incorrect password. Please try again.';
-            case 'auth/invalid-login-credentials':
-                return 'Invalid email or password. Please check your credentials and try again.';
-            case 'auth/invalid-credential':
-                return 'Invalid email or password. Please check your credentials and try again.';
-            case 'auth/too-many-requests':
-                return 'Too many failed attempts. Please try again later.';
-            case 'auth/network-request-failed':
-                return 'Network error. Please check your connection and try again.';
-            default:
-                // Security: Don't expose internal error messages
-                return 'An error occurred. Please try again.';
-        }
+        return RaAuth.friendlyError(error);
     }
-
-    // Sign-in is now triggered by the Download button when user is not signed in
-    // Auth buttons removed - users sign in via download button
 
     // Logout functionality (only in profile modal)
     const logoutBtns = [
@@ -1270,7 +878,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     logoutBtns.forEach(btn => {
         if (btn) {
             btn.addEventListener('click', () => {
-                firebase.auth().signOut().then(() => {
+                RaAuth.signOut().then(() => {
                     console.log("User signed out");
                     // Close modals if open
                     if (profileModal) {
@@ -1281,7 +889,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     deleteCookie('userLoggedIn');
                     deleteCookie('userEmail');
                     deleteCookie('userId');
-                    
+
                     console.log("User session cookies cleared on logout");
                 }).catch((error) => {
                     console.error("Sign out error:", error);
@@ -1318,58 +926,60 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, stepDuration);
     }
     
-    // Fetch and display download count
-    const downloadCountRef = db.collection('stats').doc('downloads');
+    // Total downloads = GitHub's own download count for the installer files across
+    // all public releases, so the site needs no database or write access.
     const totalDownloadContainer = document.getElementById('total-download-container');
     const DOWNLOAD_THRESHOLD = 50; // Big number threshold
-    
-    // Listen for real-time updates
-    downloadCountRef.onSnapshot((doc) => {
-        if (doc && doc.exists) {
-            const count = doc.data().count || 0;
-            
-            if (count >= DOWNLOAD_THRESHOLD) {
-                if (totalDownloadContainer) totalDownloadContainer.style.display = 'block';
-                
-                const currentText = downloadCountElement.textContent.trim();
-                const currentCount = parseInt(currentText.replace(/,/g, '')) || 0;
-                
-                if (currentText === 'Loading...' || currentText === '') {
-                    downloadCountElement.textContent = formatNumber(count);
-                } else if (count !== currentCount) {
-                    animateCount(downloadCountElement, count);
-                }
-            } else {
-                if (totalDownloadContainer) totalDownloadContainer.style.display = 'none';
-            }
-        } else {
-            if (totalDownloadContainer) totalDownloadContainer.style.display = 'none';
+    const COUNT_CACHE_KEY = 'ri_total_downloads';
+    const COUNT_CACHE_MS = 10 * 60 * 1000;
+    const INSTALLER_FILE = /\.(exe|AppImage|dmg)$/i;
+
+    function showDownloadCount(count) {
+        if (!downloadCountElement || !totalDownloadContainer) return;
+        if (count < DOWNLOAD_THRESHOLD) {
+            totalDownloadContainer.style.display = 'none';
+            return;
         }
-    }, (error) => {
-        console.error('Error fetching download count:', error);
-        downloadCountElement.innerHTML = '<span style="opacity: 0.5;">Unable to load</span>';
-    });
-    
-    // Function to increment download count
-    async function incrementDownloadCount() {
-        try {
-            await db.runTransaction(async (transaction) => {
-                const doc = await transaction.get(downloadCountRef);
-                if (doc && doc.exists) {
-                    const currentCount = doc.data().count || 0;
-                    transaction.update(downloadCountRef, {
-                        count: currentCount + 1
-                    });
-                } else {
-                    transaction.set(downloadCountRef, {
-                        count: 1
-                    });
-                }
-            });
-        } catch (error) {
-            console.error('Error incrementing download count:', error);
+        totalDownloadContainer.style.display = 'block';
+        const currentText = downloadCountElement.textContent.trim();
+        const currentCount = parseInt(currentText.replace(/,/g, '')) || 0;
+        if (currentText === 'Loading...' || currentText === '') {
+            downloadCountElement.textContent = formatNumber(count);
+        } else if (count !== currentCount) {
+            animateCount(downloadCountElement, count);
         }
     }
+
+    function countInstallerDownloads(releases) {
+        let total = 0;
+        (releases || []).forEach(release => {
+            (release.assets || []).forEach(asset => {
+                if (INSTALLER_FILE.test(asset.name)) total += asset.download_count || 0;
+            });
+        });
+        return total;
+    }
+
+    async function loadTotalDownloads() {
+        try {
+            const cached = JSON.parse(sessionStorage.getItem(COUNT_CACHE_KEY) || 'null');
+            if (cached && Date.now() - cached.at < COUNT_CACHE_MS) {
+                showDownloadCount(cached.count);
+                return;
+            }
+        } catch (e) { /* storage unavailable or corrupt: fetch fresh */ }
+        try {
+            const response = await fetch('https://api.github.com/repos/APEX-Race-Tech/RACE-Insight-Public/releases?per_page=100');
+            if (!response.ok) throw new Error('GitHub API error: ' + response.status);
+            const count = countInstallerDownloads(await response.json());
+            try { sessionStorage.setItem(COUNT_CACHE_KEY, JSON.stringify({ at: Date.now(), count: count })); } catch (e) { /* ignore */ }
+            showDownloadCount(count);
+        } catch (error) {
+            console.warn('Could not load download count:', error.message);
+            if (totalDownloadContainer) totalDownloadContainer.style.display = 'none';
+        }
+    }
+    loadTotalDownloads();
 
     // --- Download Logic ---
     const downloadBtn = document.getElementById('download-btn');
@@ -1425,7 +1035,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Function to handle download button click (opens modal if not logged in)
     async function handleDownloadClick(e) {
         if (e) e.preventDefault();
-        const user = firebase.auth().currentUser;
+        const user = RaAuth.currentUser;
         if (!user) {
             pendingDownloadAction = () => {
                 // Scroll to download section and trigger download
@@ -1479,10 +1089,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (downloadBtn) {
         downloadBtn.addEventListener('click', async () => {
             if (!selectedPlatform) {
-                alert('Please select your platform (Windows, Linux, or Mac) first.');
+                alert('Please select your platform first. Windows is available now; Linux and Mac are coming soon.');
                 return;
             }
-            const user = firebase.auth().currentUser;
+            const user = RaAuth.currentUser;
             if (!user) {
                 pendingDownloadAction = () => triggerDownload();
                 resetAuthModalToSignIn();
@@ -1504,6 +1114,68 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // ===== GitHub release lookup (shared by the version label and downloads) =====
+    // Repository is public: https://github.com/APEX-Race-Tech/RACE-Insight-Public
+    // The latest release is fetched automatically; publishing a new GitHub
+    // release updates the download and version label with no site change.
+    const GITHUB_OWNER = 'APEX-Race-Tech';
+    const GITHUB_REPO = 'RACE-Insight-Public';
+
+    const RELEASE_FILE_PATTERNS = {
+        'windows': /RACE-Insight.*Setup.*\.exe$/i,
+        'linux': /RACE-?Insight.*\.AppImage$/i,
+        'apple': /RACE-?Insight.*\.dmg$/i
+    };
+
+    const FALLBACK_VERSION = 'v0.1.37';
+    const FALLBACK_DOWNLOAD_URLS = {
+        'windows': `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v0.1.37/RACE-Insight-Setup-0.1.37.exe`
+    };
+
+    let latestReleasePromise = null;
+
+    // Fetch the latest public release once per page load and reuse the result.
+    function fetchLatestRelease() {
+        if (!latestReleasePromise) {
+            latestReleasePromise = fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`GitHub API error: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .catch(error => {
+                    // Allow a later click to retry after a transient failure.
+                    latestReleasePromise = null;
+                    throw error;
+                });
+        }
+        return latestReleasePromise;
+    }
+
+    function findReleaseAsset(release, platform) {
+        const pattern = RELEASE_FILE_PATTERNS[platform];
+        if (!pattern || !release || !Array.isArray(release.assets)) return null;
+        return release.assets.find(asset => pattern.test(asset.name)) || null;
+    }
+
+    // Show the current release version under the platform buttons.
+    const downloadVersionEl = document.getElementById('download-version');
+    if (downloadVersionEl) {
+        fetchLatestRelease()
+            .then(release => {
+                const published = release.published_at
+                    ? new Date(release.published_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+                    : '';
+                downloadVersionEl.textContent = published
+                    ? `Latest version: ${release.tag_name} (${published})`
+                    : `Latest version: ${release.tag_name}`;
+            })
+            .catch(() => {
+                downloadVersionEl.textContent = `Latest version: ${FALLBACK_VERSION}`;
+            });
+    }
+
     // Helper function to show thank you modal
     function showThankYouModal() {
         const thankYouModal = document.getElementById('thank-you-modal');
@@ -1520,33 +1192,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         const isIE = /Trident/.test(navigator.userAgent);
         const isOldEdge = /Edge/.test(navigator.userAgent) && !isEdge;
         
-        // ===== GitHub Releases API (Primary method for PUBLIC repositories) =====
-        // Repository is now public: https://github.com/APEX-Race-Tech/RACE-Insight-Public
-        // This method automatically fetches the LATEST release - no manual updates needed!
-        // When you publish a new release on GitHub, it will automatically be used here.
-        
-        const GITHUB_OWNER = 'APEX-Race-Tech';
-        const GITHUB_REPO = 'RACE-Insight-Public';
-        
-        const filePatterns = {
-            'windows': /RACE-Insight.*Setup.*\.exe$/i,
-            'linux': /RaceInsight.*\.AppImage$/i,
-            'apple': /RaceInsight.*\.dmg$/i
-        };
-        
+        // ===== GitHub Releases API (primary; see fetchLatestRelease above) =====
         let downloadUrl = null;
-        
+
         try {
-            const response = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`);
-            
-            if (!response.ok) {
-                throw new Error(`GitHub API error: ${response.status}`);
-            }
-            
-            const release = await response.json();
-            const pattern = filePatterns[selectedPlatform];
-            const asset = release.assets.find(asset => pattern.test(asset.name));
-            
+            const release = await fetchLatestRelease();
+            const asset = findReleaseAsset(release, selectedPlatform);
+
             if (!asset) {
                 // Fallback to hardcoded URLs if API doesn't find the asset
                 throw new Error(`No release file found for ${selectedPlatform}`);
@@ -1559,16 +1211,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error('GitHub API download error:', error);
             
             // ===== Fallback: Direct Download URLs =====
-            // Fallback to hardcoded URLs if GitHub API fails
-            const downloadUrls = {
-                'windows': 'https://github.com/APEX-Race-Tech/RACE-Insight-Public/releases/download/v0.1.27/RACE-Insight-Setup-0.1.27.exe',
-                'linux': 'https://github.com/APEX-Race-Tech/RACE-Insight-Public/releases/download/v0.1.27/RaceInsight_Setup_Linux.AppImage',
-                'apple': 'https://github.com/APEX-Race-Tech/RACE-Insight-Public/releases/download/v0.1.27/RaceInsight_Setup_Mac.dmg'
-            };
-            
-            downloadUrl = downloadUrls[selectedPlatform];
+            // Used only when the GitHub API is unreachable or the release has no
+            // file for this platform. Keep it in step with the latest public
+            // release. Only Windows installers are published today.
+            downloadUrl = FALLBACK_DOWNLOAD_URLS[selectedPlatform];
             if (!downloadUrl) {
-                alert('Platform not available yet. Please contact support.');
+                alert('Race Insight is not available for this platform yet. Windows is available now; Linux and Mac are coming soon.');
                 return;
             }
             
@@ -1606,21 +1254,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             
         // Do async operations after opening the download (non-blocking)
         try {
-            // Increment download count (fire and forget - don't block download)
-            incrementDownloadCount().catch(error => {
-                console.error('Error incrementing download count:', error);
-            });
-            
-            // Increment user download count (fire and forget)
-            const user = firebase.auth().currentUser;
-            if (user) {
-                db.collection('users').doc(user.uid).update({
-                    downloadCount: firebase.firestore.FieldValue.increment(1)
-                }).catch(error => {
-                    console.error('Error updating user download count:', error);
-                });
-            }
-            
             // Show thank you modal
             showThankYouModal();
             
@@ -1699,7 +1332,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.querySelectorAll('a[href="#profile"]').forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
-            const user = firebase.auth().currentUser;
+            const user = RaAuth.currentUser;
             if (user) {
                 if (profileModal) {
                     profileModal.style.display = 'flex';
@@ -1724,7 +1357,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     if (navProfileBtn) {
         navProfileBtn.addEventListener('click', () => {
-            const user = firebase.auth().currentUser;
+            const user = RaAuth.currentUser;
             if (user) {
                 if (profileModal) {
                     profileModal.style.display = 'flex';
@@ -1745,7 +1378,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (mobileNavProfileBtn) {
         mobileNavProfileBtn.addEventListener('click', () => {
-            const user = firebase.auth().currentUser;
+            const user = RaAuth.currentUser;
             if (user) {
                 if (profileModal) {
                     profileModal.style.display = 'flex';
@@ -1799,7 +1432,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (updateProfileForm) {
         updateProfileForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const user = firebase.auth().currentUser;
+            const user = RaAuth.currentUser;
             if (!user) return;
 
             const nameEl = document.getElementById('profile-name');
@@ -1821,21 +1454,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             const experience = sanitizeInput(experienceEl.value, 50);
  
             try {
-                await db.collection('users').doc(user.uid).update({
-                    displayName: displayName || user.email.split('@')[0],
+                await RaAuth.updateProfile({
+                    displayName: displayName,
                     bio: bio,
                     location: location,
                     simulator: simulator,
                     experience: experience
                 });
 
-                // Update Firebase Auth display name
-                if (displayName && displayName !== user.displayName) {
-                    await user.updateProfile({ displayName: displayName });
-                }
-
                 if (profileEditForm) profileEditForm.style.display = 'none';
-                await loadProfileData(user);
+                await loadProfileData(RaAuth.currentUser || user);
                 alert('Profile updated successfully!');
             } catch (error) {
                 console.error('Error updating profile:', error);
@@ -1849,7 +1477,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (updatePasswordForm) {
         updatePasswordForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const user = firebase.auth().currentUser;
+            const user = RaAuth.currentUser;
             if (!user) return;
 
             const currentPwdEl = document.getElementById('current-password');
@@ -1882,15 +1510,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             try {
-                // Re-authenticate user
-                const credential = firebase.auth.EmailAuthProvider.credential(
-                    user.email,
-                    currentPassword
-                );
-                await user.reauthenticateWithCredential(credential);
-
-                // Update password
-                await user.updatePassword(newPassword);
+                await RaAuth.changePassword(currentPassword, newPassword);
                 if (updatePasswordForm) updatePasswordForm.reset();
                 if (changePasswordForm) changePasswordForm.style.display = 'none';
                 alert('Password updated successfully!');
@@ -1905,19 +1525,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const deleteAccountBtn = document.getElementById('delete-account-btn');
     if (deleteAccountBtn) {
         deleteAccountBtn.addEventListener('click', async () => {
-            const user = firebase.auth().currentUser;
+            const user = RaAuth.currentUser;
             if (!user) return;
 
             const confirmed = confirm("WARNING: This will permanently delete your account and all associated data. This action cannot be undone. Are you sure?");
             
             if (confirmed) {
                 try {
-                    // 1. Delete Firestore data
-                    await db.collection('users').doc(user.uid).delete();
-                    console.log("User data deleted from Firestore");
-
-                    // 2. Delete Firebase Auth user
-                    await user.delete();
+                    await RaAuth.deleteAccount();
                     console.log("User account deleted");
 
                     alert("Your account has been successfully deleted.");
@@ -1933,11 +1548,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     location.reload(); // Refresh to update nav/state
                 } catch (error) {
                     console.error("Error deleting account:", error);
-                    if (error.code === 'auth/requires-recent-login') {
-                        alert("For security reasons, this action requires a recent login. Please log out and log back in, then try again.");
-                    } else {
-                        alert("Failed to delete account: " + error.message);
-                    }
+                    alert("Failed to delete account: " + RaAuth.friendlyError(error));
                 }
             }
         });
