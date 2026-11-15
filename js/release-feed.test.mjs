@@ -7,7 +7,7 @@ import vm from 'node:vm';
 const source = readFileSync(new URL('./release-feed.js', import.meta.url), 'utf8');
 const sandbox = { module: { exports: {} } };
 vm.runInNewContext(source, sandbox);
-const { pickDownload, describeVersion } = sandbox.module.exports;
+const { pickDownload, describeVersion, describeChecksum } = sandbox.module.exports;
 
 const latest = {
   version: '0.2.8',
@@ -49,4 +49,15 @@ test('describes the version for the label, or says it is unavailable', () => {
   assert.equal(describeVersion({ version: '0.2.8', downloads: latest.downloads }, () => 'x'), 'Latest version: v0.2.8');
   assert.equal(describeVersion({ version: '0.0.0', downloads: {} }, () => 'x'), 'Latest version: not available yet');
   assert.equal(describeVersion(null, () => 'x'), 'Latest version: not available yet');
+});
+
+test('checksum describes the exact selected download and rejects malformed hashes', () => {
+  const windows = { file: 'RACE-Insight-Setup-0.3.0-beta.1.exe', sha256: 'a'.repeat(64) };
+  const release = { downloads: { windows: { ...windows, url: 'https://cdn.example/setup.exe' } } };
+  assert.equal(describeChecksum(release, 'windows'), windows.file + '\nSHA-256\n' + windows.sha256);
+  assert.equal(describeChecksum(release, 'linux'), 'Checksum unavailable. Try again before installing.');
+  for (const sha256 of ['', 'a'.repeat(63), 'g'.repeat(64), null]) {
+    release.downloads.windows.sha256 = sha256;
+    assert.equal(describeChecksum(release, 'windows'), 'Checksum unavailable. Try again before installing.');
+  }
 });

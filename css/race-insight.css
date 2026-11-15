@@ -3067,6 +3067,19 @@ select option {
   min-height: 1.2em;
 }
 
+.beta-install-guide {
+  max-width: 720px;
+  margin: 2rem auto 0;
+  text-align: left;
+  line-height: 1.6;
+  color: var(--text-color-secondary);
+}
+.beta-install-guide summary { cursor: pointer; color: var(--text-color); }
+.beta-install-guide ol { padding-left: 1.4rem; }
+.beta-install-guide li { margin: 0.8rem 0; }
+.beta-install-guide pre, .beta-install-guide code { white-space: pre-wrap; overflow-wrap: anywhere; }
+.beta-install-guide pre { padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.8rem; }
+
 .next-release-tag {
   display: inline-block;
   margin-left: 0.4rem;
@@ -3091,3 +3104,7 @@ select option {
 .auth-step-indicator .step.active { opacity: 1; color: #fff; }
 .auth-step-indicator .step.active span { background: var(--primary-color); border-color: var(--primary-color); color: #000; }
 .auth-step-indicator .step-line { flex: 0 0 2rem; height: 1px; background: var(--border-color); }
+
+@media (max-width: 600px) {
+  body:has(.beta-install-guide[open]) .social-media-bar { display: none; }
+}

@@ -1000,6 +1000,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
             btn.classList.add('selected');
             selectedPlatform = btn.dataset.platform;
+            updateChecksum();
             console.log('Platform selected:', selectedPlatform);
         });
         
@@ -1098,6 +1099,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     // (see js/release-feed.js). Publishing a release updates the download and version label with
     // no site change.
     const downloadVersionEl = document.getElementById('download-version');
+    const checksumEl = document.getElementById('download-checksum');
+    function updateChecksum() {
+        if (!checksumEl) return;
+        RaRelease.fetchLatest().then(latest => {
+            checksumEl.textContent = RaRelease.describeChecksum(latest, selectedPlatform);
+        }).catch(() => {
+            checksumEl.textContent = 'Checksum unavailable. Try again before installing.';
+        });
+    }
+    updateChecksum();
     if (downloadVersionEl) {
         RaRelease.fetchLatest()
             .then(latest => {

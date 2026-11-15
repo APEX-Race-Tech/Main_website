@@ -165,7 +165,7 @@
                 "name": "Is Race Insight free?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Race Insight is currently available as a free beta. Sign in with your Google account to download and start analyzing your racing data at no cost."
+                    "text": "The RACE Insight beta licence is INR 1,500 and includes a version 1 licence when released. Contact info@apexracetech.in for beta purchase availability. Create an email-based RACE Insight account to download and sign in."
                 }
             },
             {
@@ -798,7 +798,7 @@
                 </details>
                 <details>
                     <summary>Is Race Insight free?</summary>
-                    <p>Race Insight is currently available as a free beta. Sign in with your Google account to download and start analyzing your racing data at no cost.</p>
+                    <p>The RACE Insight beta licence is INR 1,500 and includes a version 1 licence when released. Contact info@apexracetech.in for beta purchase availability. Create an email-based RACE Insight account to download and sign in.</p>
                 </details>
                 <details>
                     <summary>What are the system requirements for Race Insight?</summary>
@@ -820,7 +820,7 @@
         <div class="section-content">
             <div class="download-section">
                 <h3>Download Race Insight</h3>
-                <p>Choose your platform and start analyzing your racing data.</p>
+                <p>Beta for Windows 10/11 x64. Read the installation and account instructions below.</p>
 
                 <div class="download-card" style="margin-bottom: 3rem;">
                 <div id="total-download-container" class="counter-container" style="margin-bottom: 2rem; padding: 1.5rem; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); display: none;">
@@ -841,6 +841,20 @@
                 <div class="action-buttons">
                     <button id="download-btn" class="btn btn-primary">Download</button>
                 </div>
+                <details class="beta-install-guide">
+                    <summary>Install, update and send feedback</summary>
+                    <ol>
+                        <li>Download the Windows installer from this page. In PowerShell, run <code>Get-FileHash "$env:USERPROFILE\Downloads\RACE-Insight-Setup-0.3.0-beta.1.exe" -Algorithm SHA256</code> and compare the result with the checksum below. Use the actual downloaded filename for later versions.</li>
+                        <li>This beta installer is unsigned. Windows cannot verify its publisher. After confirming the download source and checksum, SmartScreen's <strong>More info</strong>, then <strong>Run anyway</strong> opens the installer. Follow your organisation's software policy.</li>
+                        <li>Create a RACE Insight account with your email address and verify the email. Accounts from before 15 November 2026 must be created again. Use the same account in the desktop app.</li>
+                        <li>Import a telemetry file, promote the session, then open Analysis. Keep copies of your original telemetry and saved projects.</li>
+                        <li>Beta usage analytics, error reports and masked session replay are on by default. Turn them off on the sign-in screen or in <strong>Settings &gt; Analytics &amp; Privacy</strong>. Text and inputs are masked in replay.</li>
+                        <li>Open <strong>Feedback and Suggestions</strong> from the app menu. Include the app version, steps and expected result. If analytics are off, use <strong>Open Email</strong>. Review any log file before attaching it. Export logs with <strong>Settings &gt; Logging &gt; Share Logs</strong>.</li>
+                        <li>For beta.1 and older builds, return here to download updates manually. Save your work and close the app before installing.</li>
+                    </ol>
+                    <p><a href="https://docs.apexracetech.in">User guide</a> · <a href="race-insight/privacy-policy.html">Privacy policy</a> · <a href="race-insight/eula.html">Licence agreement</a></p>
+                    <pre id="download-checksum" aria-live="polite">Loading checksum…</pre>
+                </details>
             </div>
         </div>
     </section>

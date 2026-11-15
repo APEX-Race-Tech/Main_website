@@ -40,6 +40,14 @@
         return latest.releaseDate ? label + ' (' + formatDate(latest.releaseDate) + ')' : label;
     }
 
+    function describeChecksum(latest, platform) {
+        var entry = pickDownload(latest, platform);
+        if (!entry || typeof entry.file !== 'string' || !/^[a-f0-9]{64}$/i.test(entry.sha256 || '')) {
+            return 'Checksum unavailable. Try again before installing.';
+        }
+        return entry.file + '\nSHA-256\n' + entry.sha256;
+    }
+
     var pending = null;
 
     /** Fetches the feed once per page load. A failure clears the cache so a later click can retry. */
@@ -58,7 +66,7 @@
         return pending;
     }
 
-    var api = { pickDownload: pickDownload, describeVersion: describeVersion, fetchLatest: fetchLatest, FEED_URL: FEED_URL };
+    var api = { pickDownload: pickDownload, describeVersion: describeVersion, describeChecksum: describeChecksum, fetchLatest: fetchLatest, FEED_URL: FEED_URL };
 
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
     else root.RaRelease = api;
