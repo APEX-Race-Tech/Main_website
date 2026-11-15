@@ -8,7 +8,7 @@
     'use strict';
 
     // The site's release address. Change here when the release hosting gets a custom domain.
-    var FEED_URL = 'https://d397u0o5fj06jy.cloudfront.net/latest.json';
+    var FEED_URL = 'https://d3incq3qmjy9qr.cloudfront.net/latest.json';
 
     // Which feed entries satisfy each platform button, best first.
     var PLATFORM_KEYS = {
