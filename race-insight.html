@@ -355,7 +355,7 @@
                         professional-grade data analysis.</p>
                     <div class="hero-actions">
                         <a href="#download" class="btn btn-primary" aria-label="Get started with Race Insight download">Get Started</a>
-                        <a href="#data-import" class="btn btn-secondary" aria-label="Learn more about Race Insight features">Learn More</a>
+                        <a href="#features" class="btn btn-secondary" aria-label="Learn more about Race Insight features">Learn More</a>
                     </div>
                     <a href="#download" class="hero-badge" style="cursor: pointer; text-decoration: none; display: inline-block;" aria-label="Download Race Insight Beta">Now Available in Beta</a>
                 </div>
@@ -395,348 +395,104 @@
         </div>
     </section>
 
-    <!-- Feature Sections -->
-    <section id="data-import" class="full-page-section feature-section">
+    <!-- Features: the workflow, one step per block -->
+    <section id="features" class="full-page-section ri-features" aria-labelledby="features-title">
         <div class="section-content">
-            <div class="section-header-card">
-                <div class="section-header-icon">
-                    <i class="fas fa-upload"></i>
-                </div>
-                <div class="section-header-text">
-                    <h2 class="section-title">Data Import</h2>
-                    <p class="section-subtitle">Seamless Ingestion for High-Performance Analysis</p>
-                </div>
-            </div>
-            <div class="feature-content">
-                <div class="feature-details style-minimal">
-                    <div class="feature-detail-item innovative-card" data-card="1">
-                        <div class="card-glow"></div>
-                        <div class="card-image-wrapper">
-                            <img src="assets/images/lap_comparison_ui.webp" alt="Universal Format Support" class="card-image" style="display: none;" loading="lazy">
-                            <div class="image-overlay" style="background: #000 !important; opacity: 1 !important; display: flex !important; align-items: center !important; justify-content: center !important;">
-                                <i class="fas fa-globe" style="font-size: 4rem !important; color: #fff !important; opacity: 1 !important; z-index: 10 !important; position: relative !important; display: inline-block !important;"></i>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <h4>Universal Format Support</h4>
-                            <p>Works with the racing data formats you already use: iRacing, MoTeC, AiM, VBOX, Autosport Labs, CSV and Excel files. Missing samples stay visible as gaps, never filled with made-up values.</p>
-                        </div>
-                        <div class="card-particles"></div>
-                    </div>
-                    <div class="feature-detail-item innovative-card" data-card="2">
-                        <div class="card-glow"></div>
-                        <div class="card-image-wrapper">
-                            <img src="assets/images/telemetry_graphs_ui.webp" alt="High-Speed Processing" class="card-image" style="display: none;" loading="lazy">
-                            <div class="image-overlay" style="background: #000 !important; opacity: 1 !important; display: flex !important; align-items: center !important; justify-content: center !important;">
-                                <i class="fas fa-bolt" style="font-size: 4rem !important; color: #fff !important; opacity: 1 !important; z-index: 10 !important; position: relative !important; display: inline-block !important;"></i>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <h4>Lightning-Fast Processing</h4>
-                            <p>Upload even the largest files (200MB+) and they're ready to analyze in seconds. No more waiting around for your data to load.</p>
-                        </div>
-                        <div class="card-particles"></div>
-                    </div>
-                    <div class="feature-detail-item innovative-card" data-card="3">
-                        <div class="card-glow"></div>
-                        <div class="card-image-wrapper">
-                            <img src="assets/images/track_map_ui.webp" alt="Offline Reliability" class="card-image" style="display: none;" loading="lazy">
-                            <div class="image-overlay" style="background: #000 !important; opacity: 1 !important; display: flex !important; align-items: center !important; justify-content: center !important;">
-                                <i class="fas fa-laptop" style="font-size: 4rem !important; color: #fff !important; opacity: 1 !important; z-index: 10 !important; position: relative !important; display: inline-block !important;"></i>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <h4>Works Offline</h4>
-                            <p>Once you've imported your data, you can analyze it anywhere—even without internet. Perfect for working on the go or in areas with spotty connectivity.</p>
-                        </div>
-                        <div class="card-particles"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+            <header class="ri-features__intro">
+                <h2 id="features-title" class="section-title">What Race Insight does</h2>
+                <p class="section-subtitle">Open a logger file, find the session, compare laps, then take the results with you.</p>
+            </header>
 
-    <section id="data-overview" class="full-page-section feature-section">
-        <div class="section-content">
-            <div class="section-header-card">
-                <div class="section-header-icon">
-                    <i class="fas fa-file-alt"></i>
-                </div>
-                <div class="section-header-text">
-                    <h2 class="section-title">Data Management</h2>
-                    <p class="section-subtitle">Intelligent Session Intelligence at a Glance</p>
-                </div>
-            </div>
-            <div class="feature-content">
-                <div class="feature-details style-minimal">
-                    <div class="feature-detail-item innovative-card" data-card="1">
-                        <div class="card-glow"></div>
-                        <div class="card-image-wrapper">
-                            <img src="assets/images/track_map_ui.webp" alt="Advanced Session Queue" class="card-image" style="display: none;">
-                            <div class="image-overlay" style="background: #000 !important; opacity: 1 !important; display: flex !important; align-items: center !important; justify-content: center !important;">
-                                <i class="fas fa-filter" style="font-size: 4rem !important; color: #fff !important; opacity: 1 !important; z-index: 10 !important; position: relative !important; display: inline-block !important;"></i>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <h4>Smart Session filter</h4>
-                            <p>Filter your racing sessions by track, driver, or car with intelligent filtering options. Sort by date, lap count, or fastest lap time to quickly narrow down to the exact sessions you need.</p>
-                        </div>
-                        <div class="card-particles"></div>
-                    </div>
-                    <div class="feature-detail-item innovative-card" data-card="2">
-                        <div class="card-glow"></div>
-                        <div class="card-image-wrapper">
-                            <img src="assets/images/lap_comparison_ui.webp" alt="Real-Time Previews" class="card-image" style="display: none;">
-                            <div class="image-overlay" style="background: #000 !important; opacity: 1 !important; display: flex !important; align-items: center !important; justify-content: center !important;">
-                                <i class="fas fa-tachometer-alt" style="font-size: 4rem !important; color: #fff !important; opacity: 1 !important; z-index: 10 !important; position: relative !important; display: inline-block !important;"></i>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <h4>Instant Performance Stats</h4>
-                            <p>Click any session to see your key metrics at a glance—average lap times, how consistent you were, and your theoretical best lap.</p>
-                        </div>
-                        <div class="card-particles"></div>
-                    </div>
-                    <div class="feature-detail-item innovative-card" data-card="3">
-                        <div class="card-glow"></div>
-                        <div class="card-image-wrapper">
-                            <img src="assets/images/telemetry_graphs_ui.webp" alt="Interactive Spatial Previews" class="card-image" style="display: none;">
-                            <div class="image-overlay" style="background: #000 !important; opacity: 1 !important; display: flex !important; align-items: center !important; justify-content: center !important;">
-                                <i class="fas fa-eye" style="font-size: 4rem !important; color: #fff !important; opacity: 1 !important; z-index: 10 !important; position: relative !important; display: inline-block !important;"></i>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <h4>Visual Previews</h4>
-                            <p>See track maps and lap-time trends right away, so you know what to expect before diving into detailed analysis.</p>
-                        </div>
-                        <div class="card-particles"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+            <nav class="ri-steps" aria-label="Feature steps">
+                <a href="#data-import"><span>1</span> Import</a>
+                <a href="#data-overview"><span>2</span> Sessions</a>
+                <a href="#analysis"><span>3</span> Analysis</a>
+                <a href="#custom-workbook"><span>4</span> Workbook</a>
+                <a href="#data-export"><span>5</span> Export</a>
+            </nav>
 
-    <section id="analysis" class="full-page-section feature-section">
-        <div class="section-content">
-            <div class="section-header-card">
-                <div class="section-header-icon">
-                    <i class="fas fa-chart-bar"></i>
-                </div>
-                <div class="section-header-text">
-                    <h2 class="section-title">Analysis</h2>
-                    <p class="section-subtitle">High-Fidelity Visualization for Split-Second Decisions</p>
-                </div>
-            </div>
-            <div class="feature-content">
-                <div class="feature-details style-minimal">
-                    <div class="feature-detail-item innovative-card" data-card="1">
-                        <div class="card-glow"></div>
-                        <div class="card-image-wrapper">
-                            <img src="assets/images/telemetry_graphs_ui.webp" alt="Professional Graphing Engine" class="card-image" style="display: none;">
-                            <div class="image-overlay" style="background: #000 !important; opacity: 1 !important; display: flex !important; align-items: center !important; justify-content: center !important;">
-                                <i class="fas fa-chart-line" style="font-size: 4rem !important; color: #fff !important; opacity: 1 !important; z-index: 10 !important; position: relative !important; display: inline-block !important;"></i>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <h4>Professional Graphing Engine <span class="next-release-tag">Next release: math channels</span></h4>
-                            <p>Smooth graphs that display your racing data without any lag. Build your own math channels with derivative, integral, smoothing and lookup functions.</p>
-                        </div>
-                        <div class="card-particles"></div>
-                    </div>
-                    <div class="feature-detail-item innovative-card" data-card="2">
-                        <div class="card-glow"></div>
-                        <div class="card-image-wrapper">
-                            <img src="assets/images/lap_comparison_ui.webp" alt="Synchronized Ecosystem" class="card-image" style="display: none;">
-                            <div class="image-overlay" style="background: #000 !important; opacity: 1 !important; display: flex !important; align-items: center !important; justify-content: center !important;">
-                                <i class="fas fa-sync-alt" style="font-size: 4rem !important; color: #fff !important; opacity: 1 !important; z-index: 10 !important; position: relative !important; display: inline-block !important;"></i>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <h4>Everything Connected</h4>
-                            <p>Move your cursor on any graph and watch everything update together—track position, G-forces, and all your gauges move in perfect sync.</p>
-                        </div>
-                        <div class="card-particles"></div>
-                    </div>
-                    <div class="feature-detail-item innovative-card" data-card="3">
-                        <div class="card-glow"></div>
-                        <div class="card-image-wrapper">
-                            <img src="assets/images/track_map_ui.webp" alt="Multi-Lap Comparison" class="card-image" style="display: none;">
-                            <div class="image-overlay" style="background: #000 !important; opacity: 1 !important; display: flex !important; align-items: center !important; justify-content: center !important;">
-                                <i class="fas fa-columns" style="font-size: 4rem !important; color: #fff !important; opacity: 1 !important; z-index: 10 !important; position: relative !important; display: inline-block !important;"></i>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <h4>Lap Comparison and Splits <span class="next-release-tag">Next release: splits</span></h4>
-                            <p>Compare any laps side-by-side, even if they were recorded at different rates. See delta time by distance, set your own track splits, and get sector times and a theoretical best lap.</p>
-                        </div>
-                        <div class="card-particles"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="custom-workbook" class="full-page-section feature-section">
-        <div class="section-content">
-            <div class="section-header-card">
-                <div class="section-header-icon">
-                    <i class="fas fa-th-large"></i>
-                </div>
-                <div class="section-header-text">
-                    <h2 class="section-title">Custom workbook</h2>
-                    <p class="section-subtitle">Your Modular Mission Control</p>
-                </div>
-            </div>
-            <div class="feature-content">
-                <div class="feature-details style-minimal">
-                    <div class="feature-detail-item innovative-card" data-card="1">
-                        <div class="card-glow"></div>
-                        <div class="card-image-wrapper">
-                            <img src="assets/images/telemetry_graphs_ui.webp" alt="Lap Analysis Widgets" class="card-image" style="display: none;">
-                            <div class="image-overlay" style="background: #000 !important; opacity: 1 !important; display: flex !important; align-items: center !important; justify-content: center !important;">
-                                <i class="fas fa-route" style="font-size: 4rem !important; color: #fff !important; opacity: 1 !important; z-index: 10 !important; position: relative !important; display: inline-block !important;"></i>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <h4>Lap Analysis Widgets <span class="next-release-tag">Next release</span></h4>
-                            <p>Corner Map, Braking and Acceleration Zones, Corner Comparison, Lap Consistency, Sector Analysis, Suspension Velocity and Tyre Grip, all linked to the same cursor.</p>
-                        </div>
-                        <div class="card-particles"></div>
-                    </div>
-                    <div class="feature-detail-item innovative-card" data-card="2">
-                        <div class="card-glow"></div>
-                        <div class="card-image-wrapper">
-                            <img src="assets/images/track_map_ui.webp" alt="Dynamic Workspace Canvas" class="card-image" style="display: none;">
-                            <div class="image-overlay" style="background: #000 !important; opacity: 1 !important; display: flex !important; align-items: center !important; justify-content: center !important;">
-                                <i class="fas fa-mouse-pointer" style="font-size: 4rem !important; color: #fff !important; opacity: 1 !important; z-index: 10 !important; position: relative !important; display: inline-block !important;"></i>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <h4>Drag-and-Drop Design</h4>
-                            <p>Build your perfect workspace by dragging, resizing and arranging graphs, track maps, speed dials, throttle/brake displays, tyre monitors and G-force gauges.</p>
-                        </div>
-                        <div class="card-particles"></div>
-                    </div>
-                    <div class="feature-detail-item innovative-card" data-card="3">
-                        <div class="card-glow"></div>
-                        <div class="card-image-wrapper">
-                            <img src="assets/images/lap_comparison_ui.webp" alt="Reports and Coaching" class="card-image" style="display: none;">
-                            <div class="image-overlay" style="background: #000 !important; opacity: 1 !important; display: flex !important; align-items: center !important; justify-content: center !important;">
-                                <i class="fas fa-user-graduate" style="font-size: 4rem !important; color: #fff !important; opacity: 1 !important; z-index: 10 !important; position: relative !important; display: inline-block !important;"></i>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <h4>Reports and Coaching <span class="next-release-tag">Next release</span></h4>
-                            <p>A Session Report gathers every lap analysis result in one place. Driver mode and the Coaching card show the corners where you lose the most time, and why.</p>
-                        </div>
-                        <div class="card-particles"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="data-export" class="full-page-section feature-section">
-        <div class="section-content">
-            <div class="section-header-card">
-                <div class="section-header-icon">
-                    <i class="fas fa-download"></i>
-                </div>
-                <div class="section-header-text">
-                    <h2 class="section-title">Data Export</h2>
-                    <p class="section-subtitle">Open Compatibility for Professional Workflows</p>
-                </div>
-            </div>
-            <div class="feature-content">
-                <div class="feature-details style-minimal">
-                    <div class="feature-detail-item innovative-card" data-card="1">
-                        <div class="card-glow"></div>
-                        <div class="card-image-wrapper">
-                            <img src="assets/images/lap_comparison_ui.webp" alt="Standardized CSV Export" class="card-image" style="display: none;">
-                            <div class="image-overlay" style="background: #000 !important; opacity: 1 !important; display: flex !important; align-items: center !important; justify-content: center !important;">
-                                <i class="fas fa-file-csv" style="font-size: 4rem !important; color: #fff !important; opacity: 1 !important; z-index: 10 !important; position: relative !important; display: inline-block !important;"></i>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <h4>Export to CSV and Parquet <span class="next-release-tag">Next release: Parquet</span></h4>
-                            <p>Save your data for Excel, MATLAB, Python and other tools you already use. Native CSV keeps every channel at its own sample rate and imports back without loss.</p>
-                        </div>
-                        <div class="card-particles"></div>
-                    </div>
-                    <div class="feature-detail-item innovative-card" data-card="2">
-                        <div class="card-glow"></div>
-                        <div class="card-image-wrapper">
-                            <img src="assets/images/telemetry_graphs_ui.webp" alt="Session Report Export" class="card-image" style="display: none;">
-                            <div class="image-overlay" style="background: #000 !important; opacity: 1 !important; display: flex !important; align-items: center !important; justify-content: center !important;">
-                                <i class="fas fa-file-alt" style="font-size: 4rem !important; color: #fff !important; opacity: 1 !important; z-index: 10 !important; position: relative !important; display: inline-block !important;"></i>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <h4>Session Reports <span class="next-release-tag">Next release</span></h4>
-                            <p>Export a printable HTML report and a Summary JSON with your lap times and best lap, ready to share with your team or keep as a record of your progress.</p>
-                        </div>
-                        <div class="card-particles"></div>
-                    </div>
-                    <div class="feature-detail-item innovative-card" data-card="3">
-                        <div class="card-glow"></div>
-                        <div class="card-image-wrapper">
-                            <img src="assets/images/track_map_ui.webp" alt="Track Map Export" class="card-image" style="display: none;">
-                            <div class="image-overlay" style="background: #000 !important; opacity: 1 !important; display: flex !important; align-items: center !important; justify-content: center !important;">
-                                <i class="fas fa-map-marked-alt" style="font-size: 4rem !important; color: #fff !important; opacity: 1 !important; z-index: 10 !important; position: relative !important; display: inline-block !important;"></i>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <h4>Export Graphs and Track Maps <span class="next-release-tag">Next release</span></h4>
-                            <p>Save graphs as PNG images and track maps as SVG files, ideal for presentations, documentation or detailed track analysis.</p>
-                        </div>
-                        <div class="card-particles"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="features" class="full-page-section" style="display: none;">
-        <div class="section-content">
-            <div class="advantage-cards">
-                <div class="advantage-card feature-card">
-                    <img src="assets/images/lap_comparison_ui.webp" alt="Lap Comparison" class="feature-img">
-                    <h4>Lap Comparison</h4>
-                    <p>Compare multiple laps side-by-side to identify time gains and losses.</p>
-                </div>
-                <div class="advantage-card feature-card">
-                    <img src="assets/images/telemetry_graphs_ui.webp" alt="Data Analysis" class="feature-img">
-                    <h4>Advanced Data Analysis</h4>
-                    <p>Dive deep into speed, throttle, brake, and steering data with precise graphs.</p>
-                </div>
-                <div class="advantage-card feature-card">
-                    <img src="assets/images/track_map_ui.webp" alt="Track Mapping" class="feature-img">
-                    <h4>Interactive Track Map</h4>
-                    <p>Visualize your racing line and position on the track in real-time.</p>
-                </div>
-                <div class="advantage-card feature-card">
-                    <div class="feature-icon-container">
-                        <i class="fas fa-file-alt"></i>
-                    </div>
-                    <h4>Supported File Formats</h4>
-                    <p style="padding-bottom: 0.5rem;">Compatible with popular data formats for seamless integration with your workflow.</p>
-                    <ul class="file-format-list">
-                        <li>iRacing (.ibt)</li>
-                        <li>MoTeC (.ld, .ldx)</li>
-                        <li>AiM (.xrk)</li>
-                        <li>VBOX (.vbo, .vbb)</li>
-                        <li>Autosport Labs (.log)</li>
-                        <li>CSV</li>
-                        <li>Excel / OpenDocument (.xlsx, .xls, .ods)</li>
+            <article id="data-import" class="ri-feature ri-feature--text">
+                <div class="ri-feature__text">
+                    <p class="ri-feature__step">Step 1 · Import</p>
+                    <h3>Open the files your logger already writes</h3>
+                    <p>Drop a file into Race Insight. It is read on your computer.</p>
+                    <ul class="ri-points">
+                        <li>Large files, 200 MB and up, are ready in seconds.</li>
+                        <li>Gaps in the data stay visible. Missing samples are never filled with made-up values.</li>
+                        <li>After your first sign-in, import and analysis work offline. Map tiles need a connection.</li>
                     </ul>
                 </div>
-                <div class="advantage-card feature-card">
-                    <div class="feature-icon-container">
-                        <i class="fas fa-th"></i>
-                    </div>
-                    <h4>Custom Workbook</h4>
-                    <p>Create any type and size of layout you want for personalized data analysis.</p>
+                <div class="ri-formats" aria-label="Supported file formats">
+                    <p class="ri-formats__title">Supported formats</p>
+                    <ul>
+                        <li><strong>iRacing</strong> .ibt</li>
+                        <li><strong>MoTeC</strong> .ld, .ldx</li>
+                        <li><strong>AiM</strong> .xrk</li>
+                        <li><strong>VBOX</strong> .vbo, .vbb</li>
+                        <li><strong>Autosport Labs</strong> .log</li>
+                        <li><strong>CSV</strong> .csv</li>
+                        <li><strong>Spreadsheets</strong> .xlsx, .xls, .ods</li>
+                    </ul>
                 </div>
+            </article>
+
+            <article id="data-overview" class="ri-feature">
+                <div class="ri-feature__text">
+                    <p class="ri-feature__step">Step 2 · Sessions</p>
+                    <h3>Find the session you want</h3>
+                    <ul class="ri-points">
+                        <li>Filter by track, driver or vehicle. Sort by date, lap count or fastest lap.</li>
+                        <li>Each session shows its average lap, consistency and theoretical best.</li>
+                        <li>The lap list, track map and lap-time trend sit on one screen.</li>
+                    </ul>
+                </div>
+                <button type="button" class="ri-shot" data-zoom aria-label="Enlarge screenshot: Data Overview">
+                    <img src="assets/ri_images/Dataoverview.webp" alt="Data Overview screen with the session list, lap times, track map and lap-time trend" loading="lazy" width="1920" height="1080">
+                </button>
+            </article>
+
+            <article id="analysis" class="ri-feature ri-feature--flip">
+                <div class="ri-feature__text">
+                    <p class="ri-feature__step">Step 3 · Analysis</p>
+                    <h3>Compare laps and see where the time goes</h3>
+                    <ul class="ri-points">
+                        <li>Overlay any laps by distance or time, even ones recorded at different rates.</li>
+                        <li>Move the cursor on one graph and every graph, value and the track map follow.</li>
+                        <li>See your line on satellite imagery or a vector map.</li>
+                        <li><span class="ri-tag">Next release</span> Math channels with derivative, integral, smoothing and lookup functions.</li>
+                        <li><span class="ri-tag">Next release</span> Your own track splits, with sector times and a theoretical best lap.</li>
+                    </ul>
+                </div>
+                <button type="button" class="ri-shot" data-zoom aria-label="Enlarge screenshot: lap comparison">
+                    <img src="assets/ri_images/Comparision%20laps.webp" alt="Two laps overlaid on speed, throttle, brake, RPM and gear graphs, with both lines drawn on a satellite map" loading="lazy" width="1920" height="1080">
+                </button>
+            </article>
+
+            <div class="ri-feature-pair">
+            <article id="custom-workbook" class="ri-feature ri-feature--text">
+                <div class="ri-feature__text">
+                    <p class="ri-feature__step">Step 4 · Workbook</p>
+                    <h3>Lay out the screen the way you work</h3>
+                    <ul class="ri-points">
+                        <li>Drag, resize and arrange graphs, track maps, speed dials, throttle and brake bars, tyre monitors and G-force gauges.</li>
+                        <li><span class="ri-tag">Next release</span> Lap analysis widgets: corner map, braking and acceleration zones, corner comparison, lap consistency, sector analysis, suspension velocity and tyre grip.</li>
+                        <li><span class="ri-tag">Next release</span> A session report with every lap analysis in one place, and a coaching card that shows the corners where you lose the most time.</li>
+                    </ul>
+                </div>
+            </article>
+
+            <article id="data-export" class="ri-feature ri-feature--text">
+                <div class="ri-feature__text">
+                    <p class="ri-feature__step">Step 5 · Export</p>
+                    <h3>Take your data to other tools</h3>
+                    <ul class="ri-points">
+                        <li>Export CSV for Excel, MATLAB or Python. Each channel keeps its own sample rate, and the file imports back without loss.</li>
+                        <li><span class="ri-tag">Next release</span> Parquet export.</li>
+                        <li><span class="ri-tag">Next release</span> A printable HTML report and a summary JSON with lap times and best lap.</li>
+                        <li><span class="ri-tag">Next release</span> Graphs as PNG images and track maps as SVG files.</li>
+                    </ul>
+                </div>
+            </article>
             </div>
         </div>
     </section>

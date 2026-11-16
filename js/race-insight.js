@@ -1555,7 +1555,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const imageModal = document.getElementById('image-modal');
         const modalImage = document.getElementById('modal-image');
         const closeImageModal = document.getElementById('close-image-modal');
-        const imageWrappers = document.querySelectorAll('.card-image-wrapper');
+        const imageWrappers = document.querySelectorAll('[data-zoom]');
 
         if (!imageModal || !modalImage) return;
 
@@ -1582,7 +1582,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         imageWrappers.forEach(wrapper => {
             wrapper.addEventListener('click', function(e) {
                 e.stopPropagation(); // Prevent card click event
-                const img = wrapper.querySelector('.card-image');
+                const img = wrapper.querySelector('img');
                 if (img && img.src) {
                     openImageModal(img.src, img.alt);
                 }
@@ -1610,7 +1610,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Initialize image modal
-    // initImageModal(); // Disabled - image expanded modal is not needed
+    initImageModal(); // enlarges the feature screenshots ([data-zoom])
 
     // --- Hero Slideshow Functionality ---
     function initSlideshow() {
