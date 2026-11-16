@@ -119,6 +119,13 @@ function fakeLink() {
         attrs,
         classList: { toggle(name, on) { if (on) classes.add(name); else classes.delete(name); }, contains: (name) => classes.has(name) },
         querySelector: (sel) => (sel === '.cloud-link__lock' ? lock : null),
+        listeners: {},
+        addEventListener(type, cb) { this.listeners[type] = cb; },
+        click() {
+            const event = { prevented: false, preventDefault() { this.prevented = true; } };
+            if (this.listeners.click) this.listeners.click(event);
+            return event.prevented; // true: the page did not open
+        },
         setAttribute(name, value) { attrs[name] = value; },
         removeAttribute(name) { delete attrs[name]; },
         get visible() { return this.style.display !== 'none'; },
@@ -320,7 +327,7 @@ test('in the browser, every [data-cloud-link] element is bound', async () => {
     const window = {
         RaAuth: auth,
         RaCloudSync: fakeSync({ account: LAPSED }),
-        document: { querySelectorAll: (sel) => (sel === '[data-cloud-link]' ? links : []) }
+        document: { querySelectorAll: (sel) => (sel === '[data-cloud-link]' ? links : []), getElementById: () => null }
     };
     vm.runInNewContext(gateSource, { window, Promise, Array });
     await settle();
@@ -331,4 +338,77 @@ test('in the browser, every [data-cloud-link] element is bound', async () => {
     });
     auth.set(null);
     links.forEach((link) => assert.equal(link.visible, false));
+});
+
+test('clicking a locked link calls onLocked with the state instead of opening the page', async () => {
+    const { bindLink } = loadGate();
+    for (const [sync, state] of [[fakeSync({ account: LAPSED }), 'no_subscription'],
+        [fakeSync({ configured: false }), 'unavailable'], [fakeSync({ account: syncError('network') }), 'error']]) {
+        const seen = [];
+        const link = fakeLink();
+        bindLink(link, fakeAuth({ user: ADA }), sync, { onLocked: (s) => { seen.push(s); return true; } });
+        await settle();
+        assert.equal(link.click(), true, 'navigation prevented');
+        assert.deepEqual(seen, [state]);
+    }
+});
+
+test('clicking opens the page for subscribers, while checking, or without a popup', async () => {
+    const { bindLink } = loadGate();
+    const calls = [];
+    const onLocked = (s) => { calls.push(s); return true; };
+
+    const subscriber = fakeLink();
+    bindLink(subscriber, fakeAuth({ user: ADA }), fakeSync(), { onLocked });
+    await settle();
+    assert.equal(subscriber.click(), false);
+
+    let release;
+    const slow = new Promise((resolve) => { release = resolve; });
+    const checking = fakeLink();
+    bindLink(checking, fakeAuth({ user: ADA }), fakeSync({ account: () => slow }), { onLocked });
+    await tick();
+    assert.equal(checking.click(), false, 'the page checks again itself');
+    release(LAPSED);
+    await settle();
+    assert.equal(checking.click(), true);
+
+    const noPopup = fakeLink();
+    bindLink(noPopup, fakeAuth({ user: ADA }), fakeSync({ account: LAPSED }), { onLocked: () => false });
+    await settle();
+    assert.equal(noPopup.click(), false, 'falls back to the page');
+
+    assert.deepEqual(calls, ['no_subscription']);
+});
+
+/** A fake document holding the popup elements. */
+function popupDocument({ withDialog = true } = {}) {
+    const el = () => ({ textContent: '', style: { display: '' } });
+    const nodes = {
+        'cloud-locked-title': el(), 'cloud-locked-body': el(), 'cloud-locked-contact': el(),
+        'cloud-locked-dialog': { open: false, showModal() { this.open = true; } }
+    };
+    if (!withDialog) delete nodes['cloud-locked-dialog'];
+    return { nodes, getElementById: (id) => nodes[id] || null };
+}
+
+test('openLockedDialog shows the text for each state', () => {
+    const { openLockedDialog, LOCKED_MESSAGES } = loadGate();
+    const doc = popupDocument();
+    assert.equal(openLockedDialog(doc, 'no_subscription'), true);
+    assert.equal(doc.nodes['cloud-locked-dialog'].open, true);
+    assert.equal(doc.nodes['cloud-locked-title'].textContent, LOCKED_MESSAGES.no_subscription.title);
+    assert.equal(doc.nodes['cloud-locked-contact'].style.display, '');
+
+    const soon = popupDocument();
+    openLockedDialog(soon, 'unavailable');
+    assert.equal(soon.nodes['cloud-locked-title'].textContent, 'Cloud files are coming soon');
+    assert.equal(soon.nodes['cloud-locked-contact'].style.display, 'none', 'nothing to buy yet');
+
+    const odd = popupDocument();
+    openLockedDialog(odd, 'something_else');
+    assert.equal(odd.nodes['cloud-locked-title'].textContent, LOCKED_MESSAGES.error.title);
+
+    assert.equal(openLockedDialog(popupDocument({ withDialog: false }), 'no_subscription'), false);
+    assert.equal(openLockedDialog(null, 'no_subscription'), false);
 });

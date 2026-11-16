@@ -1029,6 +1029,26 @@
         </div>
     </div>
 
+    <!-- Cloud files: shown instead of the page when the account has no access -->
+    <dialog id="cloud-locked-dialog" class="cloud-locked-dialog" aria-labelledby="cloud-locked-title" aria-describedby="cloud-locked-body">
+        <form method="dialog" class="cloud-locked-dialog__inner">
+            <button value="close" class="cloud-locked-dialog__close" aria-label="Close">&times;</button>
+            <div class="cloud-locked-dialog__icon" aria-hidden="true"><i class="fas fa-cloud"></i><i class="fas fa-lock"></i></div>
+            <h3 id="cloud-locked-title">Cloud files need a subscription</h3>
+            <p id="cloud-locked-body">Cloud files are part of a RACE Insight subscription.</p>
+            <ul class="cloud-locked-dialog__features">
+                <li><i class="fas fa-cloud" aria-hidden="true"></i> See the sessions you synced from the desktop app</li>
+                <li><i class="fas fa-download" aria-hidden="true"></i> Download your files, checked for integrity</li>
+                <li><i class="fas fa-share-nodes" aria-hidden="true"></i> Share sessions with other RACE Insight users</li>
+                <li><i class="fas fa-upload" aria-hidden="true"></i> Upload a logger file as a new session</li>
+            </ul>
+            <div class="cloud-locked-dialog__actions">
+                <a id="cloud-locked-contact" class="btn btn-primary" href="mailto:info@apexracetech.in?subject=RACE%20Insight%20subscription">Contact us</a>
+                <button value="close" class="btn btn-secondary">Close</button>
+            </div>
+        </form>
+    </dialog>
+
     <!-- Auth Modal -->
     <div id="auth-modal" class="modal-backdrop">
         <div class="modal-content">

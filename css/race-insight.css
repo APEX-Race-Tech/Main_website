@@ -3276,3 +3276,125 @@ select option {
     display: none;
   }
 }
+
+/* Cloud files "no access" popup */
+.cloud-locked-dialog {
+  width: calc(100% - 2rem);
+  max-width: 440px;
+  max-height: calc(100% - 2rem);
+  margin: auto; /* the site reset sets margin: 0, which pins a <dialog> top-left */
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  background: #1a1a1a;
+  color: var(--text-color);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.cloud-locked-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.75);
+}
+
+.cloud-locked-dialog__inner {
+  position: relative;
+  padding: 2rem 1.75rem 1.75rem;
+  text-align: center;
+}
+
+.cloud-locked-dialog__close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.9rem;
+  background: none;
+  border: none;
+  color: var(--text-color-secondary);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.cloud-locked-dialog__close:hover {
+  color: var(--text-color);
+}
+
+.cloud-locked-dialog__icon {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 1rem;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 210, 255, 0.1);
+  color: var(--primary-color);
+  font-size: 1.4rem;
+}
+
+.cloud-locked-dialog__icon .fa-lock {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #2a2a2a;
+  border: 2px solid #1a1a1a;
+  color: var(--text-color);
+  font-size: 0.65rem;
+}
+
+.cloud-locked-dialog h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.cloud-locked-dialog p {
+  margin: 0 0 1.25rem;
+  color: var(--text-color-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.cloud-locked-dialog__features {
+  list-style: none;
+  margin: 0 0 1.5rem;
+  padding: 1rem;
+  display: grid;
+  gap: 0.65rem;
+  text-align: left;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.cloud-locked-dialog__features li {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.875rem;
+  color: var(--text-color);
+}
+
+.cloud-locked-dialog__features i {
+  width: 1rem;
+  text-align: center;
+  color: var(--primary-color);
+  font-size: 0.8rem;
+}
+
+.cloud-locked-dialog__actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.cloud-locked-dialog__actions .btn {
+  min-width: 120px;
+  justify-content: center;
+}

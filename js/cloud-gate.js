@@ -49,17 +49,64 @@
 
     var LOCKED_TITLE = 'Cloud files need a RACE Insight subscription';
 
+    /** What the popup says when a locked Cloud link is clicked. */
+    var LOCKED_MESSAGES = {
+        no_subscription: {
+            title: 'Cloud files need a subscription',
+            body: 'Cloud files are part of a RACE Insight subscription. Your account does not have an active one.',
+            contact: true
+        },
+        unavailable: {
+            title: 'Cloud files are coming soon',
+            body: 'Cloud sync is not available on the website yet. It will appear here for subscribers when it launches.',
+            contact: false
+        },
+        error: {
+            title: 'Could not check your subscription',
+            body: 'The cloud service did not answer. Please try again in a moment.',
+            contact: false
+        }
+    };
+
+    function lockedMessage(state) {
+        return LOCKED_MESSAGES[state] || LOCKED_MESSAGES.error;
+    }
+
+    /**
+     * Opens the "no access" popup (a <dialog>) with the text for this state.
+     * Returns false when the page has no such dialog, so the link opens the
+     * Cloud files page instead.
+     */
+    function openLockedDialog(doc, state) {
+        var dialog = doc && doc.getElementById('cloud-locked-dialog');
+        if (!dialog || typeof dialog.showModal !== 'function') return false;
+        var message = lockedMessage(state);
+        var title = doc.getElementById('cloud-locked-title');
+        var body = doc.getElementById('cloud-locked-body');
+        var contact = doc.getElementById('cloud-locked-contact');
+        if (title) title.textContent = message.title;
+        if (body) body.textContent = message.body;
+        if (contact) contact.style.display = message.contact ? '' : 'none';
+        if (!dialog.open) dialog.showModal();
+        return true;
+    }
+
     /**
      * Shows the "Cloud files" link to every signed-in user. It is locked
      * (lock icon, tooltip, "locked" class) unless the API confirms an active
-     * subscription, so non-subscribers see the feature but the page only
-     * shows them the subscription message. Hidden while signed out.
-     * Returns a function that stops watching.
+     * subscription. Clicking a locked link calls options.onLocked(state)
+     * instead of opening the page, when onLocked returns true. While the
+     * check is still running the link opens the page, which checks again.
+     * Hidden while signed out. Returns a function that stops watching.
      */
-    function bindLink(link, auth, sync) {
+    function bindLink(link, auth, sync, options) {
         if (!link) return function () {};
+        var onLocked = options && options.onLocked;
         var lock = link.querySelector ? link.querySelector('.cloud-link__lock') : null;
-        function render(visible, locked) {
+        var lockedState = 'pending';
+        function render(visible, state) {
+            var locked = state !== 'subscribed';
+            lockedState = locked ? state : null;
             link.style.display = visible ? '' : 'none';
             if (link.classList) link.classList.toggle('cloud-link--locked', locked);
             if (lock) lock.style.display = locked ? '' : 'none';
@@ -71,27 +118,44 @@
                 if (link.removeAttribute) link.removeAttribute('aria-label');
             }
         }
-        render(false, true);
+        if (link.addEventListener) {
+            link.addEventListener('click', function (event) {
+                if (!onLocked || !lockedState || lockedState === 'pending' || lockedState === 'signed_out') return;
+                if (onLocked(lockedState, link) && event.preventDefault) event.preventDefault();
+            });
+        }
+        render(false, 'signed_out');
         if (!auth || !auth.configured) return function () {};
         var generation = 0;
         return auth.onAuthStateChanged(function (user) {
             var mine = ++generation;
-            if (!user) { render(false, true); return; }
-            render(true, true); // locked until the API says otherwise
+            if (!user) { render(false, 'signed_out'); return; }
+            render(true, 'pending'); // locked until the API says otherwise
             checkAccess(auth, sync, user).then(function (result) {
                 if (mine !== generation) return; // a newer sign-in or sign-out won
-                render(true, result.state !== 'subscribed');
+                render(true, result.state);
             });
         });
     }
 
-    var api = { STATES: STATES, LOCKED_TITLE: LOCKED_TITLE, isActive: isActive, checkAccess: checkAccess, bindLink: bindLink };
+    var api = {
+        STATES: STATES, LOCKED_TITLE: LOCKED_TITLE, LOCKED_MESSAGES: LOCKED_MESSAGES, isActive: isActive,
+        checkAccess: checkAccess, bindLink: bindLink, lockedMessage: lockedMessage, openLockedDialog: openLockedDialog
+    };
 
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = api;
     } else {
         root.RaCloudGate = api;
-        var links = root.document ? root.document.querySelectorAll('[data-cloud-link]') : [];
-        Array.prototype.forEach.call(links, function (link) { bindLink(link, root.RaAuth, root.RaCloudSync); });
+        var doc = root.document;
+        var links = doc ? doc.querySelectorAll('[data-cloud-link]') : [];
+        var options = { onLocked: function (state) { return openLockedDialog(doc, state); } };
+        var dialog = doc && doc.getElementById('cloud-locked-dialog');
+        if (dialog && dialog.addEventListener) {
+            dialog.addEventListener('click', function (event) {
+                if (event.target === dialog) dialog.close(); // click on the backdrop
+            });
+        }
+        Array.prototype.forEach.call(links, function (link) { bindLink(link, root.RaAuth, root.RaCloudSync, options); });
     }
 })(typeof window !== 'undefined' ? window : globalThis);
