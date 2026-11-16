@@ -47,29 +47,45 @@
             });
     }
 
+    var LOCKED_TITLE = 'Cloud files need a RACE Insight subscription';
+
     /**
-     * Shows a "Cloud files" link only to signed-in subscribers. The link
-     * stays hidden while signed out, while the API is not configured, and
-     * when the check fails. Returns a function that stops watching.
+     * Shows the "Cloud files" link to every signed-in user. It is locked
+     * (lock icon, tooltip, "locked" class) unless the API confirms an active
+     * subscription, so non-subscribers see the feature but the page only
+     * shows them the subscription message. Hidden while signed out.
+     * Returns a function that stops watching.
      */
     function bindLink(link, auth, sync) {
         if (!link) return function () {};
-        var hide = function () { link.style.display = 'none'; };
-        hide();
-        if (!sync || !sync.configured || !auth || !auth.configured) return function () {};
+        var lock = link.querySelector ? link.querySelector('.cloud-link__lock') : null;
+        function render(visible, locked) {
+            link.style.display = visible ? '' : 'none';
+            if (link.classList) link.classList.toggle('cloud-link--locked', locked);
+            if (lock) lock.style.display = locked ? '' : 'none';
+            if (locked) {
+                link.title = LOCKED_TITLE;
+                link.setAttribute('aria-label', 'Cloud files (subscription needed)');
+            } else {
+                link.title = '';
+                if (link.removeAttribute) link.removeAttribute('aria-label');
+            }
+        }
+        render(false, true);
+        if (!auth || !auth.configured) return function () {};
         var generation = 0;
         return auth.onAuthStateChanged(function (user) {
             var mine = ++generation;
-            hide();
-            if (!user) return;
+            if (!user) { render(false, true); return; }
+            render(true, true); // locked until the API says otherwise
             checkAccess(auth, sync, user).then(function (result) {
                 if (mine !== generation) return; // a newer sign-in or sign-out won
-                if (result.state === 'subscribed') link.style.display = '';
+                render(true, result.state !== 'subscribed');
             });
         });
     }
 
-    var api = { STATES: STATES, isActive: isActive, checkAccess: checkAccess, bindLink: bindLink };
+    var api = { STATES: STATES, LOCKED_TITLE: LOCKED_TITLE, isActive: isActive, checkAccess: checkAccess, bindLink: bindLink };
 
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = api;
