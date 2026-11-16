@@ -98,19 +98,33 @@ test('buildModel: Library first, sessions in their projects, orphans in Library'
 });
 
 test('buildModel: empty and missing input', () => {
-    assert.deepEqual(plain(cx.buildModel(null, null)), { projects: [], shared: [], pending: [] });
+    assert.deepEqual(plain(cx.buildModel(null, null)), { projects: [], shared: [], pending: [], outgoing: [] });
     const model = plain(cx.buildModel({ sessions: [{ id: 'x', name: 'Lone' }] }, {}));
     assert.deepEqual(model.projects.map((p) => [p.id, p.name, p.sessions.length]), [['_library', 'Library', 1]]);
 });
 
-test('locations round-trip through the URL hash', () => {
-    for (const loc of [{ type: 'mine' }, { type: 'shared' }, { type: 'project', id: 'p 1' },
+test('locations round-trip through the #cloud hash; other hashes are not cloud locations', () => {
+    for (const loc of [{ type: 'mine' }, { type: 'shared' }, { type: 'outgoing' }, { type: 'project', id: 'p 1' },
         { type: 'session', id: 's1' }, { type: 'share', id: '4'.repeat(32) }]) {
-        assert.deepEqual(plain(cx.hashToLocation(cx.locationToHash(loc))), loc);
+        const hash = cx.locationToHash(loc);
+        assert.ok(hash === '#cloud' || hash.startsWith('#cloud/'), hash);
+        assert.deepEqual(plain(cx.hashToLocation(hash)), loc);
     }
-    assert.deepEqual(plain(cx.hashToLocation('')), { type: 'mine' });
-    assert.deepEqual(plain(cx.hashToLocation('#nonsense')), { type: 'mine' });
-    assert.deepEqual(plain(cx.hashToLocation('#p=%E0%A4%A')), { type: 'mine' }, 'bad encoding');
+    assert.equal(cx.locationToHash({ type: 'mine' }), '#cloud');
+    assert.equal(cx.hashToLocation(''), null);
+    assert.equal(cx.hashToLocation('#features'), null);
+    assert.equal(cx.hashToLocation('#cloudy'), null);
+    assert.deepEqual(plain(cx.hashToLocation('#cloud/nonsense')), { type: 'mine' });
+    assert.deepEqual(plain(cx.hashToLocation('#cloud/p=%E0%A4%A')), { type: 'mine' }, 'bad encoding');
+});
+
+test('buildModel: Shared with others groups active shares by session', () => {
+    const model = plain(cx.buildModel(UNITS, { ...SHARES, outgoing: [...SHARES.outgoing,
+        { share_id: '6'.repeat(32), session_id: 'gone', status: 'accepted', recipient_email: 'x@example.com' }] }));
+    assert.deepEqual(model.outgoing.map((o) => [o.name, o.project_name, o.recipients.length, o.exists]),
+        [['Deleted session', '', 1, false], ['Race', 'Spa 2026', 2, true]]);
+    assert.deepEqual(model.outgoing[1].recipients.map((r) => r.status), ['accepted', 'pending']);
+    assert.deepEqual(plain(cx.trail(cx.buildModel(UNITS, SHARES), { type: 'outgoing' })).map((t) => t.label), ['Shared with others']);
 });
 
 test('trail: breadcrumbs, and null for something that no longer exists', () => {

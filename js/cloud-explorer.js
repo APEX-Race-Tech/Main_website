@@ -140,7 +140,28 @@
         var pending = (shares.pending || []).map(function (s) {
             return { share_id: s.share_id, name: s.session_name || 'a session', owner_name: s.owner_name || 'Someone' };
         });
-        return { projects: list, shared: shared, pending: pending };
+        // Shared with others: your sessions with an active invitation or accepted share.
+        var bySession = {};
+        var outgoing = [];
+        (shares.outgoing || []).forEach(function (s) {
+            if (!s || (s.status !== 'pending' && s.status !== 'accepted')) return;
+            var entry = bySession[s.session_id];
+            if (!entry) {
+                var found = null;
+                list.forEach(function (p) {
+                    p.sessions.forEach(function (x) { if (x.id === s.session_id) found = { session: x, project: p }; });
+                });
+                entry = bySession[s.session_id] = {
+                    session_id: s.session_id, name: found ? found.session.name : 'Deleted session',
+                    project_name: found ? found.project.name : '', exists: !!found, recipients: []
+                };
+                outgoing.push(entry);
+            }
+            entry.recipients.push({ share_id: s.share_id, email: s.recipient_email || '', status: s.status,
+                expires: s.expires || null });
+        });
+        outgoing.sort(byName);
+        return { projects: list, shared: shared, pending: pending, outgoing: outgoing };
     }
 
     /* ---- Locations ----
@@ -150,19 +171,24 @@
      *   { type: 'session', id }             one of your sessions
      *   { type: 'shared' }                  Shared with me
      *   { type: 'share', id }               a session shared with you (id = share id)
-     * It is kept in the URL hash, so the browser's back button works.
+     *   { type: 'outgoing' }                Shared with others
+     * It is kept in the URL hash under "#cloud" (#cloud, #cloud/p=<id>, ...),
+     * so the back button works and the page's other anchors are untouched.
      */
     var HASH_KEYS = { project: 'p', session: 's', share: 'sh' };
 
     function locationToHash(loc) {
-        if (!loc || loc.type === 'mine') return '#mine';
-        if (loc.type === 'shared') return '#shared';
-        return '#' + HASH_KEYS[loc.type] + '=' + encodeURIComponent(loc.id);
+        if (!loc || loc.type === 'mine') return '#cloud';
+        if (loc.type === 'shared' || loc.type === 'outgoing') return '#cloud/' + loc.type;
+        return '#cloud/' + HASH_KEYS[loc.type] + '=' + encodeURIComponent(loc.id);
     }
 
+    /** The location in a "#cloud..." hash, or null for any other hash. */
     function hashToLocation(hash) {
-        var text = String(hash || '').replace(/^#/, '');
-        if (text === 'shared') return { type: 'shared' };
+        var text = String(hash || '');
+        if (text !== '#cloud' && text.indexOf('#cloud/') !== 0) return null;
+        text = text.slice('#cloud/'.length);
+        if (text === 'shared' || text === 'outgoing') return { type: text };
         var match = /^(p|s|sh)=(.+)$/.exec(text);
         if (!match) return { type: 'mine' };
         var id;
@@ -196,6 +222,7 @@
         var shared = { label: 'Shared with me', location: { type: 'shared' } };
         if (!loc || loc.type === 'mine') return [mine];
         if (loc.type === 'shared') return [shared];
+        if (loc.type === 'outgoing') return [{ label: 'Shared with others', location: loc }];
         if (loc.type === 'project') {
             var project = findProject(model, loc.id);
             return project ? [mine, { label: project.name, location: loc }] : null;

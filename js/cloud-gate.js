@@ -94,9 +94,9 @@
     /**
      * Shows the "Cloud files" link to every signed-in user. It is locked
      * (lock icon, tooltip, "locked" class) unless the API confirms an active
-     * subscription. Clicking a locked link calls options.onLocked(state)
-     * instead of opening the page, when onLocked returns true. While the
-     * check is still running the link opens the page, which checks again.
+     * subscription. Clicking a locked link calls options.onLocked(state);
+     * clicking it when subscribed, or while the check is still running, calls
+     * options.onOpen(). Either one returning true stops the link's navigation.
      * Hidden while signed out. Returns a function that stops watching.
      */
     function bindLink(link, auth, sync, options) {
@@ -118,10 +118,18 @@
                 if (link.removeAttribute) link.removeAttribute('aria-label');
             }
         }
+        var onOpen = options && options.onOpen;
         if (link.addEventListener) {
             link.addEventListener('click', function (event) {
-                if (!onLocked || !lockedState || lockedState === 'pending' || lockedState === 'signed_out') return;
-                if (onLocked(lockedState, link) && event.preventDefault) event.preventDefault();
+                if (lockedState === 'signed_out') return;
+                var handled = false;
+                if (lockedState && lockedState !== 'pending') {
+                    handled = !!(onLocked && onLocked(lockedState, link));
+                } else if (onOpen) {
+                    // Subscribed, or the check is still running: Cloud files checks again itself.
+                    handled = !!onOpen(link);
+                }
+                if (handled && event.preventDefault) event.preventDefault();
             });
         }
         render(false, 'signed_out');
@@ -149,7 +157,11 @@
         root.RaCloudGate = api;
         var doc = root.document;
         var links = doc ? doc.querySelectorAll('[data-cloud-link]') : [];
-        var options = { onLocked: function (state) { return openLockedDialog(doc, state); } };
+        var options = {
+            onLocked: function (state) { return openLockedDialog(doc, state); },
+            // js/cloud-app.js loads after this file; look it up at click time.
+            onOpen: function () { return !!(root.RaCloudApp && root.RaCloudApp.open()); }
+        };
         var dialog = doc && doc.getElementById('cloud-locked-dialog');
         if (dialog && dialog.addEventListener) {
             dialog.addEventListener('click', function (event) {

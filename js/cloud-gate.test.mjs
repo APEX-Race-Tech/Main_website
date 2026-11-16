@@ -289,3 +289,30 @@ test('openLockedDialog shows the text for each state', () => {
     assert.equal(openLockedDialog(popupDocument({ withDialog: false }), 'no_subscription'), false);
     assert.equal(openLockedDialog(null, 'no_subscription'), false);
 });
+
+test('clicking an unlocked or still-checking link calls onOpen instead of navigating', async () => {
+    const { bindLink } = loadGate();
+    const opened = [];
+    const options = { onLocked: () => true, onOpen: () => { opened.push('open'); return true; } };
+
+    const subscriber = fakeLink();
+    bindLink(subscriber, fakeAuth({ user: ADA }), fakeSync(), options);
+    await settle();
+    assert.equal(subscriber.click(), true, 'navigation prevented');
+
+    let release;
+    const slow = new Promise((resolve) => { release = resolve; });
+    const checking = fakeLink();
+    bindLink(checking, fakeAuth({ user: ADA }), fakeSync({ account: () => slow }), options);
+    await tick();
+    assert.equal(checking.click(), true);
+    release(SUBSCRIBED);
+    await settle();
+
+    assert.deepEqual(opened, ['open', 'open']);
+
+    const noApp = fakeLink();
+    bindLink(noApp, fakeAuth({ user: ADA }), fakeSync(), { onOpen: () => false });
+    await settle();
+    assert.equal(noApp.click(), false, 'falls back to the link when the popup is missing');
+});

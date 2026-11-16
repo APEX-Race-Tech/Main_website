@@ -212,6 +212,7 @@
     <!-- Local Stylesheets -->
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/race-insight.css">
+    <link rel="stylesheet" href="css/cloud.css">
     
     <!-- Polyfills for Edge compatibility -->
     <script>
@@ -785,6 +786,113 @@
         </div>
     </div>
 
+    <!-- Cloud files: file explorer for synced sessions (js/cloud-app.js) -->
+    <dialog id="cloud-modal" class="cx-modal" aria-labelledby="cloud-modal-title">
+        <div class="cx-modal__head">
+            <div class="cx-modal__title">
+                <span class="cx-modal__icon" aria-hidden="true"><i class="fas fa-cloud"></i></span>
+                <h2 id="cloud-modal-title">Cloud files</h2>
+                <span id="cloud-demo-badge" class="cloud-badge cx-demo-badge" hidden>Sample data</span>
+            </div>
+            <div id="cloud-account" class="cx-quota" hidden>
+                <div class="cx-quota__text">
+                    <span id="cloud-edition" class="cloud-badge"></span>
+                    <span id="cloud-quota-text"></span>
+                </div>
+                <div class="cloud-quota" role="progressbar" aria-label="Cloud storage used" aria-valuemin="0" aria-valuemax="100">
+                    <div id="cloud-quota-bar" class="cloud-quota__bar"></div>
+                </div>
+            </div>
+            <button id="cloud-modal-close" type="button" class="cx-icon-btn cx-modal__close" aria-label="Close Cloud files"><i class="fas fa-xmark" aria-hidden="true"></i></button>
+        </div>
+
+        <div class="cx-modal__messages">
+            <p id="cloud-status" class="cloud-muted" role="status">Loading…</p>
+            <p id="cloud-error" class="cloud-error" role="alert" hidden></p>
+            <p id="cloud-consent" class="cloud-muted" hidden>Agree to cloud sync in the desktop app before uploading.</p>
+        </div>
+
+        <section id="cloud-locked" class="cx-locked" hidden>
+            <h3><i class="fas fa-lock" aria-hidden="true"></i> Included with a RACE Insight subscription</h3>
+            <ul class="cloud-features">
+                <li><i class="fas fa-cloud" aria-hidden="true"></i> See the sessions you synced from the desktop app</li>
+                <li><i class="fas fa-download" aria-hidden="true"></i> Download your files, checked for integrity</li>
+                <li><i class="fas fa-share-nodes" aria-hidden="true"></i> Share sessions with other RACE Insight users</li>
+                <li><i class="fas fa-upload" aria-hidden="true"></i> Upload a logger file as a new session</li>
+            </ul>
+            <button id="cloud-signin-btn" type="button" class="btn btn-primary" hidden>Sign in</button>
+        </section>
+
+        <section id="cloud-explorer" class="cx" hidden>
+            <div class="cx-toolbar">
+                <nav id="cx-breadcrumbs" class="cx-breadcrumbs" aria-label="Folder path"></nav>
+                <div class="cx-toolbar__actions">
+                    <button id="cx-open-btn" type="button" class="btn btn-secondary cloud-btn" hidden><i class="fas fa-up-right-from-square" aria-hidden="true"></i> Open in RACE Insight</button>
+                    <button id="cx-share-btn" type="button" class="btn btn-secondary cloud-btn" hidden><i class="fas fa-share-nodes" aria-hidden="true"></i> Share</button>
+                    <label id="cx-upload-label" class="btn btn-primary cloud-btn cloud-upload">
+                        <i class="fas fa-upload" aria-hidden="true"></i> Upload logger file
+                        <input id="cloud-upload-input" type="file" hidden>
+                    </label>
+                </div>
+            </div>
+            <p id="cloud-upload-status" class="cloud-muted cx-status" hidden></p>
+            <div class="cx-body">
+                <nav id="cx-tree" class="cx-tree" aria-label="Folders"></nav>
+                <div class="cx-main">
+                    <div class="cx-head" aria-hidden="true">
+                        <span>Name</span><span class="cx-col cx-col--type">Type</span><span class="cx-col cx-col--size">Size</span><span class="cx-col cx-col--date">Modified</span><span class="cx-col--actions"></span>
+                    </div>
+                    <ul id="cx-list" class="cx-list"></ul>
+                    <p id="cx-empty" class="cloud-muted cx-empty" hidden></p>
+                </div>
+            </div>
+        </section>
+    </dialog>
+
+    <dialog id="cx-viewer" class="cloud-dialog cx-viewer" aria-labelledby="cx-viewer-title">
+        <div class="cx-viewer__head">
+            <h2 id="cx-viewer-title"></h2>
+            <div class="cx-viewer__actions">
+                <button id="cx-viewer-download" type="button" class="btn btn-secondary cloud-btn"><i class="fas fa-download" aria-hidden="true"></i> Download</button>
+                <button id="cx-viewer-close" type="button" class="cx-icon-btn" aria-label="Close"><i class="fas fa-xmark" aria-hidden="true"></i></button>
+            </div>
+        </div>
+        <div id="cx-viewer-body" class="cx-viewer__body"></div>
+    </dialog>
+
+    <dialog id="cx-open-dialog" class="cloud-dialog cx-open-dialog" aria-labelledby="cx-open-title">
+        <form method="dialog">
+            <h2 id="cx-open-title">Opening in RACE Insight</h2>
+            <p id="cx-open-text" class="cloud-muted">Your browser may ask to open RACE Insight. Allow it to continue.</p>
+            <p class="cloud-muted">Nothing happened? Install or update the RACE Insight desktop app, then try again.</p>
+            <div class="cloud-row cloud-row--end">
+                <a class="btn btn-secondary" href="#download" id="cx-open-get">Get RACE Insight</a>
+                <button value="close" class="btn btn-primary">OK</button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="cloud-share-dialog" class="cloud-dialog">
+        <form method="dialog" id="cloud-share-form">
+            <h2>Share <span id="cloud-share-name"></span></h2>
+            <p class="cloud-muted">Recipients see your future changes to this session. Revoking stops new access but cannot
+                remove copies they already downloaded.</p>
+            <label>Recipient emails
+                <textarea id="cloud-share-emails" rows="2" placeholder="driver@example.com, engineer@example.com"></textarea>
+            </label>
+            <label class="cloud-check"><input id="cloud-share-ai" type="checkbox"> Let recipients' AI assistant use this
+                session</label>
+            <label>Expires (optional) <input id="cloud-share-expires" type="date"></label>
+            <p id="cloud-share-error" class="cloud-error" role="alert" hidden></p>
+            <h3>Shared with</h3>
+            <ul id="cloud-share-recipients" class="cloud-list"></ul>
+            <div class="cloud-row cloud-row--end">
+                <button value="cancel" class="btn btn-secondary">Close</button>
+                <button id="cloud-share-submit" type="button" class="btn btn-primary">Share</button>
+            </div>
+        </form>
+    </dialog>
+
     <!-- Cloud files: shown instead of the page when the account has no access -->
     <dialog id="cloud-locked-dialog" class="cloud-locked-dialog" aria-labelledby="cloud-locked-title" aria-describedby="cloud-locked-body">
         <form method="dialog" class="cloud-locked-dialog__inner">
@@ -998,7 +1106,10 @@
     <script src="js/cognito-auth.js"></script>
     <script src="js/cloud-config.js"></script>
     <script src="js/cloud-sync.js"></script>
+    <script src="js/cloud-demo.js"></script>
     <script src="js/cloud-gate.js"></script>
+    <script src="js/cloud-explorer.js"></script>
+    <script src="js/cloud-app.js"></script>
     <!-- race-insight.js loads after the sign-in scripts -->
     <script src="js/release-feed.js"></script>
     <script defer src="js/race-insight.js"></script>
