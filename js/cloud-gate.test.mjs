@@ -107,39 +107,66 @@ test('checkAccess: API errors map to states and never reject', async () => {
     assert.equal(thrown.state, 'error');
 });
 
+/** The profile "Cloud files" link with its lock icon. */
 function fakeLink() {
-    return { style: { display: '' } };
+    const classes = new Set();
+    const attrs = {};
+    const lock = { style: { display: '' } };
+    return {
+        style: { display: '' },
+        title: '',
+        lock,
+        attrs,
+        classList: { toggle(name, on) { if (on) classes.add(name); else classes.delete(name); }, contains: (name) => classes.has(name) },
+        querySelector: (sel) => (sel === '.cloud-link__lock' ? lock : null),
+        setAttribute(name, value) { attrs[name] = value; },
+        removeAttribute(name) { delete attrs[name]; },
+        get visible() { return this.style.display !== 'none'; },
+        get locked() { return classes.has('cloud-link--locked') && lock.style.display !== 'none' && this.title !== ''; },
+        get unlocked() { return !classes.has('cloud-link--locked') && lock.style.display === 'none' && this.title === '' && !('aria-label' in attrs); }
+    };
 }
 
-test('bindLink hides the link while the API is not configured', async () => {
+const settle = async () => { await tick(); await tick(); };
+
+test('bindLink hides the link while signed out', async () => {
     const { bindLink } = loadGate();
     const link = fakeLink();
-    bindLink(link, fakeAuth({ user: ADA }), fakeSync({ configured: false }));
-    await tick(); await tick();
-    assert.equal(link.style.display, 'none');
+    bindLink(link, fakeAuth(), fakeSync());
+    await settle();
+    assert.equal(link.visible, false);
+    const noAuth = fakeLink();
+    bindLink(noAuth, fakeAuth({ configured: false, user: ADA }), fakeSync());
+    await settle();
+    assert.equal(noAuth.visible, false);
 });
 
-test('bindLink shows the link only to signed-in subscribers', async () => {
+test('bindLink shows non-subscribers a locked link', async () => {
+    const { bindLink, LOCKED_TITLE } = loadGate();
+    for (const sync of [fakeSync({ account: LAPSED }), fakeSync({ account: syncError('subscription_required') }),
+        fakeSync({ account: syncError('network') }), fakeSync({ configured: false })]) {
+        const link = fakeLink();
+        bindLink(link, fakeAuth({ user: ADA }), sync);
+        await settle();
+        assert.equal(link.visible, true);
+        assert.equal(link.locked, true);
+        assert.equal(link.title, LOCKED_TITLE);
+        assert.equal(link.attrs['aria-label'], 'Cloud files (subscription needed)');
+    }
+});
+
+test('bindLink unlocks the link for subscribers only after the API confirms', async () => {
     const { bindLink } = loadGate();
-    const signedOut = fakeLink();
-    bindLink(signedOut, fakeAuth(), fakeSync());
-    await tick(); await tick();
-    assert.equal(signedOut.style.display, 'none');
-
-    const lapsed = fakeLink();
-    bindLink(lapsed, fakeAuth({ user: ADA }), fakeSync({ account: LAPSED }));
-    await tick(); await tick();
-    assert.equal(lapsed.style.display, 'none');
-
-    const failing = fakeLink();
-    bindLink(failing, fakeAuth({ user: ADA }), fakeSync({ account: syncError('network') }));
-    await tick(); await tick();
-    assert.equal(failing.style.display, 'none');
-
-    const subscriber = fakeLink();
-    bindLink(subscriber, fakeAuth({ user: ADA }), fakeSync());
-    await tick(); await tick();
-    assert.equal(subscriber.style.display, '');
+    let release;
+    const slow = new Promise((resolve) => { release = resolve; });
+    const link = fakeLink();
+    bindLink(link, fakeAuth({ user: ADA }), fakeSync({ account: () => slow }));
+    await tick();
+    assert.equal(link.visible, true);
+    assert.equal(link.locked, true, 'locked while the check runs');
+    release(SUBSCRIBED);
+    await settle();
+    assert.equal(link.unlocked, true);
 });
 
 test('bindLink hides the link on sign-out and ignores a late answer', async () => {
@@ -152,16 +179,17 @@ test('bindLink hides the link on sign-out and ignores a late answer', async () =
     await tick();
     auth.set(null); // signs out before the account check answers
     release(SUBSCRIBED);
-    await tick(); await tick();
-    assert.equal(link.style.display, 'none');
+    await settle();
+    assert.equal(link.visible, false);
 
     const auth2 = fakeAuth({ user: ADA });
     const link2 = fakeLink();
     bindLink(link2, auth2, fakeSync());
-    await tick(); await tick();
-    assert.equal(link2.style.display, '');
+    await settle();
+    assert.equal(link2.unlocked, true);
     auth2.set(null);
-    assert.equal(link2.style.display, 'none');
+    assert.equal(link2.visible, false);
+    assert.equal(link2.locked, true, 'locked again for the next sign-in');
 });
 
 /** A minimal DOM with the elements cloud.html gives cloud-page.js. */
@@ -185,11 +213,11 @@ function fakeDocument() {
         if (id) nodes.set(id, node);
         return node;
     };
-    ['cloud-status', 'cloud-error', 'cloud-account', 'cloud-edition', 'cloud-quota-text', 'cloud-quota-bar', 'cloud-consent',
+    ['cloud-status', 'cloud-error', 'cloud-locked', 'cloud-account', 'cloud-edition', 'cloud-quota-text', 'cloud-quota-bar', 'cloud-consent',
         'cloud-inbox', 'cloud-inbox-list', 'cloud-sessions', 'cloud-session-list', 'cloud-upload-input', 'cloud-upload-status',
         'cloud-share-dialog', 'cloud-share-name', 'cloud-share-emails', 'cloud-share-ai', 'cloud-share-expires',
         'cloud-share-error', 'cloud-share-recipients', 'cloud-share-submit'].forEach((id) => make('div', id));
-    ['cloud-account', 'cloud-inbox', 'cloud-sessions', 'cloud-error', 'cloud-consent', 'cloud-upload-status'].forEach((id) => { nodes.get(id).hidden = true; });
+    ['cloud-locked', 'cloud-account', 'cloud-inbox', 'cloud-sessions', 'cloud-error', 'cloud-consent', 'cloud-upload-status'].forEach((id) => { nodes.get(id).hidden = true; });
     nodes.get('cloud-status')._text = 'Loading…';
     return {
         nodes,
@@ -221,6 +249,7 @@ test('page: API not configured shows "not available yet" and no data', async () 
     const page = await runPage({ auth: fakeAuth({ user: ADA }), sync });
     assert.equal(page.status(), 'Cloud sync is not available yet.');
     assert.equal(page.visible('cloud-sessions'), false);
+    assert.equal(page.visible('cloud-locked'), false);
     assert.deepEqual(sync.calls, []);
 });
 
@@ -229,6 +258,7 @@ test('page: signed out shows a sign-in link and never asks for data', async () =
     const page = await runPage({ auth: fakeAuth(), sync });
     assert.match(page.status(), /Sign in/);
     assert.equal(page.link().href, 'race-insight.html');
+    assert.equal(page.visible('cloud-locked'), true, 'shows what Cloud files offers');
     assert.equal(page.visible('cloud-sessions'), false);
     assert.equal(page.visible('cloud-account'), false);
     assert.deepEqual(sync.calls, []);
@@ -241,6 +271,7 @@ test('page: signed in without a subscription sees the message and no data', asyn
     assert.equal(page.visible('cloud-sessions'), false);
     assert.equal(page.visible('cloud-inbox'), false);
     assert.equal(page.visible('cloud-account'), false);
+    assert.equal(page.visible('cloud-locked'), true, 'shows what Cloud files offers');
     assert.deepEqual(sync.calls, ['account'], 'sessions and shares are not requested');
 });
 
@@ -259,6 +290,7 @@ test('page: subscriber sees account and sessions; sign-out clears them', async (
     assert.equal(page.visible('cloud-account'), true);
     assert.equal(page.visible('cloud-sessions'), true);
     assert.equal(page.sessionCount(), 2);
+    assert.equal(page.visible('cloud-locked'), false, 'no lock card for subscribers');
     assert.deepEqual([...sync.calls].sort(), ['account', 'listShares', 'listUnits']);
 
     auth.set(null);

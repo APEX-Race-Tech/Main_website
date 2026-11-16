@@ -1511,6 +1511,14 @@ select option {
   font-size: 0.9rem;
 }
 
+.profile-actions .cloud-link--locked {
+  opacity: 0.7;
+}
+
+.profile-actions .cloud-link__lock {
+  font-size: 0.75rem;
+}
+
 .profile-edit-form {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border-color);

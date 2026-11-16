@@ -214,7 +214,7 @@
             .catch(function (err) { show('cloud-upload-status', false); setError(err); });
     });
 
-    var CONTENT_SECTIONS = ['cloud-account', 'cloud-inbox', 'cloud-sessions'];
+    var CONTENT_SECTIONS = ['cloud-account', 'cloud-inbox', 'cloud-sessions', 'cloud-locked'];
 
     /** Hides and empties everything that shows account data. */
     function clearContent() {
@@ -232,12 +232,14 @@
         link.href = 'race-insight.html';
         $('cloud-status').appendChild(link);
         show('cloud-status', true);
+        show('cloud-locked', true);
     }
 
     function showNoSubscription() {
         clearContent();
         setError(null);
         setStatus('A RACE Insight subscription is needed to use Cloud files.');
+        show('cloud-locked', true);
     }
 
     function showState(result) {

@@ -27,6 +27,11 @@
 .cloud-item { border-top: 1px solid var(--border-color); padding: 0.85rem 0; }
 .cloud-item:first-child { border-top: none; }
 
+.cloud-locked h2 { display: flex; align-items: center; gap: 0.5rem; }
+.cloud-features { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: 0.6rem; }
+.cloud-features li { display: flex; align-items: center; gap: 0.6rem; color: var(--text-color-secondary); }
+.cloud-features i { width: 1.1rem; text-align: center; color: var(--text-color-secondary); }
+
 .cloud-muted { color: var(--text-color-secondary); font-size: 0.9rem; }
 .cloud-error { color: var(--danger-color); font-size: 0.9rem; }
 
