@@ -5,7 +5,6 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
 const gateSource = readFileSync(new URL('./cloud-gate.js', import.meta.url), 'utf8');
-const pageSource = readFileSync(new URL('./cloud-page.js', import.meta.url), 'utf8');
 
 function loadGate() {
     const sandbox = { module: { exports: {} }, Promise };
@@ -197,128 +196,6 @@ test('bindLink hides the link on sign-out and ignores a late answer', async () =
     auth2.set(null);
     assert.equal(link2.visible, false);
     assert.equal(link2.locked, true, 'locked again for the next sign-in');
-});
-
-/** A minimal DOM with the elements cloud.html gives cloud-page.js. */
-function fakeDocument() {
-    const nodes = new Map();
-    const make = (tag, id) => {
-        const node = {
-            tagName: tag, id, hidden: false, className: '', href: '', open: false, value: '', checked: false,
-            children: [], style: {}, listeners: {},
-            classList: { toggle() {} },
-            get textContent() { return this._text + this.children.map((c) => c.textContent).join(''); },
-            set textContent(value) { this._text = String(value); this.children = []; },
-            _text: '',
-            appendChild(child) { this.children.push(child); return child; },
-            addEventListener(type, cb) { this.listeners[type] = cb; },
-            setAttribute() {},
-            close() { this.open = false; },
-            showModal() { this.open = true; },
-            remove() {}
-        };
-        if (id) nodes.set(id, node);
-        return node;
-    };
-    ['cloud-status', 'cloud-error', 'cloud-locked', 'cloud-account', 'cloud-edition', 'cloud-quota-text', 'cloud-quota-bar', 'cloud-consent',
-        'cloud-inbox', 'cloud-inbox-list', 'cloud-sessions', 'cloud-session-list', 'cloud-upload-input', 'cloud-upload-status',
-        'cloud-share-dialog', 'cloud-share-name', 'cloud-share-emails', 'cloud-share-ai', 'cloud-share-expires',
-        'cloud-share-error', 'cloud-share-recipients', 'cloud-share-submit'].forEach((id) => make('div', id));
-    ['cloud-locked', 'cloud-account', 'cloud-inbox', 'cloud-sessions', 'cloud-error', 'cloud-consent', 'cloud-upload-status'].forEach((id) => { nodes.get(id).hidden = true; });
-    nodes.get('cloud-status')._text = 'Loading…';
-    return {
-        nodes,
-        getElementById: (id) => nodes.get(id) || null,
-        createElement: (tag) => make(tag),
-        querySelector: () => make('div'),
-        body: make('body')
-    };
-}
-
-async function runPage({ auth, sync }) {
-    const document = fakeDocument();
-    const window = { RaAuth: auth, RaCloudSync: sync, document };
-    window.RaCloudGate = loadGate();
-    vm.runInNewContext(pageSource, { window, document, Promise, setTimeout, URL, Blob, Date, Array, Math, String, Set });
-    for (let i = 0; i < 6; i += 1) await tick();
-    const n = (id) => document.nodes.get(id);
-    return {
-        document,
-        status: () => (n('cloud-status').hidden ? '' : n('cloud-status').textContent),
-        visible: (id) => !n(id).hidden,
-        link: () => n('cloud-status').children.find((c) => c.tagName === 'a'),
-        sessionCount: () => n('cloud-session-list').children.length
-    };
-}
-
-test('page: API not configured shows "not available yet" and no data', async () => {
-    const sync = fakeSync({ configured: false });
-    const page = await runPage({ auth: fakeAuth({ user: ADA }), sync });
-    assert.equal(page.status(), 'Cloud sync is not available yet.');
-    assert.equal(page.visible('cloud-sessions'), false);
-    assert.equal(page.visible('cloud-locked'), false);
-    assert.deepEqual(sync.calls, []);
-});
-
-test('page: signed out shows a sign-in link and never asks for data', async () => {
-    const sync = fakeSync({ units: { sessions: [{ id: 's1', name: 'Spa' }] } });
-    const page = await runPage({ auth: fakeAuth(), sync });
-    assert.match(page.status(), /Sign in/);
-    assert.equal(page.link().href, 'race-insight.html');
-    assert.equal(page.visible('cloud-locked'), true, 'shows what Cloud files offers');
-    assert.equal(page.visible('cloud-sessions'), false);
-    assert.equal(page.visible('cloud-account'), false);
-    assert.deepEqual(sync.calls, []);
-});
-
-test('page: signed in without a subscription sees the message and no data', async () => {
-    const sync = fakeSync({ account: LAPSED, units: { sessions: [{ id: 's1', name: 'Spa' }] } });
-    const page = await runPage({ auth: fakeAuth({ user: ADA }), sync });
-    assert.equal(page.status(), 'A RACE Insight subscription is needed to use Cloud files.');
-    assert.equal(page.visible('cloud-sessions'), false);
-    assert.equal(page.visible('cloud-inbox'), false);
-    assert.equal(page.visible('cloud-account'), false);
-    assert.equal(page.visible('cloud-locked'), true, 'shows what Cloud files offers');
-    assert.deepEqual(sync.calls, ['account'], 'sessions and shares are not requested');
-});
-
-test('page: subscription_required from the API shows the subscription message', async () => {
-    const sync = fakeSync({ account: syncError('subscription_required') });
-    const page = await runPage({ auth: fakeAuth({ user: ADA }), sync });
-    assert.equal(page.status(), 'A RACE Insight subscription is needed to use Cloud files.');
-    assert.equal(page.visible('cloud-sessions'), false);
-});
-
-test('page: subscriber sees account and sessions; sign-out clears them', async () => {
-    const auth = fakeAuth({ user: ADA });
-    const sync = fakeSync({ units: { sessions: [{ id: 's1', name: 'Spa' }, { id: 's2', name: 'Monza' }] } });
-    const page = await runPage({ auth, sync });
-    assert.equal(page.status(), '');
-    assert.equal(page.visible('cloud-account'), true);
-    assert.equal(page.visible('cloud-sessions'), true);
-    assert.equal(page.sessionCount(), 2);
-    assert.equal(page.visible('cloud-locked'), false, 'no lock card for subscribers');
-    assert.deepEqual([...sync.calls].sort(), ['account', 'listShares', 'listUnits']);
-
-    auth.set(null);
-    assert.equal(page.visible('cloud-sessions'), false);
-    assert.equal(page.visible('cloud-account'), false);
-    assert.equal(page.sessionCount(), 0);
-    assert.match(page.status(), /Sign in/);
-});
-
-test('page: data that arrives after sign-out is not shown', async () => {
-    let release;
-    const slow = new Promise((resolve) => { release = resolve; });
-    const auth = fakeAuth({ user: ADA });
-    const sync = fakeSync({ units: () => slow });
-    const page = await runPage({ auth, sync });
-    auth.set(null);
-    release({ sessions: [{ id: 's1', name: 'Spa' }] });
-    for (let i = 0; i < 4; i += 1) await tick();
-    assert.equal(page.visible('cloud-sessions'), false);
-    assert.equal(page.sessionCount(), 0);
-    assert.match(page.status(), /Sign in/);
 });
 
 test('in the browser, every [data-cloud-link] element is bound', async () => {

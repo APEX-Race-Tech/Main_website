@@ -55,21 +55,29 @@
             <p id="cloud-consent" class="cloud-muted" hidden>Agree to cloud sync in the desktop app before uploading.</p>
         </section>
 
-        <section id="cloud-inbox" class="cloud-card" hidden>
-            <h2>Shared with me</h2>
-            <ul id="cloud-inbox-list" class="cloud-list"></ul>
-        </section>
-
-        <section id="cloud-sessions" class="cloud-card" hidden>
-            <div class="cloud-row">
-                <h2>My sessions</h2>
-                <label class="btn btn-primary cloud-upload">
-                    <i class="fas fa-upload"></i> Upload logger file
-                    <input id="cloud-upload-input" type="file" hidden>
-                </label>
+        <section id="cloud-explorer" class="cloud-card cx" hidden>
+            <div class="cx-toolbar">
+                <nav id="cx-breadcrumbs" class="cx-breadcrumbs" aria-label="Folder path"></nav>
+                <div class="cx-toolbar__actions">
+                    <button id="cx-open-btn" type="button" class="btn btn-secondary cloud-btn" hidden><i class="fas fa-up-right-from-square" aria-hidden="true"></i> Open in RACE Insight</button>
+                    <button id="cx-share-btn" type="button" class="btn btn-secondary cloud-btn" hidden><i class="fas fa-share-nodes" aria-hidden="true"></i> Share</button>
+                    <label id="cx-upload-label" class="btn btn-primary cloud-btn cloud-upload">
+                        <i class="fas fa-upload" aria-hidden="true"></i> Upload logger file
+                        <input id="cloud-upload-input" type="file" hidden>
+                    </label>
+                </div>
             </div>
-            <p id="cloud-upload-status" class="cloud-muted" hidden></p>
-            <ul id="cloud-session-list" class="cloud-list"></ul>
+            <p id="cloud-upload-status" class="cloud-muted cx-status" hidden></p>
+            <div class="cx-body">
+                <nav id="cx-tree" class="cx-tree" aria-label="Folders"></nav>
+                <div class="cx-main">
+                    <div class="cx-head" aria-hidden="true">
+                        <span>Name</span><span class="cx-col cx-col--type">Type</span><span class="cx-col cx-col--size">Size</span><span class="cx-col cx-col--date">Modified</span><span class="cx-col--actions"></span>
+                    </div>
+                    <ul id="cx-list" class="cx-list"></ul>
+                    <p id="cx-empty" class="cloud-muted cx-empty" hidden></p>
+                </div>
+            </div>
         </section>
     </main>
 
@@ -94,12 +102,36 @@
         </form>
     </dialog>
 
+    <dialog id="cx-viewer" class="cloud-dialog cx-viewer" aria-labelledby="cx-viewer-title">
+        <div class="cx-viewer__head">
+            <h2 id="cx-viewer-title"></h2>
+            <div class="cx-viewer__actions">
+                <button id="cx-viewer-download" type="button" class="btn btn-secondary cloud-btn"><i class="fas fa-download" aria-hidden="true"></i> Download</button>
+                <button id="cx-viewer-close" type="button" class="cx-icon-btn" aria-label="Close"><i class="fas fa-xmark" aria-hidden="true"></i></button>
+            </div>
+        </div>
+        <div id="cx-viewer-body" class="cx-viewer__body"></div>
+    </dialog>
+
+    <dialog id="cx-open-dialog" class="cloud-dialog cx-open-dialog" aria-labelledby="cx-open-title">
+        <form method="dialog">
+            <h2 id="cx-open-title">Opening in RACE Insight</h2>
+            <p id="cx-open-text" class="cloud-muted">Your browser may ask to open RACE Insight. Allow it to continue.</p>
+            <p class="cloud-muted">Nothing happened? Install or update the RACE Insight desktop app, then try again.</p>
+            <div class="cloud-row cloud-row--end">
+                <a class="btn btn-secondary" href="race-insight.html#download">Get RACE Insight</a>
+                <button value="close" class="btn btn-primary">OK</button>
+            </div>
+        </form>
+    </dialog>
+
     <script src="js/vendor/amazon-cognito-identity.min.js"></script>
     <script src="js/cognito-config.js"></script>
     <script src="js/cognito-auth.js"></script>
     <script src="js/cloud-config.js"></script>
     <script src="js/cloud-sync.js"></script>
     <script src="js/cloud-gate.js"></script>
+    <script src="js/cloud-explorer.js"></script>
     <script src="js/cloud-page.js"></script>
 </body>
 

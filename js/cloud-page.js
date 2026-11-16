@@ -1,8 +1,9 @@
 /*
- * Cloud files page: lists the signed-in user's synced sessions, downloads
- * verified files, shares sessions with other RACE Insight users and uploads a
- * logger file as a new session. All text from the service is set with
- * textContent, never as HTML.
+ * Cloud files page: a file explorer over the signed-in user's synced
+ * projects, sessions and files, plus sessions other users shared with them.
+ * Opens RACE Insight files in the desktop app, previews images, videos and
+ * PDFs, downloads verified files, shares sessions and uploads a logger file.
+ * All text from the service is set with textContent, never as HTML.
  */
 (function () {
     'use strict';
@@ -10,9 +11,17 @@
     var sync = window.RaCloudSync;
     var auth = window.RaAuth;
     var gate = window.RaCloudGate;
+    var cx = window.RaCloudExplorer;
     var $ = function (id) { return document.getElementById(id); };
     var GIB = 1024 * 1024 * 1024;
+
+    var model = null;            // folder model from cx.buildModel
+    var rawShares = {};          // GET /v1/shares, for the share dialog
+    var current = cx.hashToLocation(window.location.hash);
+    var fileCache = {};          // 's:<id>' or 'sh:<id>' -> Promise of files
+    var renderToken = 0;
     var shareTarget = null;
+    var viewer = { token: 0, url: null, file: null, shareId: null };
 
     function show(id, visible) { $(id).hidden = !visible; }
     function setStatus(text) { $('cloud-status').textContent = text; show('cloud-status', !!text); }
@@ -29,13 +38,30 @@
         return node;
     }
 
-    function button(label, className, onClick) {
-        var b = el('button', 'btn ' + (className || 'btn-secondary') + ' cloud-btn', label);
+    function icon(name, extra) {
+        var i = el('i', 'fas ' + name + (extra ? ' ' + extra : ''));
+        i.setAttribute('aria-hidden', 'true');
+        return i;
+    }
+
+    /** A button that disables itself while its action runs and reports errors. */
+    function button(label, className, onClick, iconName) {
+        var b = el('button', className || 'btn btn-secondary cloud-btn');
         b.type = 'button';
-        b.addEventListener('click', function () {
+        if (iconName) b.appendChild(icon(iconName));
+        if (label) b.appendChild(document.createTextNode(iconName ? ' ' + label : label));
+        b.addEventListener('click', function (event) {
+            if (event && event.stopPropagation) event.stopPropagation();
             b.disabled = true;
-            Promise.resolve(onClick()).catch(setError).then(function () { b.disabled = false; });
+            Promise.resolve().then(onClick).catch(setError).then(function () { b.disabled = false; });
         });
+        return b;
+    }
+
+    function iconButton(label, iconName, onClick) {
+        var b = button('', 'cx-icon-btn', onClick, iconName);
+        b.setAttribute('aria-label', label);
+        b.title = label;
         return b;
     }
 
@@ -43,6 +69,13 @@
         if (bytes >= GIB) return (bytes / GIB).toFixed(bytes >= 10 * GIB ? 0 : 1) + ' GB';
         if (bytes >= 1024 * 1024) return Math.round(bytes / 1024 / 1024) + ' MB';
         return Math.max(0, Math.round(bytes / 1024)) + ' KB';
+    }
+
+    function formatDate(value) {
+        if (!value) return '';
+        var date = new Date(value);
+        if (isNaN(date.getTime())) return '';
+        return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
     }
 
     function save(name, buffer) {
@@ -56,20 +89,11 @@
         setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
     }
 
-    function fileButtons(files, shareId) {
-        var wrap = el('div', 'cloud-files');
-        files.forEach(function (file) {
-            if (file.storage !== 'standard' && file.storage !== 'restored') {
-                wrap.appendChild(el('span', 'cloud-muted', file.name + ' (archived)'));
-                return;
-            }
-            wrap.appendChild(button(file.name + ' · ' + formatBytes(file.size), 'btn-secondary', function () {
-                return sync.downloadFile(file, shareId).then(function (buffer) { save(file.name, buffer); });
-            }));
-        });
-        if (!files.length) wrap.appendChild(el('span', 'cloud-muted', 'No files'));
-        return wrap;
+    function download(file, shareId) {
+        return sync.downloadFile(file, shareId).then(function (buffer) { save(file.name, buffer); });
     }
+
+    /* ---- Account ---- */
 
     function renderAccount(account) {
         var used = (account.quota.bytes_used || 0) + (account.quota.bytes_reserved || 0);
@@ -85,98 +109,374 @@
         show('cloud-account', true);
     }
 
-    function renderSessions(units, shares) {
-        var list = $('cloud-session-list');
-        list.textContent = '';
-        var outgoing = shares.outgoing || [];
-        (units.sessions || []).forEach(function (unit) {
-            var item = el('li', 'cloud-item');
-            var head = el('div', 'cloud-row');
-            head.appendChild(el('strong', '', unit.name || unit.id));
-            var active = outgoing.filter(function (s) { return s.session_id === unit.id && (s.status === 'pending' || s.status === 'accepted'); });
-            if (active.length) head.appendChild(el('span', 'cloud-badge', 'Shared with ' + active.length));
-            if (unit.updated_at) head.appendChild(el('span', 'cloud-muted', String(unit.updated_at).slice(0, 10)));
-            var actions = el('div', 'cloud-actions');
-            var filesBox = el('div');
-            actions.appendChild(button('Files', 'btn-secondary', function () {
-                return sync.unitFiles('session', unit.id).then(function (files) {
-                    filesBox.textContent = '';
-                    filesBox.appendChild(fileButtons(files));
-                });
-            }));
-            actions.appendChild(button('Share', 'btn-primary', function () { openShare(unit, outgoing); }));
-            head.appendChild(actions);
-            item.appendChild(head);
-            item.appendChild(filesBox);
-            list.appendChild(item);
-        });
-        if (!(units.sessions || []).length) list.appendChild(el('li', 'cloud-muted', 'No synced sessions yet. Sync from the desktop app or upload a file.'));
-        show('cloud-sessions', true);
+    /* ---- Opening files ---- */
+
+    /** Asks the desktop app to open a session or one of its files. */
+    function openInApp(target) {
+        var a = el('a');
+        a.href = cx.openInAppUrl(target);
+        a.rel = 'noopener';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        $('cx-open-text').textContent = 'Your browser may ask to open RACE Insight to show '
+            + (target.label || 'this file') + '. Allow it to continue.';
+        if (!$('cx-open-dialog').open) $('cx-open-dialog').showModal();
     }
 
-    function renderInbox(shares, account) {
-        var list = $('cloud-inbox-list');
-        list.textContent = '';
-        var subscribed = account && account.entitlement.active;
-        (shares.pending || []).forEach(function (invite) {
-            var item = el('li', 'cloud-item cloud-row');
-            item.appendChild(el('span', '', (invite.owner_name || 'Someone') + ' shared ' + (invite.session_name || 'a session')));
-            var actions = el('div', 'cloud-actions');
-            if (subscribed) {
-                actions.appendChild(button('Accept', 'btn-primary', function () { return sync.acceptShare(invite.share_id).then(load); }));
+    function closeViewer() {
+        viewer.token += 1;
+        if (viewer.url) URL.revokeObjectURL(viewer.url);
+        viewer.url = null;
+        viewer.file = null;
+        viewer.buffer = null;
+        $('cx-viewer-body').textContent = '';
+        if ($('cx-viewer').open) $('cx-viewer').close();
+    }
+
+    /** Previews an image, video or PDF after its SHA-256 is verified. */
+    function openViewer(file, shareId) {
+        var mime = cx.previewType(file);
+        if (!mime) return download(file, shareId);
+        closeViewer();
+        var token = viewer.token;
+        viewer.file = file;
+        viewer.shareId = shareId || null;
+        $('cx-viewer-title').textContent = file.name;
+        var body = $('cx-viewer-body');
+        body.appendChild(el('p', 'cloud-muted cx-viewer__loading', 'Loading ' + formatBytes(file.size) + '…'));
+        $('cx-viewer').showModal();
+        return sync.downloadFile(file, shareId).then(function (buffer) {
+            if (token !== viewer.token) return; // closed or replaced meanwhile
+            viewer.buffer = buffer;
+            viewer.url = URL.createObjectURL(new Blob([buffer], { type: mime }));
+            body.textContent = '';
+            var node;
+            if (mime.indexOf('image/') === 0) {
+                node = el('img', 'cx-viewer__media');
+                node.alt = file.name;
+            } else if (mime.indexOf('video/') === 0) {
+                node = el('video', 'cx-viewer__media');
+                node.controls = true;
+                node.playsInline = true;
             } else {
-                actions.appendChild(el('span', 'cloud-muted', 'A subscription is needed to open it'));
+                node = el('iframe', 'cx-viewer__pdf');
+                node.title = file.name;
             }
-            actions.appendChild(button('Decline', 'btn-secondary', function () { return sync.removeShare(invite.share_id).then(load); }));
-            item.appendChild(actions);
-            list.appendChild(item);
+            node.src = viewer.url;
+            body.appendChild(node);
+        }, function (err) {
+            if (token !== viewer.token) return;
+            body.textContent = '';
+            body.appendChild(el('p', 'cloud-error', sync.friendlyError(err)));
         });
-        (shares.inbox || []).forEach(function (share) {
-            var item = el('li', 'cloud-item');
-            var head = el('div', 'cloud-row');
-            head.appendChild(el('strong', '', share.session_name || 'Session'));
-            head.appendChild(el('span', 'cloud-badge cloud-badge--shared', 'Shared by ' + (share.owner_name || 'another user')));
-            var filesBox = el('div');
-            if (share.status === 'accepted') {
-                head.appendChild(button('Files', 'btn-secondary', function () {
-                    return sync.sharedFiles(share.share_id).then(function (files) {
-                        filesBox.textContent = '';
-                        filesBox.appendChild(fileButtons(files, share.share_id));
-                    });
+    }
+
+    $('cx-viewer-close').addEventListener('click', closeViewer);
+    $('cx-viewer').addEventListener('close', closeViewer);
+    $('cx-viewer').addEventListener('click', function (event) {
+        if (event.target === $('cx-viewer')) closeViewer();
+    });
+    $('cx-viewer-download').addEventListener('click', function () {
+        if (!viewer.file) return;
+        if (viewer.buffer && viewer.url) { save(viewer.file.name, viewer.buffer); return; }
+        download(viewer.file, viewer.shareId).catch(setError);
+    });
+
+    /* ---- Explorer ---- */
+
+    function filesFor(loc) {
+        var key = (loc.type === 'share' ? 'sh:' : 's:') + loc.id;
+        if (!fileCache[key]) {
+            fileCache[key] = (loc.type === 'share' ? sync.sharedFiles(loc.id) : sync.unitFiles('session', loc.id))
+                .catch(function (err) { delete fileCache[key]; throw err; });
+        }
+        return fileCache[key];
+    }
+
+    function navigate(loc) {
+        var hash = cx.locationToHash(loc);
+        if (window.location.hash === hash) { current = loc; render(); return; }
+        window.location.hash = hash; // the hashchange listener renders
+    }
+
+    window.addEventListener('hashchange', function () {
+        current = cx.hashToLocation(window.location.hash);
+        if (model) render();
+    });
+
+    function sameLocation(a, b) { return a.type === b.type && (a.id || null) === (b.id || null); }
+
+    function renderTree() {
+        var tree = $('cx-tree');
+        tree.textContent = '';
+        var activeProject = null;
+        if (current.type === 'project') activeProject = current.id;
+        if (current.type === 'session') {
+            var found = cx.findSession(model, current.id);
+            activeProject = found && found.project.id;
+        }
+        function item(label, iconName, loc, active, depth, count) {
+            var b = el('button', 'cx-tree__item' + (active ? ' is-active' : '') + (depth ? ' cx-tree__item--child' : ''));
+            b.type = 'button';
+            if (active) b.setAttribute('aria-current', 'true');
+            b.appendChild(icon(iconName));
+            b.appendChild(el('span', 'cx-tree__label', label));
+            if (count) b.appendChild(el('span', 'cx-tree__count', String(count)));
+            b.addEventListener('click', function () { navigate(loc); });
+            tree.appendChild(b);
+        }
+        item('My files', 'fa-hard-drive', { type: 'mine' }, current.type === 'mine', 0);
+        model.projects.forEach(function (p) {
+            item(p.name, p.id === cx.LIBRARY_PROJECT_ID ? 'fa-book' : 'fa-folder', { type: 'project', id: p.id },
+                activeProject === p.id, 1);
+        });
+        var invites = model.pending.length;
+        item('Shared with me', 'fa-user-group', { type: 'shared' }, current.type === 'shared' || current.type === 'share', 0, invites);
+    }
+
+    function renderBreadcrumbs(steps) {
+        var nav = $('cx-breadcrumbs');
+        nav.textContent = '';
+        steps.forEach(function (step, index) {
+            if (index) nav.appendChild(icon('fa-chevron-right', 'cx-breadcrumbs__sep'));
+            if (index === steps.length - 1) {
+                var here = el('span', 'cx-breadcrumbs__here', step.label);
+                here.setAttribute('aria-current', 'page');
+                nav.appendChild(here);
+            } else {
+                var b = el('button', 'cx-breadcrumbs__link', step.label);
+                b.type = 'button';
+                b.addEventListener('click', function () { navigate(step.location); });
+                nav.appendChild(b);
+            }
+        });
+    }
+
+    /**
+     * One explorer row. options: { iconName, iconClass, name, badge, type, size,
+     * date, onOpen, actions: [nodes], muted }
+     */
+    function row(options) {
+        var li = el('li', 'cx-row' + (options.muted ? ' cx-row--muted' : ''));
+        var main = el(options.onOpen ? 'button' : 'div', 'cx-row__main');
+        if (options.onOpen) {
+            main.type = 'button';
+            main.title = options.openLabel || options.name;
+            main.addEventListener('click', function () {
+                Promise.resolve().then(options.onOpen).catch(setError);
+            });
+        }
+        main.appendChild(icon(options.iconName, 'cx-row__icon ' + (options.iconClass || '')));
+        var name = el('span', 'cx-row__name');
+        name.appendChild(el('span', 'cx-row__title', options.name));
+        if (options.badge) name.appendChild(el('span', 'cloud-badge cx-row__badge', options.badge));
+        if (options.sub) name.appendChild(el('span', 'cx-row__sub', options.sub));
+        main.appendChild(name);
+        li.appendChild(main);
+        li.appendChild(el('span', 'cx-col cx-col--type', options.type || ''));
+        li.appendChild(el('span', 'cx-col cx-col--size', options.size || ''));
+        li.appendChild(el('span', 'cx-col cx-col--date', options.date || ''));
+        var actions = el('span', 'cx-col--actions');
+        (options.actions || []).forEach(function (node) { actions.appendChild(node); });
+        li.appendChild(actions);
+        return li;
+    }
+
+    var FILE_ICONS = {
+        race: ['fa-chart-line', 'cx-icon--race'], image: ['fa-file-image', 'cx-icon--image'],
+        video: ['fa-file-video', 'cx-icon--video'], pdf: ['fa-file-pdf', 'cx-icon--pdf'], other: ['fa-file', '']
+    };
+
+    function fileRow(file, sessionId, shareId) {
+        var category = cx.fileCategory(file.name);
+        var available = cx.isAvailable(file);
+        var canPreview = available && !!cx.previewType(file);
+        var actions = [];
+        var onOpen = null;
+        var openLabel = '';
+        if (available && category === 'race') {
+            onOpen = function () { openInApp({ sessionId: sessionId, shareId: shareId, sha256: file.sha256, label: file.name }); };
+            openLabel = 'Open ' + file.name + ' in RACE Insight';
+            actions.push(iconButton('Open in RACE Insight', 'fa-up-right-from-square', onOpen));
+        } else if (canPreview) {
+            onOpen = function () { return openViewer(file, shareId); };
+            openLabel = 'View ' + file.name;
+            actions.push(iconButton('View', 'fa-eye', onOpen));
+        } else if (available) {
+            onOpen = function () { return download(file, shareId); };
+            openLabel = 'Download ' + file.name;
+        }
+        if (available) actions.push(iconButton('Download', 'fa-download', function () { return download(file, shareId); }));
+        var look = FILE_ICONS[category];
+        return row({
+            iconName: look[0], iconClass: look[1], name: file.name, onOpen: onOpen, openLabel: openLabel,
+            badge: available ? '' : 'Archived', type: cx.typeLabel(file.name), size: formatBytes(file.size),
+            actions: actions, muted: !available
+        });
+    }
+
+    function setToolbar(loc) {
+        var inSession = loc.type === 'session';
+        var inShare = loc.type === 'share';
+        show('cx-open-btn', inSession || (inShare && isAccepted(loc.id)));
+        show('cx-share-btn', inSession);
+        $('cx-upload-label').hidden = loc.type === 'shared' || inShare;
+    }
+
+    function isAccepted(shareId) {
+        var share = cx.findShare(model, shareId);
+        return !!share && share.status === 'accepted';
+    }
+
+    function empty(text) {
+        $('cx-empty').textContent = text;
+        show('cx-empty', !!text);
+    }
+
+    function render() {
+        var token = ++renderToken;
+        var steps = cx.trail(model, current);
+        if (!steps) { current = { type: 'mine' }; steps = cx.trail(model, current); }
+        renderTree();
+        renderBreadcrumbs(steps);
+        setToolbar(current);
+        var list = $('cx-list');
+        list.textContent = '';
+        empty('');
+
+        if (current.type === 'mine') {
+            model.projects.forEach(function (p) {
+                list.appendChild(row({
+                    iconName: p.id === cx.LIBRARY_PROJECT_ID ? 'fa-book' : 'fa-folder', iconClass: 'cx-icon--folder',
+                    name: p.name, onOpen: function () { navigate({ type: 'project', id: p.id }); },
+                    type: 'Project', size: p.sessions.length + (p.sessions.length === 1 ? ' session' : ' sessions'),
+                    date: formatDate(p.updated_at)
                 }));
-            } else {
-                head.appendChild(el('span', 'cloud-muted', 'No longer shared'));
-            }
-            head.appendChild(button('Remove', 'btn-secondary', function () { return sync.removeShare(share.share_id).then(load); }));
-            item.appendChild(head);
-            item.appendChild(filesBox);
-            list.appendChild(item);
+            });
+            if (!model.projects.length) empty('Nothing synced yet. Sync from the desktop app, or upload a logger file.');
+            return;
+        }
+
+        if (current.type === 'project') {
+            var project = cx.findProject(model, current.id);
+            project.sessions.forEach(function (s) {
+                list.appendChild(row({
+                    iconName: 'fa-folder', iconClass: 'cx-icon--folder', name: s.name,
+                    badge: s.shared_with ? 'Shared with ' + s.shared_with : '',
+                    onOpen: function () { navigate({ type: 'session', id: s.id }); },
+                    type: 'Session', date: formatDate(s.updated_at),
+                    actions: [
+                        iconButton('Open in RACE Insight', 'fa-up-right-from-square', function () {
+                            openInApp({ sessionId: s.id, label: s.name });
+                        }),
+                        iconButton('Share', 'fa-share-nodes', function () { openShare(s); })
+                    ]
+                }));
+            });
+            if (!project.sessions.length) empty('This project has no synced sessions.');
+            return;
+        }
+
+        if (current.type === 'shared') {
+            model.pending.forEach(function (invite) {
+                list.appendChild(row({
+                    iconName: 'fa-envelope', iconClass: 'cx-icon--invite', name: invite.name,
+                    sub: invite.owner_name + ' invited you', type: 'Invitation',
+                    actions: [
+                        button('Accept', 'btn btn-primary cloud-btn', function () { return sync.acceptShare(invite.share_id).then(load); }),
+                        button('Decline', 'btn btn-secondary cloud-btn', function () { return sync.removeShare(invite.share_id).then(load); })
+                    ]
+                }));
+            });
+            model.shared.forEach(function (share) {
+                var accepted = share.status === 'accepted';
+                var actions = [];
+                if (accepted) {
+                    actions.push(iconButton('Open in RACE Insight', 'fa-up-right-from-square', function () {
+                        openInApp({ sessionId: '', shareId: share.share_id, label: share.name });
+                    }));
+                }
+                actions.push(iconButton('Remove from my list', 'fa-xmark', function () { return sync.removeShare(share.share_id).then(load); }));
+                list.appendChild(row({
+                    iconName: 'fa-folder', iconClass: accepted ? 'cx-icon--shared' : '', name: share.name,
+                    sub: 'Shared by ' + share.owner_name, badge: accepted ? '' : 'No longer shared', muted: !accepted,
+                    onOpen: accepted ? function () { navigate({ type: 'share', id: share.share_id }); } : null,
+                    type: 'Shared session', actions: actions
+                }));
+            });
+            if (!model.pending.length && !model.shared.length) empty('Nobody has shared a session with you yet.');
+            return;
+        }
+
+        // A session's files: yours, or one shared with you.
+        var shareId = current.type === 'share' ? current.id : null;
+        if (shareId && !isAccepted(shareId)) { empty('This session is no longer shared with you.'); return; }
+        var sessionId = shareId ? '' : current.id;
+        empty('Loading files…');
+        filesFor(current).then(function (files) {
+            if (token !== renderToken) return;
+            empty(files.length ? '' : 'This session has no files.');
+            files.slice().sort(function (a, b) {
+                var ra = cx.fileCategory(a.name) === 'race' ? 0 : 1;
+                var rb = cx.fileCategory(b.name) === 'race' ? 0 : 1;
+                return ra - rb || a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
+            }).forEach(function (file) { list.appendChild(fileRow(file, sessionId, shareId)); });
+        }, function (err) {
+            if (token !== renderToken) return;
+            empty('');
+            setError(err);
         });
-        show('cloud-inbox', (shares.pending || []).length + (shares.inbox || []).length > 0);
     }
 
-    function renderRecipients(sessionId, outgoing) {
+    $('cx-open-btn').addEventListener('click', function () {
+        if (current.type === 'session') {
+            var found = cx.findSession(model, current.id);
+            openInApp({ sessionId: current.id, label: found ? found.session.name : 'this session' });
+        } else if (current.type === 'share') {
+            var share = cx.findShare(model, current.id);
+            openInApp({ sessionId: '', shareId: current.id, label: share ? share.name : 'this session' });
+        }
+    });
+
+    $('cx-share-btn').addEventListener('click', function () {
+        if (current.type !== 'session') return;
+        var found = cx.findSession(model, current.id);
+        if (found) openShare(found.session);
+    });
+
+    /* ---- Sharing (per session) ---- */
+
+    function outgoingFor(sessionId) {
+        return (rawShares.outgoing || []).filter(function (s) {
+            return s.session_id === sessionId && (s.status === 'pending' || s.status === 'accepted');
+        });
+    }
+
+    function renderRecipients(sessionId) {
         var list = $('cloud-share-recipients');
         list.textContent = '';
-        var active = outgoing.filter(function (s) { return s.session_id === sessionId && (s.status === 'pending' || s.status === 'accepted'); });
+        var active = outgoingFor(sessionId);
         active.forEach(function (share) {
             var item = el('li', 'cloud-row');
             item.appendChild(el('span', '', share.recipient_email));
             item.appendChild(el('span', 'cloud-badge', share.status === 'accepted' ? 'Accepted' : 'Invited'));
-            item.appendChild(button('Revoke', 'btn-secondary', function () { return sync.removeShare(share.share_id).then(load); }));
+            item.appendChild(button('Revoke', 'btn btn-secondary cloud-btn', function () {
+                return sync.removeShare(share.share_id).then(load).then(function () { renderRecipients(sessionId); });
+            }));
             list.appendChild(item);
         });
         if (!active.length) list.appendChild(el('li', 'cloud-muted', 'Nobody yet.'));
     }
 
-    function openShare(unit, outgoing) {
-        shareTarget = unit;
-        $('cloud-share-name').textContent = unit.name || unit.id;
+    function openShare(session) {
+        shareTarget = session;
+        $('cloud-share-name').textContent = session.name || session.id;
         $('cloud-share-emails').value = '';
         $('cloud-share-ai').checked = false;
         $('cloud-share-expires').value = '';
         show('cloud-share-error', false);
-        renderRecipients(unit.id, outgoing);
+        renderRecipients(session.id);
         $('cloud-share-dialog').showModal();
     }
 
@@ -198,10 +498,12 @@
             .then(function () {
                 $('cloud-share-emails').value = '';
                 shareError('');
-                return load().then(function (state) { if (state) renderRecipients(shareTarget.id, state.shares.outgoing || []); });
+                return load().then(function (state) { if (state) renderRecipients(shareTarget.id); });
             })
             .catch(function (err) { shareError(sync.friendlyError(err)); });
     });
+
+    /* ---- Upload ---- */
 
     $('cloud-upload-input').addEventListener('change', function (event) {
         var file = event.target.files && event.target.files[0];
@@ -210,18 +512,29 @@
         setError(null);
         show('cloud-upload-status', true);
         sync.uploadSession(file, function (step) { $('cloud-upload-status').textContent = step + '…'; })
-            .then(function () { $('cloud-upload-status').textContent = 'Uploaded ' + file.name + '.'; return load(); })
+            .then(function (result) {
+                $('cloud-upload-status').textContent = 'Uploaded ' + file.name + ' to Library.';
+                return load().then(function () { if (result && result.sessionId) navigate({ type: 'session', id: result.sessionId }); });
+            })
             .catch(function (err) { show('cloud-upload-status', false); setError(err); });
     });
 
-    var CONTENT_SECTIONS = ['cloud-account', 'cloud-inbox', 'cloud-sessions', 'cloud-locked'];
+    /* ---- Access and loading ---- */
+
+    var CONTENT_SECTIONS = ['cloud-account', 'cloud-explorer', 'cloud-locked'];
 
     /** Hides and empties everything that shows account data. */
     function clearContent() {
         CONTENT_SECTIONS.forEach(function (id) { show(id, false); });
-        $('cloud-session-list').textContent = '';
-        $('cloud-inbox-list').textContent = '';
-        if ($('cloud-share-dialog').open) $('cloud-share-dialog').close();
+        model = null;
+        rawShares = {};
+        fileCache = {};
+        renderToken += 1;
+        $('cx-list').textContent = '';
+        $('cx-tree').textContent = '';
+        $('cx-breadcrumbs').textContent = '';
+        closeViewer();
+        ['cloud-share-dialog', 'cx-open-dialog'].forEach(function (id) { if ($(id).open) $(id).close(); });
     }
 
     function showSignIn() {
@@ -253,8 +566,8 @@
     }
 
     /**
-     * Loads sessions and shares only after the account is confirmed to have an
-     * active subscription. Resolves to the loaded state, or null.
+     * Loads projects, sessions and shares only after the account is confirmed
+     * to have an active subscription. Resolves to the loaded state, or null.
      */
     function load() {
         setError(null);
@@ -267,10 +580,13 @@
             return Promise.all([sync.listUnits(), sync.listShares()]).then(function (results) {
                 if (stale()) return null;
                 var state = { account: access.account, units: results[0], shares: results[1] };
+                rawShares = state.shares || {};
+                model = cx.buildModel(state.units, state.shares);
+                fileCache = {};
                 setStatus('');
                 renderAccount(state.account);
-                renderInbox(state.shares, state.account);
-                renderSessions(state.units, state.shares);
+                show('cloud-explorer', true);
+                render();
                 return state;
             });
         }).catch(function (err) {
