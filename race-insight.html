@@ -306,6 +306,9 @@
                 </ul>
                 <div class="header-action-item">
                     <button id="nav-signin-btn" class="btn-text-signin">Sign In</button>
+                    <a href="cloud.html" id="nav-cloud-link" class="nav-cloud-btn" data-cloud-link style="display: none;">
+                        <i class="fas fa-cloud" aria-hidden="true"></i><span>Cloud</span><span class="cloud-link__lock" aria-hidden="true"><i class="fas fa-lock"></i></span>
+                    </a>
                     <button id="nav-profile-btn" class="btn-profile-icon" aria-label="Profile" title="Profile" style="display: none;">
                         <i class="fas fa-user"></i>
                     </button>
@@ -328,6 +331,9 @@
             <button id="mobile-nav-profile-btn" class="btn-profile-icon" style="margin-bottom: 0.5rem; display: none;" aria-label="Profile">
                 <i class="fas fa-user"></i>
             </button>
+            <a href="cloud.html" id="mobile-nav-cloud-link" class="nav-cloud-btn" data-cloud-link style="margin-bottom: 0.5rem; display: none;">
+                <i class="fas fa-cloud" aria-hidden="true"></i><span>Cloud</span><span class="cloud-link__lock" aria-hidden="true"><i class="fas fa-lock"></i></span>
+            </a>
             <a href="#download" class="btn btn-primary" id="mobile-nav-download-btn" aria-label="Download Race Insight">Download</a>
         </div>
     </div>
@@ -889,9 +895,8 @@
 
     <!-- Profile Modal -->
     <div id="profile-modal" class="modal-backdrop" style="display: none;">
-        <div class="modal-content profile-modal-content">
-            <button id="close-profile-modal" class="modal-close">&times;</button>
-            <h2 class="section-title">Profile</h2>
+        <div class="modal-content profile-modal-content" role="dialog" aria-modal="true" aria-labelledby="profile-display-name">
+            <button id="close-profile-modal" class="modal-close" aria-label="Close">&times;</button>
             <div class="profile-container">
                 <div class="profile-header">
                     <div class="profile-avatar">
@@ -899,19 +904,56 @@
                         <img id="profile-avatar-img" src="" alt="Profile" style="display: none; width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
                     </div>
                     <div class="profile-info">
+                        <span class="profile-eyebrow">RACE Insight account</span>
                         <h3 id="profile-display-name">Loading...</h3>
-                        <p id="profile-email" style="color: var(--text-color-secondary); margin: 0;">Loading...</p>
-                        <p id="profile-member-since" style="color: var(--text-color-secondary); font-size: 0.9rem; margin: 0;">Member since: Loading...</p>
+                        <p id="profile-email" class="profile-email">Loading...</p>
+                        <p id="profile-member-since" class="profile-meta">Member since: Loading...</p>
                     </div>
                 </div>
 
-                <div class="profile-actions">
-                    <button id="edit-profile-btn" class="btn btn-primary"><i class="fas fa-edit"></i> Edit Profile</button>
-                    <a href="cloud.html" id="profile-cloud-link" class="btn btn-secondary" style="display: none;"><i class="fas fa-cloud"></i> Cloud files <i class="fas fa-lock cloud-link__lock" aria-hidden="true"></i></a>
-                    <button id="change-password-btn" class="btn btn-secondary"><i class="fas fa-key"></i> Passwords</button>
-                    <button id="modal-logout-btn" class="btn btn-secondary" style="border-color: rgba(255,255,255,0.1); color: #fff; min-width: 48px;" aria-label="Logout" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
-                    <button id="delete-account-btn" class="btn btn-secondary" style="border-color: #ff4757; color: #ff4757;"><i class="fas fa-trash-alt"></i> Delete Account</button>
-                </div>
+                <section class="profile-block" aria-labelledby="profile-racing-title">
+                    <h4 id="profile-racing-title" class="profile-block__title">Racing profile</h4>
+                    <dl class="profile-details">
+                        <div class="profile-detail">
+                            <dt><i class="fas fa-gamepad" aria-hidden="true"></i> Simulator</dt>
+                            <dd id="profile-simulator">N/A</dd>
+                        </div>
+                        <div class="profile-detail">
+                            <dt><i class="fas fa-gauge-high" aria-hidden="true"></i> Experience</dt>
+                            <dd id="profile-experience">N/A</dd>
+                        </div>
+                        <div class="profile-detail">
+                            <dt><i class="fas fa-compass" aria-hidden="true"></i> Found us via</dt>
+                            <dd id="profile-referral">N/A</dd>
+                        </div>
+                        <div class="profile-detail">
+                            <dt><i class="fas fa-location-dot" aria-hidden="true"></i> Location</dt>
+                            <dd id="profile-location-display">N/A</dd>
+                        </div>
+                    </dl>
+                </section>
+
+                <section class="profile-block" aria-labelledby="profile-account-title">
+                    <h4 id="profile-account-title" class="profile-block__title">Account</h4>
+                    <div class="profile-menu">
+                        <button id="edit-profile-btn" type="button" class="profile-menu__item">
+                            <span class="profile-menu__icon"><i class="fas fa-user-pen" aria-hidden="true"></i></span>
+                            <span class="profile-menu__text"><strong>Edit profile</strong><small>Name, location and racing details</small></span>
+                            <i class="fas fa-chevron-right profile-menu__chevron" aria-hidden="true"></i>
+                        </button>
+                        <a href="cloud.html" id="profile-cloud-link" class="profile-menu__item" data-cloud-link style="display: none;">
+                            <span class="profile-menu__icon"><i class="fas fa-cloud" aria-hidden="true"></i></span>
+                            <span class="profile-menu__text"><strong>Cloud files</strong><small>Synced sessions and files shared with you</small></span>
+                            <span class="profile-badge cloud-link__lock" aria-hidden="true"><i class="fas fa-lock"></i><span class="profile-badge__text">Subscribers</span></span>
+                            <i class="fas fa-chevron-right profile-menu__chevron" aria-hidden="true"></i>
+                        </a>
+                        <button id="change-password-btn" type="button" class="profile-menu__item">
+                            <span class="profile-menu__icon"><i class="fas fa-key" aria-hidden="true"></i></span>
+                            <span class="profile-menu__text"><strong>Password</strong><small>Change the password you sign in with</small></span>
+                            <i class="fas fa-chevron-right profile-menu__chevron" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </section>
 
                 <div id="profile-edit-form" class="profile-edit-form" style="display: none;">
                     <h4>Edit Profile</h4>
@@ -979,23 +1021,9 @@
                     </form>
                 </div>
 
-                <div class="profile-stats">
-                    <div class="stat-card">
-                        <div class="stat-value" id="profile-simulator">N/A</div>
-                        <div class="stat-label">Simulator</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="profile-experience">N/A</div>
-                        <div class="stat-label">Experience</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="profile-referral" style="font-size: 1.1rem;">N/A</div>
-                        <div class="stat-label">Discovery</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="profile-location-display" style="font-size: 1.1rem;">N/A</div>
-                        <div class="stat-label">Location</div>
-                    </div>
+                <div class="profile-footer">
+                    <button id="modal-logout-btn" type="button" class="btn btn-secondary profile-signout"><i class="fas fa-arrow-right-from-bracket" aria-hidden="true"></i> Sign out</button>
+                    <button id="delete-account-btn" type="button" class="profile-delete"><i class="fas fa-trash-can" aria-hidden="true"></i> Delete account</button>
                 </div>
             </div>
         </div>

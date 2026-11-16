@@ -313,3 +313,22 @@ test('page: data that arrives after sign-out is not shown', async () => {
     assert.equal(page.sessionCount(), 0);
     assert.match(page.status(), /Sign in/);
 });
+
+test('in the browser, every [data-cloud-link] element is bound', async () => {
+    const links = [fakeLink(), fakeLink()];
+    const auth = fakeAuth({ user: ADA });
+    const window = {
+        RaAuth: auth,
+        RaCloudSync: fakeSync({ account: LAPSED }),
+        document: { querySelectorAll: (sel) => (sel === '[data-cloud-link]' ? links : []) }
+    };
+    vm.runInNewContext(gateSource, { window, Promise, Array });
+    await settle();
+    assert.equal(typeof window.RaCloudGate.bindLink, 'function');
+    links.forEach((link) => {
+        assert.equal(link.visible, true);
+        assert.equal(link.locked, true);
+    });
+    auth.set(null);
+    links.forEach((link) => assert.equal(link.visible, false));
+});

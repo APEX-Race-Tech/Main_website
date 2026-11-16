@@ -1335,6 +1335,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         editProfileBtn.addEventListener('click', () => {
             if (profileEditForm) profileEditForm.style.display = 'block';
             if (changePasswordForm) changePasswordForm.style.display = 'none';
+            if (profileEditForm) profileEditForm.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         });
     }
 
@@ -1343,6 +1344,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         changePasswordBtn.addEventListener('click', () => {
             if (changePasswordForm) changePasswordForm.style.display = 'block';
             if (profileEditForm) profileEditForm.style.display = 'none';
+            if (changePasswordForm) changePasswordForm.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         });
     }
 

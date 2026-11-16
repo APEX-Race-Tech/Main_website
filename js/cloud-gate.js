@@ -91,7 +91,7 @@
         module.exports = api;
     } else {
         root.RaCloudGate = api;
-        var link = root.document && root.document.getElementById('profile-cloud-link');
-        if (link) bindLink(link, root.RaAuth, root.RaCloudSync);
+        var links = root.document ? root.document.querySelectorAll('[data-cloud-link]') : [];
+        Array.prototype.forEach.call(links, function (link) { bindLink(link, root.RaAuth, root.RaCloudSync); });
     }
 })(typeof window !== 'undefined' ? window : globalThis);
