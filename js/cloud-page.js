@@ -9,6 +9,7 @@
 
     var sync = window.RaCloudSync;
     var auth = window.RaAuth;
+    var gate = window.RaCloudGate;
     var $ = function (id) { return document.getElementById(id); };
     var GIB = 1024 * 1024 * 1024;
     var shareTarget = null;
@@ -213,36 +214,81 @@
             .catch(function (err) { show('cloud-upload-status', false); setError(err); });
     });
 
-    function load() {
-        setError(null);
-        return Promise.all([sync.account(), sync.listUnits(), sync.listShares()]).then(function (results) {
-            var state = { account: results[0], units: results[1], shares: results[2] };
-            setStatus('');
-            renderAccount(state.account);
-            renderInbox(state.shares, state.account);
-            renderSessions(state.units, state.shares);
-            return state;
-        }).catch(function (err) { setStatus(''); setError(err); return null; });
+    var CONTENT_SECTIONS = ['cloud-account', 'cloud-inbox', 'cloud-sessions'];
+
+    /** Hides and empties everything that shows account data. */
+    function clearContent() {
+        CONTENT_SECTIONS.forEach(function (id) { show(id, false); });
+        $('cloud-session-list').textContent = '';
+        $('cloud-inbox-list').textContent = '';
+        if ($('cloud-share-dialog').open) $('cloud-share-dialog').close();
     }
 
-    if (!sync || !sync.configured) {
-        setStatus('Cloud sync is not available yet.');
-        return;
+    function showSignIn() {
+        clearContent();
+        setError(null);
+        $('cloud-status').textContent = 'Sign in to see your cloud files. ';
+        var link = el('a', '', 'Sign in on the RACE Insight page');
+        link.href = 'race-insight.html';
+        $('cloud-status').appendChild(link);
+        show('cloud-status', true);
     }
-    if (!auth || !auth.configured) {
-        setStatus('Sign-in is not available right now.');
-        return;
+
+    function showNoSubscription() {
+        clearContent();
+        setError(null);
+        setStatus('A RACE Insight subscription is needed to use Cloud files.');
     }
-    auth.onAuthStateChanged(function (user) {
-        if (!user) {
-            $('cloud-status').textContent = '';
-            var link = el('a', '', 'Sign in on the RACE Insight page');
-            link.href = 'race-insight.html';
-            $('cloud-status').appendChild(link);
-            show('cloud-status', true);
-            return;
-        }
-        setStatus('Loading your files…');
-        load();
+
+    function showState(result) {
+        if (result.state === 'signed_out') return showSignIn();
+        if (result.state === 'no_subscription') return showNoSubscription();
+        clearContent();
+        if (result.state === 'unavailable') return setStatus('Cloud sync is not available yet.');
+        if (result.state === 'auth_unavailable') return setStatus('Sign-in is not available right now.');
+        setStatus('');
+        setError(result.error);
+    }
+
+    /**
+     * Loads sessions and shares only after the account is confirmed to have an
+     * active subscription. Resolves to the loaded state, or null.
+     */
+    function load() {
+        setError(null);
+        var user = auth && auth.currentUser;
+        var uid = user && user.uid;
+        var stale = function () { var now = auth && auth.currentUser; return (now && now.uid) !== uid; };
+        return gate.checkAccess(auth, sync, user).then(function (access) {
+            if (stale()) return null; // signed out or switched account meanwhile
+            if (access.state !== 'subscribed') { showState(access); return null; }
+            return Promise.all([sync.listUnits(), sync.listShares()]).then(function (results) {
+                if (stale()) return null;
+                var state = { account: access.account, units: results[0], shares: results[1] };
+                setStatus('');
+                renderAccount(state.account);
+                renderInbox(state.shares, state.account);
+                renderSessions(state.units, state.shares);
+                return state;
+            });
+        }).catch(function (err) {
+            if (stale()) return null;
+            if (err && err.code === 'subscription_required') { showNoSubscription(); return null; }
+            if (err && err.code === 'signed_out') { showSignIn(); return null; }
+            setStatus('');
+            setError(err);
+            return null;
+        });
+    }
+
+    var initial = gate.checkAccess(auth, sync, null);
+    initial.then(function (result) {
+        if (result.state === 'unavailable' || result.state === 'auth_unavailable') { showState(result); return; }
+        auth.onAuthStateChanged(function (user) {
+            if (!user) { showSignIn(); return; }
+            clearContent();
+            setStatus('Loading your files…');
+            load();
+        });
     });
 })();
