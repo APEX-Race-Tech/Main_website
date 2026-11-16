@@ -23,7 +23,7 @@ function idToken(payload) {
 }
 
 function session(payload = { sub: 'sub-1' }) {
-    return { isValid: () => true, getIdToken: () => idToken(payload) };
+    return { isValid: () => true, getIdToken: () => idToken(payload), getAccessToken: () => ({ getJwtToken: () => 'access-jwt' }) };
 }
 
 /** Fake of the pieces of amazon-cognito-identity-js the adapter uses. */
@@ -205,4 +205,11 @@ test('changePassword, signOut and deleteAccount reach Cognito and clear the user
     assert.equal(auth.currentUser, null);
     await auth.signOut();
     assert.equal(calls.signedOut, true);
+});
+
+test('getAccessToken returns the access token, or null when signed out', async () => {
+    const { createRaAuth } = loadModule();
+    assert.equal(await createRaAuth(makeSdk().sdk, config).getAccessToken(), 'access-jwt');
+    assert.equal(await createRaAuth(makeSdk({ noStoredUser: true }).sdk, config).getAccessToken(), null);
+    assert.equal(await createRaAuth(null, null).getAccessToken(), null);
 });
