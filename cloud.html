@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>Cloud files | RACE Insight</title>
+    <link rel="icon" href="apex_art_mark.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/cloud.css">
+</head>
+
+<body>
+    <header class="header">
+        <nav class="nav-container">
+            <a href="race-insight.html" class="header__logo">
+                <img src="assets/images/apex_orange_Horizontal.svg" alt="APEXRACE Technologies Logo" class="logo--full"
+                    style="filter: hue-rotate(190deg) brightness(1.2);">
+            </a>
+            <div class="nav-right">
+                <ul class="nav-links">
+                    <li><a href="race-insight.html">RACE Insight</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main class="cloud-page">
+        <h1>Cloud files</h1>
+        <p id="cloud-status" class="cloud-muted" role="status">Loading…</p>
+        <p id="cloud-error" class="cloud-error" role="alert" hidden></p>
+
+        <section id="cloud-account" class="cloud-card" hidden>
+            <div class="cloud-row">
+                <span id="cloud-edition" class="cloud-badge"></span>
+                <span id="cloud-quota-text" class="cloud-muted"></span>
+            </div>
+            <div class="cloud-quota" role="progressbar" aria-label="Cloud storage used" aria-valuemin="0" aria-valuemax="100">
+                <div id="cloud-quota-bar" class="cloud-quota__bar"></div>
+            </div>
+            <p id="cloud-consent" class="cloud-muted" hidden>Agree to cloud sync in the desktop app before uploading.</p>
+        </section>
+
+        <section id="cloud-inbox" class="cloud-card" hidden>
+            <h2>Shared with me</h2>
+            <ul id="cloud-inbox-list" class="cloud-list"></ul>
+        </section>
+
+        <section id="cloud-sessions" class="cloud-card" hidden>
+            <div class="cloud-row">
+                <h2>My sessions</h2>
+                <label class="btn btn-primary cloud-upload">
+                    <i class="fas fa-upload"></i> Upload logger file
+                    <input id="cloud-upload-input" type="file" hidden>
+                </label>
+            </div>
+            <p id="cloud-upload-status" class="cloud-muted" hidden></p>
+            <ul id="cloud-session-list" class="cloud-list"></ul>
+        </section>
+    </main>
+
+    <dialog id="cloud-share-dialog" class="cloud-dialog">
+        <form method="dialog" id="cloud-share-form">
+            <h2>Share <span id="cloud-share-name"></span></h2>
+            <p class="cloud-muted">Recipients see your future changes to this session. Revoking stops new access but cannot
+                remove copies they already downloaded.</p>
+            <label>Recipient emails
+                <textarea id="cloud-share-emails" rows="2" placeholder="driver@example.com, engineer@example.com"></textarea>
+            </label>
+            <label class="cloud-check"><input id="cloud-share-ai" type="checkbox"> Let recipients' AI assistant use this
+                session</label>
+            <label>Expires (optional) <input id="cloud-share-expires" type="date"></label>
+            <p id="cloud-share-error" class="cloud-error" role="alert" hidden></p>
+            <h3>Shared with</h3>
+            <ul id="cloud-share-recipients" class="cloud-list"></ul>
+            <div class="cloud-row cloud-row--end">
+                <button value="cancel" class="btn btn-secondary">Close</button>
+                <button id="cloud-share-submit" type="button" class="btn btn-primary">Share</button>
+            </div>
+        </form>
+    </dialog>
+
+    <script src="js/vendor/amazon-cognito-identity.min.js"></script>
+    <script src="js/cognito-config.js"></script>
+    <script src="js/cognito-auth.js"></script>
+    <script src="js/cloud-config.js"></script>
+    <script src="js/cloud-sync.js"></script>
+    <script src="js/cloud-page.js"></script>
+</body>
+
+</html>

@@ -7,6 +7,7 @@ export default {
         index: './index.html',
         kineticsports: './kineticsports.html',
         racing: './racing.html',
+        cloud: './cloud.html',
         'race-insight/eula': './race-insight/eula.html',
         'race-insight/terms': './race-insight/terms.html',
         'race-insight/privacy-policy': './race-insight/privacy-policy.html',

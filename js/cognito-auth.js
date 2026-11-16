@@ -273,6 +273,16 @@
             };
         }
 
+        /**
+         * A fresh access token (JWT) for the RACE Insight cloud sync API, or null
+         * when signed out. The API refuses ID tokens.
+         */
+        function getAccessToken() {
+            return activeSession()
+                .then(function (s) { return s.session.getAccessToken().getJwtToken(); })
+                .catch(function () { return null; });
+        }
+
         if (configured) restore();
         else { ready = true; setTimeout(notify, 0); }
 
@@ -290,6 +300,7 @@
             changePassword: changePassword,
             updateProfile: updateProfile,
             deleteAccount: deleteAccount,
+            getAccessToken: getAccessToken,
             friendlyError: friendlyError
         };
     }
