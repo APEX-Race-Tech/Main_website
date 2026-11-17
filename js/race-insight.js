@@ -967,6 +967,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     const platformBtns = document.querySelectorAll('.platform-btn');
     let selectedPlatform = null;
 
+    // Downloads stay closed until the beta opens (#download[data-downloads-open-at]).
+    // This only hides the button: the installer files on the release address stay reachable.
+    const downloadsOpenAt = document.getElementById('download')?.dataset.downloadsOpenAt;
+    const downloadsAvailable = () => RaRelease.downloadsOpen(downloadsOpenAt);
+    const openingDateText = (() => {
+        const opens = new Date(downloadsOpenAt || '');
+        return Number.isNaN(opens.getTime()) ? '' : opens.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata' });
+    })();
+    if (!downloadsAvailable()) {
+        if (downloadBtn) {
+            downloadBtn.disabled = true;
+            downloadBtn.textContent = openingDateText ? `Available ${openingDateText}` : 'Not available yet';
+        }
+        const openingEl = document.getElementById('download-opening');
+        if (openingEl) {
+            openingEl.textContent = openingDateText
+                ? `The RACE Insight beta opens on ${openingDateText}. Downloads start then.`
+                : 'Downloads are not available yet.';
+            openingEl.hidden = false;
+        }
+        document.querySelectorAll('.hero-badge[href="#download"]').forEach(badge => {
+            badge.textContent = openingDateText ? `Beta opens ${openingDateText}` : 'Beta coming soon';
+        });
+    }
+
     // Auto-select Windows on page load
     const windowsBtn = document.querySelector('.platform-btn[data-platform="windows"]');
     if (windowsBtn) {
@@ -1068,6 +1093,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (downloadBtn) {
         downloadBtn.addEventListener('click', async () => {
+            if (!downloadsAvailable()) return;
             if (!selectedPlatform) {
                 alert('Please select your platform first. Windows is available now; Linux and Mac are coming soon.');
                 return;
@@ -1102,6 +1128,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const checksumEl = document.getElementById('download-checksum');
     function updateChecksum() {
         if (!checksumEl) return;
+        if (!downloadsAvailable()) {
+            checksumEl.textContent = 'The checksum appears here when downloads open.';
+            return;
+        }
         RaRelease.fetchLatest().then(latest => {
             checksumEl.textContent = RaRelease.describeChecksum(latest, selectedPlatform);
         }).catch(() => {
@@ -1109,7 +1139,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
     updateChecksum();
-    if (downloadVersionEl) {
+    if (downloadVersionEl && downloadsAvailable()) {
         RaRelease.fetchLatest()
             .then(latest => {
                 downloadVersionEl.textContent = RaRelease.describeVersion(latest, iso =>
@@ -1131,6 +1161,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function triggerDownload() {
+        if (!downloadsAvailable()) return;
         // Detect Edge browser
         const isEdge = /Edg/.test(navigator.userAgent);
         const isIE = /Trident/.test(navigator.userAgent);
@@ -1333,6 +1364,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Edit profile button
     if (editProfileBtn) {
         editProfileBtn.addEventListener('click', () => {
+            // The sign-in email is shown read-only; nothing on this page changes it.
+            const emailEl = document.getElementById('profile-email-input');
+            if (emailEl) emailEl.value = RaAuth.currentUser?.email || '';
             if (profileEditForm) profileEditForm.style.display = 'block';
             if (changePasswordForm) changePasswordForm.style.display = 'none';
             if (profileEditForm) profileEditForm.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -1396,6 +1430,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                     simulator: simulator,
                     experience: experience
                 });
+
+                // Team, car, phone and billing address live in the accounts API
+                // (js/account-profile.js). Keep the form open if that save fails.
+                if (window.RaAccountProfile) {
+                    try {
+                        const saved = await window.RaAccountProfile.save();
+                        if (saved?.phoneCodeSent) {
+                            await loadProfileData(RaAuth.currentUser || user);
+                            alert('Profile saved. Enter the code we sent by SMS to verify your phone number.');
+                            return;
+                        }
+                    } catch (accountError) {
+                        await loadProfileData(RaAuth.currentUser || user);
+                        alert(`Profile updated, but team, car and billing address were not saved. ${accountError.message}`);
+                        return;
+                    }
+                }
 
                 if (profileEditForm) profileEditForm.style.display = 'none';
                 await loadProfileData(RaAuth.currentUser || user);

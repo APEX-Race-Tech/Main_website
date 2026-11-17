@@ -211,7 +211,7 @@
     
     <!-- Local Stylesheets -->
     <link rel="stylesheet" href="css/main.css?v=224f5cfa5c">
-    <link rel="stylesheet" href="css/race-insight.css?v=75d09c02a3">
+    <link rel="stylesheet" href="css/race-insight.css?v=6cc4374e1c">
     <link rel="stylesheet" href="css/cloud.css?v=947ae16b12">
     
     <!-- Polyfills for Edge compatibility -->
@@ -579,7 +579,7 @@
         </div>
     </section>
 
-    <section id="download" class="full-page-section">
+    <section id="download" class="full-page-section" data-downloads-open-at="2027-01-01T00:00:00+05:30">
         <div class="section-content">
             <div class="download-section">
                 <h3>Download Race Insight</h3>
@@ -604,9 +604,10 @@
                 <div class="action-buttons">
                     <button id="download-btn" class="btn btn-primary">Download</button>
                 </div>
-                <div id="beta-checkout" class="beta-checkout" data-accounts-api="" data-checkout-mode="live" hidden>
+                <p id="download-opening" class="download-opening" role="status" hidden></p>
+                <div id="beta-checkout" class="beta-checkout" data-accounts-api="" data-checkout-mode="live" data-beta-opens-at="2027-01-01T00:00:00+05:30" data-beta-ends-at="2027-03-31T23:59:59+05:30" hidden>
                     <h4>RACE Insight beta licence</h4>
-                    <p><strong>US$15</strong> one time, before tax. Includes version 1.</p>
+                    <p><strong>US$15</strong> one time, before tax. Includes version 1 and the cloud services plan during the beta. The beta runs 1 January to 31 March 2027 and may be extended.</p>
                     <button id="buy-beta-licence" type="button" class="btn btn-primary">Buy beta licence</button>
                     <p id="beta-checkout-status" class="beta-checkout-status" role="status"></p>
                 </div>
@@ -696,12 +697,23 @@
                     </dl>
                 </section>
 
+                <section id="account-profile" class="profile-block" aria-labelledby="account-profile-title" data-accounts-api="" hidden>
+                    <h4 id="account-profile-title" class="profile-block__title">Team, car and address</h4>
+                    <dl id="account-details-list" class="profile-details"></dl>
+                    <h4 class="profile-block__title account-subtitle">Licences and services</h4>
+                    <ul id="account-licences" class="account-list"></ul>
+                    <p id="account-services" class="account-line"></p>
+                    <h4 class="profile-block__title account-subtitle">Billing</h4>
+                    <p id="account-billing" class="account-line"></p>
+                    <p id="account-profile-status" class="account-status" role="status"></p>
+                </section>
+
                 <section class="profile-block" aria-labelledby="profile-account-title">
                     <h4 id="profile-account-title" class="profile-block__title">Account</h4>
                     <div class="profile-menu">
                         <button id="edit-profile-btn" type="button" class="profile-menu__item">
                             <span class="profile-menu__icon"><i class="fas fa-user-pen" aria-hidden="true"></i></span>
-                            <span class="profile-menu__text"><strong>Edit profile</strong><small>Name, location and racing details</small></span>
+                            <span class="profile-menu__text"><strong>Edit profile</strong><small>Name, location, racing details, team and billing address</small></span>
                             <i class="fas fa-chevron-right profile-menu__chevron" aria-hidden="true"></i>
                         </button>
                         <a href="cloud.html" id="profile-cloud-link" class="profile-menu__item" data-cloud-link style="display: none;">
@@ -721,6 +733,11 @@
                 <div id="profile-edit-form" class="profile-edit-form" style="display: none;">
                     <h4>Edit Profile</h4>
                     <form id="update-profile-form">
+                        <div class="form-group">
+                            <label for="profile-email-input">Email</label>
+                            <input type="email" id="profile-email-input" readonly aria-describedby="profile-email-hint">
+                            <p id="profile-email-hint" class="account-hint">Your sign-in email cannot be changed.</p>
+                        </div>
                         <div class="form-group">
                             <label for="profile-name">Display Name</label>
                             <input type="text" id="profile-name" name="displayName" placeholder="Enter your display name">
@@ -755,6 +772,63 @@
                                 <option value="Professional">Professional</option>
                             </select>
                         </div>
+                        <fieldset id="account-details-fields" class="account-fieldset" hidden>
+                            <legend>Team, car and billing address</legend>
+                            <div class="form-group">
+                                <label for="account-full-name">Full name</label>
+                                <input type="text" id="account-full-name" name="full_name" maxlength="100" autocomplete="name">
+                            </div>
+                            <div class="account-form-grid">
+                                <div class="form-group">
+                                    <label for="account-team">Team</label>
+                                    <input type="text" id="account-team" name="team" maxlength="100" autocomplete="organization">
+                                </div>
+                                <div class="form-group">
+                                    <label for="account-car">Car</label>
+                                    <input type="text" id="account-car" name="car" maxlength="100">
+                                </div>
+                                <div class="form-group">
+                                    <label for="account-class">Racing class</label>
+                                    <input type="text" id="account-class" name="racing_class" maxlength="60">
+                                </div>
+                                <div class="form-group">
+                                    <label for="account-phone">Phone, with country code</label>
+                                    <input type="tel" id="account-phone" name="phone_number" maxlength="20" autocomplete="tel" inputmode="tel" placeholder="+91 98765 43210">
+                                </div>
+                            </div>
+                            <div id="phone-verify" class="phone-verify" hidden>
+                                <p id="phone-verify-text" class="account-hint" role="status"></p>
+                                <div class="phone-verify__row">
+                                    <input type="text" id="phone-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6-digit code" aria-label="SMS verification code">
+                                    <button type="button" id="phone-verify-btn" class="btn btn-primary">Verify</button>
+                                    <button type="button" id="phone-resend-btn" class="btn btn-secondary">Send new code</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="account-street">Street address</label>
+                                <input type="text" id="account-street" name="street" maxlength="200" autocomplete="street-address">
+                            </div>
+                            <div class="account-form-grid">
+                                <div class="form-group">
+                                    <label for="account-city">City</label>
+                                    <input type="text" id="account-city" name="city" maxlength="100" autocomplete="address-level2">
+                                </div>
+                                <div class="form-group">
+                                    <label for="account-state">State or region</label>
+                                    <input type="text" id="account-state" name="state" maxlength="100" autocomplete="address-level1">
+                                </div>
+                                <div class="form-group">
+                                    <label for="account-postal-code">Postal code</label>
+                                    <input type="text" id="account-postal-code" name="postal_code" maxlength="20" autocomplete="postal-code">
+                                </div>
+                                <div class="form-group">
+                                    <label for="account-country">Country code</label>
+                                    <input type="text" id="account-country" name="country" maxlength="2" autocomplete="country" placeholder="IN">
+                                </div>
+                            </div>
+                            <p class="account-hint">Leave a field empty to remove it. A new phone number is verified with a code sent by SMS. Use the two-letter country code for the address, for example IN, GB or US.</p>
+                            <p id="account-details-form-status" class="account-status" role="status"></p>
+                        </fieldset>
                         <div class="form-actions">
                             <button type="submit" class="btn btn-primary">Save Changes</button>
                             <button type="button" id="cancel-edit-btn" class="btn btn-secondary">Cancel</button>
@@ -1104,7 +1178,7 @@
     <!-- Sign-in: AWS Cognito -->
     <script src="js/vendor/amazon-cognito-identity.min.js?v=32811f6945"></script>
     <script src="js/cognito-config.js?v=e785b5d04f"></script>
-    <script src="js/cognito-auth.js?v=d93298cefd"></script>
+    <script src="js/cognito-auth.js?v=c2c99eb17a"></script>
     <script src="js/cloud-config.js?v=a077f17e8a"></script>
     <script src="js/cloud-sync.js?v=4b4427f2f4"></script>
     <script src="js/cloud-demo.js?v=c904281c9f"></script>
@@ -1112,9 +1186,10 @@
     <script src="js/cloud-explorer.js?v=6b99fc221a"></script>
     <script src="js/cloud-app.js?v=549e0422c4"></script>
     <!-- race-insight.js loads after the sign-in scripts -->
-    <script src="js/release-feed.js?v=23cb93880c"></script>
-    <script defer src="js/race-insight.js?v=d81ac9eb83"></script>
-    <script type="module" src="js/beta-checkout.js?v=6898d184f5"></script>
+    <script src="js/release-feed.js?v=097a367787"></script>
+    <script defer src="js/race-insight.js?v=ed05ac4559"></script>
+    <script type="module" src="js/beta-checkout.js?v=b3b09d9430"></script>
+    <script type="module" src="js/account-profile.js?v=241f541a77"></script>
 
     <footer class="site-footer" style="margin-top: auto; padding: 2rem 0; border-top: 1px solid rgba(255, 255, 255, 0.1);">
         <div class="footer-bottom" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; gap: 1.5rem;">

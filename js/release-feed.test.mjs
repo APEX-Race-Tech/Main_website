@@ -61,3 +61,25 @@ test('checksum describes the exact selected download and rejects malformed hashe
     assert.equal(describeChecksum(release, 'windows'), 'Checksum unavailable. Try again before installing.');
   }
 });
+
+const { downloadsOpen } = sandbox.module.exports;
+
+test('downloads stay closed before the beta opens and open from that moment', () => {
+  const opensAt = '2027-01-01T00:00:00+05:30';
+  assert.equal(downloadsOpen(opensAt, new Date('2026-12-31T18:29:59.000Z')), false);
+  assert.equal(downloadsOpen(opensAt, new Date('2026-12-31T18:30:00.000Z')), true);
+  assert.equal(downloadsOpen(opensAt, new Date('2027-02-01T00:00:00.000Z')), true);
+});
+
+test('a missing or unreadable opening time keeps downloads closed', () => {
+  const now = new Date('2030-01-01T00:00:00.000Z');
+  assert.equal(downloadsOpen('', now), false);
+  assert.equal(downloadsOpen(undefined, now), false);
+  assert.equal(downloadsOpen('next year', now), false);
+});
+
+test('no release address is in the site before the beta opens, and fetchLatest refuses without one', async () => {
+  assert.equal(sandbox.module.exports.FEED_URL, '');
+  assert.doesNotMatch(source, /cloudfront\.net/);
+  await assert.rejects(sandbox.module.exports.fetchLatest(), /not published yet/);
+});

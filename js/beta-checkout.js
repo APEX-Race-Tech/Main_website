@@ -3,6 +3,18 @@ const checkoutHosts = {
     live: 'checkout.dodopayments.com',
 };
 
+/**
+ * The server decides whether the beta is open. This only chooses what the page
+ * shows, so a visitor with a wrong clock cannot buy early or late.
+ */
+export function betaPhase(opensAt, endsAt, now = new Date()) {
+    const opens = opensAt ? new Date(opensAt) : null;
+    const ends = endsAt ? new Date(endsAt) : null;
+    if (opens && !Number.isNaN(opens.getTime()) && now < opens) return 'not_open';
+    if (ends && !Number.isNaN(ends.getTime()) && now >= ends) return 'closed';
+    return 'open';
+}
+
 export async function requestBetaCheckout(apiUrl, mode, idToken, fetchCheckout = fetch) {
     const api = new URL(apiUrl);
     if (api.protocol !== 'https:' || api.username || api.password || !Object.hasOwn(checkoutHosts, mode) || !idToken) {
@@ -18,6 +30,12 @@ export async function requestBetaCheckout(apiUrl, mode, idToken, fetchCheckout =
     const result = await response.json().catch(() => null);
     if (response.status === 409 && result?.error === 'already_licensed') {
         throw new Error('Your account already has a beta licence.', { cause: 'already_licensed' });
+    }
+    if (response.status === 403 && result?.error === 'beta_not_open') {
+        throw new Error('Beta purchases open on 1 January 2027.', { cause: 'beta_not_open' });
+    }
+    if (response.status === 403 && result?.error === 'beta_closed') {
+        throw new Error('The beta has ended. The full licence will be on sale after the beta.', { cause: 'beta_closed' });
     }
     if (response.status === 401) throw new Error('Sign in again, then retry checkout.', { cause: 'signed_out' });
     if (response.status === 403 && result?.error === 'email_unverified') {
@@ -45,6 +63,14 @@ function bindBetaCheckout() {
     const status = document.getElementById('beta-checkout-status');
     if (!button || !status) return;
     panel.hidden = false;
+    const phase = betaPhase(panel.dataset.betaOpensAt, panel.dataset.betaEndsAt);
+    if (phase !== 'open') {
+        button.disabled = true;
+        status.textContent = phase === 'not_open'
+            ? 'Beta purchases open on 1 January 2027.'
+            : 'The beta has ended. The full licence will be on sale after the beta.';
+        return;
+    }
     if (mode === 'test') button.textContent = 'Open test checkout';
     button.addEventListener('click', async () => {
         button.disabled = true;
@@ -69,7 +95,7 @@ function bindBetaCheckout() {
             status.textContent = '';
             window.location.assign(url);
         } catch (error) {
-            status.textContent = error instanceof Error && ['already_licensed', 'signed_out', 'email_unverified'].includes(error.cause)
+            status.textContent = error instanceof Error && ['already_licensed', 'signed_out', 'email_unverified', 'beta_not_open', 'beta_closed'].includes(error.cause)
                 ? error.message
                 : 'Could not open checkout. Sign in again or try shortly.';
         } finally {

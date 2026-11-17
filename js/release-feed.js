@@ -7,8 +7,10 @@
 (function (root) {
     'use strict';
 
-    // The site's release address. Change here when the release hosting gets a custom domain.
-    var FEED_URL = 'https://d3incq3qmjy9qr.cloudfront.net/latest.json';
+    // The release feed address (latest.json on the release hosting). Kept empty until the
+    // beta opens on 1 January 2027 so the page does not reveal where installers live.
+    // Set it back to the release address's latest.json when downloads open.
+    var FEED_URL = '';
 
     // Which feed entries satisfy each platform button, best first.
     var PLATFORM_KEYS = {
@@ -48,10 +50,22 @@
         return entry.file + '\nSHA-256\n' + entry.sha256;
     }
 
+    /**
+     * True once the beta has opened. opensAt is an ISO time with an offset, from
+     * #download[data-downloads-open-at]. A missing or unreadable value keeps downloads closed.
+     */
+    function downloadsOpen(opensAt, now) {
+        if (typeof opensAt !== 'string' || !/^\d{4}-\d{2}-\d{2}T/.test(opensAt)) return false;
+        var opens = new Date(opensAt).getTime();
+        if (isNaN(opens)) return false;
+        return (now || new Date()).getTime() >= opens;
+    }
+
     var pending = null;
 
     /** Fetches the feed once per page load. A failure clears the cache so a later click can retry. */
     function fetchLatest() {
+        if (!FEED_URL) return Promise.reject(new Error('Release feed not published yet'));
         if (!pending) {
             pending = fetch(FEED_URL, { cache: 'no-store' })
                 .then(function (response) {
@@ -66,7 +80,7 @@
         return pending;
     }
 
-    var api = { pickDownload: pickDownload, describeVersion: describeVersion, describeChecksum: describeChecksum, fetchLatest: fetchLatest, FEED_URL: FEED_URL };
+    var api = { pickDownload: pickDownload, describeVersion: describeVersion, describeChecksum: describeChecksum, downloadsOpen: downloadsOpen, fetchLatest: fetchLatest, FEED_URL: FEED_URL };
 
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
     else root.RaRelease = api;

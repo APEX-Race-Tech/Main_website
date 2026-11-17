@@ -34,6 +34,10 @@
         PasswordResetRequiredException: 'Your password needs to be reset. Use Forgot password.',
         NewPasswordRequired: 'This account needs a new password. Use Forgot password.',
         NetworkError: 'Network error. Please check your connection and try again.',
+        InvalidPhoneNumber: 'Enter the phone number with its country code, for example +91 98765 43210.',
+        CodeDeliveryFailureException: 'The SMS code could not be sent. Check the number and try again later.',
+        InvalidSmsRoleAccessPolicyException: 'Phone verification is not available yet. Please try again later.',
+        InvalidSmsRoleTrustRelationshipException: 'Phone verification is not available yet. Please try again later.',
         NotConfigured: 'Sign-in is not available right now. Please try again later.'
     };
 
@@ -82,7 +86,15 @@
             Object.keys(PROFILE_ATTRIBUTES).forEach(function (key) {
                 profile[key] = attrs[PROFILE_ATTRIBUTES[key]] || '';
             });
-            return { uid: sub, email: email, displayName: displayName, photoURL: null, profile: profile };
+            return {
+                uid: sub,
+                email: email,
+                displayName: displayName,
+                photoURL: null,
+                profile: profile,
+                phoneNumber: attrs.phone_number || '',
+                phoneVerified: attrs.phone_number_verified === 'true'
+            };
         }
 
         /** Resolves the signed-in CognitoUser with a valid session, or rejects. */
@@ -252,6 +264,68 @@
             });
         }
 
+        /** E.164 from what the user typed (spaces, dashes, dots and brackets removed), or null. */
+        function normalizePhone(value) {
+            var phone = String(value || '').replace(/[\s().-]/g, '');
+            return /^\+[1-9]\d{6,14}$/.test(phone) ? phone : null;
+        }
+
+        function sendCode(cognitoUser) {
+            return new Promise(function (resolve, reject) {
+                cognitoUser.getAttributeVerificationCode('phone_number', {
+                    onSuccess: function () { resolve(); },
+                    onFailure: reject,
+                    inputVerificationCode: function () { resolve(); }
+                });
+            });
+        }
+
+        /**
+         * Saves the phone number (E.164) and sends a verification code by SMS.
+         * An empty value removes the number. Resolves { user, codeSent }.
+         * Cognito marks a changed number unverified until verifyPhoneCode succeeds.
+         */
+        function setPhoneNumber(value) {
+            var empty = !String(value || '').trim();
+            var phone = empty ? null : normalizePhone(value);
+            if (!empty && !phone) return Promise.reject({ code: 'InvalidPhoneNumber' });
+            return activeSession().then(function (s) {
+                function call(method, arg) {
+                    return new Promise(function (resolve, reject) {
+                        s.cognitoUser[method](arg, function (err) { err ? reject(err) : resolve(); });
+                    });
+                }
+                var unchanged = currentUser && currentUser.phoneNumber === (phone || '');
+                var save = unchanged ? Promise.resolve()
+                    : empty ? call('deleteAttributes', ['phone_number'])
+                    : call('updateAttributes', [new sdk.CognitoUserAttribute({ Name: 'phone_number', Value: phone })]);
+                return save
+                    .then(function () { return loadUser(s.cognitoUser, s.session); })
+                    .then(function (user) {
+                        currentUser = user;
+                        if (empty || user.phoneVerified) return { user: user, codeSent: false };
+                        return sendCode(s.cognitoUser).then(function () { return { user: user, codeSent: true }; });
+                    });
+            });
+        }
+
+        /** Sends a new SMS code for the saved, unverified phone number. */
+        function sendPhoneCode() {
+            return activeSession().then(function (s) { return sendCode(s.cognitoUser); });
+        }
+
+        /** Confirms the phone number with the SMS code. Resolves the refreshed user. */
+        function verifyPhoneCode(code) {
+            var clean = String(code || '').trim();
+            return activeSession().then(function (s) {
+                return new Promise(function (resolve, reject) {
+                    s.cognitoUser.verifyAttribute('phone_number', clean, { onSuccess: resolve, onFailure: reject });
+                })
+                    .then(function () { return loadUser(s.cognitoUser, s.session); })
+                    .then(function (user) { currentUser = user; return user; });
+            });
+        }
+
         function deleteAccount() {
             return activeSession().then(function (s) {
                 return new Promise(function (resolve, reject) {
@@ -305,6 +379,9 @@
             signOut: signOut,
             changePassword: changePassword,
             updateProfile: updateProfile,
+            setPhoneNumber: setPhoneNumber,
+            sendPhoneCode: sendPhoneCode,
+            verifyPhoneCode: verifyPhoneCode,
             deleteAccount: deleteAccount,
             getAccessToken: getAccessToken,
             getIdToken: getIdToken,

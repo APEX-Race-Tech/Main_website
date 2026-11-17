@@ -1724,6 +1724,8 @@ select option {
 }
 
 .profile-edit-form input[type="text"],
+.profile-edit-form input[type="email"],
+.profile-edit-form input[type="tel"],
 .profile-edit-form input[type="password"],
 .profile-edit-form textarea {
   width: 100%;
@@ -1749,6 +1751,148 @@ select option {
   display: flex;
   gap: 1rem;
   margin-top: 1.5rem;
+}
+
+/* Account details from the accounts API (js/account-profile.js) */
+.profile-menu__item[hidden],
+.profile-block[hidden] {
+  display: none;
+}
+
+.account-subtitle {
+  margin-top: 1.25rem;
+}
+
+.account-list {
+  margin: 0;
+  text-align: left;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.account-list__item,
+.account-list__empty {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.75rem;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.account-list__item:first-child,
+.account-list__empty:first-child {
+  border-top: none;
+}
+
+.account-list__item strong {
+  color: var(--text-color);
+  font-size: 0.95rem;
+}
+
+.account-list__item small,
+.account-list__empty {
+  color: var(--text-color-secondary);
+  font-size: 0.8rem;
+}
+
+.account-list__item small {
+  flex-basis: 100%;
+}
+
+.account-state--revoked {
+  opacity: 0.6;
+}
+
+.modal-content .account-line {
+  margin: 0.6rem 0 0;
+  text-align: left;
+  color: var(--text-color);
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+.modal-content .account-status {
+  margin: 0.6rem 0 0;
+  text-align: left;
+  min-height: 1em;
+  color: var(--text-color-secondary);
+  font-size: 0.85rem;
+}
+
+.modal-content .account-hint {
+  margin: 0 0 0.5rem;
+  text-align: left;
+  color: var(--text-color-secondary);
+  font-size: 0.8rem;
+}
+
+.profile-edit-form input[readonly] {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.profile-edit-form input[readonly]:focus {
+  border-color: var(--border-color);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: none;
+}
+
+.account-fieldset {
+  margin: 0.5rem 0 0;
+  padding: 1.25rem 0 0;
+  border: 0;
+  border-top: 1px solid var(--border-color);
+  min-width: 0;
+}
+
+.account-fieldset[hidden] {
+  display: none;
+}
+
+.account-fieldset legend {
+  padding: 0 0.5rem 0 0;
+  color: var(--text-color-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.phone-verify {
+  margin: 0 0 1.5rem;
+}
+
+.phone-verify[hidden] {
+  display: none;
+}
+
+.phone-verify__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.profile-edit-form .phone-verify__row input {
+  flex: 1 1 8rem;
+  width: auto;
+  letter-spacing: 0.2em;
+}
+
+.account-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 1rem;
+}
+
+@media (max-width: 560px) {
+  .account-form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 /* Cloud button in the header */
@@ -3214,6 +3358,23 @@ select option {
   color: var(--text-color-secondary);
   text-align: center;
   min-height: 1.2em;
+}
+
+.download-opening {
+  margin: 1rem auto 0;
+  max-width: 560px;
+  font-size: 0.9rem;
+  color: var(--text-color-secondary);
+  text-align: center;
+}
+
+.download-opening[hidden] {
+  display: none;
+}
+
+#download-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .beta-install-guide {

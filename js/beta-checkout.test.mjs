@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { requestBetaCheckout } from './beta-checkout.js';
+import { betaPhase, requestBetaCheckout } from './beta-checkout.js';
 
 const api = 'https://accounts.example.com';
 const hosted = 'https://test.checkout.dodopayments.com/session/cks_example';
@@ -58,4 +58,20 @@ test('keeps checkout hidden without config and opens existing sign-in for a sign
         delete globalThis.document;
         delete globalThis.window;
     }
+});
+
+test('maps the server beta window errors to clear messages', async () => {
+    const notOpen = async () => Response.json({ error: 'beta_not_open' }, { status: 403 });
+    await assert.rejects(requestBetaCheckout(api, 'test', 'id-token', notOpen), /open on 1 January 2027/);
+    const closed = async () => Response.json({ error: 'beta_closed' }, { status: 403 });
+    await assert.rejects(requestBetaCheckout(api, 'test', 'id-token', closed), /beta has ended/);
+});
+
+test('chooses the page phase from the beta window', () => {
+    const opens = '2027-01-01T00:00:00+05:30';
+    const ends = '2027-03-31T23:59:59+05:30';
+    assert.equal(betaPhase(opens, ends, new Date('2026-12-31T18:29:59Z')), 'not_open');
+    assert.equal(betaPhase(opens, ends, new Date('2026-12-31T18:30:00Z')), 'open');
+    assert.equal(betaPhase(opens, ends, new Date('2027-03-31T18:30:00Z')), 'closed');
+    assert.equal(betaPhase('', '', new Date('2030-01-01T00:00:00Z')), 'open');
 });
