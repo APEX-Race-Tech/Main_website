@@ -283,6 +283,12 @@
                 .catch(function () { return null; });
         }
 
+        function getIdToken() {
+            return activeSession()
+                .then(function (s) { return s.session.getIdToken().getJwtToken(); })
+                .catch(function () { return null; });
+        }
+
         if (configured) restore();
         else { ready = true; setTimeout(notify, 0); }
 
@@ -301,6 +307,7 @@
             updateProfile: updateProfile,
             deleteAccount: deleteAccount,
             getAccessToken: getAccessToken,
+            getIdToken: getIdToken,
             friendlyError: friendlyError
         };
     }

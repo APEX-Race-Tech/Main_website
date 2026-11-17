@@ -165,7 +165,7 @@
                 "name": "Is Race Insight free?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "The RACE Insight beta licence is INR 1,500 and includes a version 1 licence when released. Contact info@apexracetech.in for beta purchase availability. Create an email-based RACE Insight account to download and sign in."
+                    "text": "The RACE Insight beta licence costs US$15 one time before tax and includes version 1 when released. Online checkout opens soon. Until then, email info@apexracetech.in to buy a licence. Sign in with the same RACE Insight account you use in the desktop app."
                 }
             },
             {
@@ -561,7 +561,7 @@
                 </details>
                 <details>
                     <summary>Is Race Insight free?</summary>
-                    <p>The RACE Insight beta licence is INR 1,500 and includes a version 1 licence when released. Contact info@apexracetech.in for beta purchase availability. Create an email-based RACE Insight account to download and sign in.</p>
+                    <p>The RACE Insight beta licence costs US$15 one time before tax and includes version 1 when released. Online checkout opens soon. Until then, email info@apexracetech.in to buy a licence. Sign in with the same RACE Insight account you use in the desktop app.</p>
                 </details>
                 <details>
                     <summary>What are the system requirements for Race Insight?</summary>
@@ -603,6 +603,12 @@
 
                 <div class="action-buttons">
                     <button id="download-btn" class="btn btn-primary">Download</button>
+                </div>
+                <div id="beta-checkout" class="beta-checkout" data-accounts-api="" data-checkout-mode="live" hidden>
+                    <h4>RACE Insight beta licence</h4>
+                    <p><strong>US$15</strong> one time, before tax. Includes version 1.</p>
+                    <button id="buy-beta-licence" type="button" class="btn btn-primary">Buy beta licence</button>
+                    <p id="beta-checkout-status" class="beta-checkout-status" role="status"></p>
                 </div>
                 <details class="beta-install-guide">
                     <summary>Install, update and send feedback</summary>
@@ -1113,6 +1119,7 @@
     <!-- race-insight.js loads after the sign-in scripts -->
     <script src="js/release-feed.js"></script>
     <script defer src="js/race-insight.js"></script>
+    <script type="module" src="js/beta-checkout.js"></script>
 
     <footer class="site-footer" style="margin-top: auto; padding: 2rem 0; border-top: 1px solid rgba(255, 255, 255, 0.1);">
         <div class="footer-bottom" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; gap: 1.5rem;">

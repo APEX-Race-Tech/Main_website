@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let pendingCredentials = null; // email + password kept between sign-up and email confirmation
 
     const AUTH_MODES = {
-        signin:  { title: 'Sign In to Download', subtitle: 'Sign in to access downloads and save your preferences.', submit: 'Sign In' },
+        signin:  { title: 'Sign In to RACE Insight', subtitle: 'Use the same account on the website and in the desktop app.', submit: 'Sign In' },
         signup:  { title: 'Create Account', subtitle: 'Step 1 of 2: your account details.', submit: 'Next' },
         confirm: { title: 'Confirm Your Email', subtitle: 'Enter the verification code we emailed you.', submit: 'Confirm' },
         forgot:  { title: 'Reset Password', subtitle: 'Enter your email and we will send a verification code.', submit: 'Send Code' },

@@ -3683,3 +3683,33 @@ select option {
     padding: 0.4rem 0.7rem;
   }
 }
+.beta-checkout {
+    width: min(100%, 30rem);
+    margin: 1.5rem auto;
+    padding: 1.25rem;
+    background: #111827;
+    border: 1px solid #374151;
+    border-radius: 8px;
+}
+
+.beta-checkout h4 {
+    margin: 0 0 0.5rem;
+    color: #f9fafb;
+}
+
+.beta-checkout strong {
+    color: #22d3ee;
+}
+
+.beta-checkout #buy-beta-licence {
+    background: #06b6d4;
+    color: #030712;
+}
+
+.beta-checkout #buy-beta-licence:hover:not(:disabled) {
+    background: #22d3ee;
+}
+
+.beta-checkout-status:empty {
+    display: none;
+}

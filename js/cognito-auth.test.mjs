@@ -19,7 +19,7 @@ function attr(Name, Value) {
 }
 
 function idToken(payload) {
-    return { decodePayload: () => payload };
+    return { decodePayload: () => payload, getJwtToken: () => 'id-jwt' };
 }
 
 function session(payload = { sub: 'sub-1' }) {
@@ -97,6 +97,15 @@ test('reports signed out when nothing is stored', async () => {
     const { createRaAuth } = loadModule();
     const { sdk } = makeSdk({ noStoredUser: true });
     assert.equal(await firstState(createRaAuth(sdk, config)), null);
+});
+
+test('exposes the Cognito ID token for checkout and the access token for cloud sync', async () => {
+    const { createRaAuth } = loadModule();
+    const auth = createRaAuth(makeSdk().sdk, config);
+    assert.equal(await auth.getIdToken(), 'id-jwt');
+    assert.equal(await auth.getAccessToken(), 'access-jwt');
+    const signedOut = createRaAuth(makeSdk({ noStoredUser: true }).sdk, config);
+    assert.equal(await signedOut.getIdToken(), null);
 });
 
 test('clears a dead stored session whose refresh token was rejected', async () => {
