@@ -1,7 +1,7 @@
 /*
  * Account details in the profile window: team, car, class and billing address the
- * user enters, the phone number verified through Cognito by SMS, plus licences, the services plan and billing from the RACE Insight
- * accounts API (GET and PUT /me/profile). The API takes the account from the
+ * user enters, the phone number (Cognito phone_number attribute, not verified),
+ * plus licences, the services plan and billing from the RACE Insight accounts API (GET and PUT /me/profile). The API takes the account from the
  * Cognito ID token, never from the page. Values are written with textContent only.
  *
  * The section stays hidden until an accounts API URL is configured, on
@@ -82,8 +82,7 @@ function licenceTitle(licence) {
 }
 
 function describePhone(phone) {
-    if (!phone?.number) return 'Not set';
-    return `${phone.number} (${phone.verified ? 'verified' : 'not verified'})`;
+    return phone?.number || 'Not set';
 }
 
 /**
@@ -194,11 +193,6 @@ function bindAccountProfile() {
     const fields = document.getElementById('account-details-fields');
     const form = document.getElementById('update-profile-form');
     const formStatus = document.getElementById('account-details-form-status');
-    const phoneVerify = document.getElementById('phone-verify');
-    const phoneVerifyText = document.getElementById('phone-verify-text');
-    const phoneCode = document.getElementById('phone-code');
-    const phoneVerifyButton = document.getElementById('phone-verify-btn');
-    const phoneResendButton = document.getElementById('phone-resend-btn');
     if (!status || !detailsList || !licenceList || !servicesLine || !billingLine || !fields || !form) return;
 
     section.hidden = false;
@@ -212,18 +206,6 @@ function bindAccountProfile() {
         return user ? { number: user.phoneNumber, verified: user.phoneVerified } : null;
     }
 
-    /** Shows the code entry while the saved phone number is unverified. */
-    function showPhoneVerify(message) {
-        if (!phoneVerify) return;
-        const phone = livePhone();
-        const pending = !!(phone?.number && !phone.verified);
-        phoneVerify.hidden = !pending;
-        if (phoneVerifyText) {
-            phoneVerifyText.textContent = message || (pending ? `Enter the 6-digit code sent by SMS to ${phone.number}.` : '');
-        }
-        if (!pending && phoneCode) phoneCode.value = '';
-    }
-
     function show(view, owner) {
         current = view;
         currentOwner = owner;
@@ -233,7 +215,6 @@ function bindAccountProfile() {
         servicesLine.textContent = shown.services;
         billingLine.textContent = shown.billing || 'No payment yet.';
         fillForm(form, view, auth.currentUser?.phoneNumber);
-        showPhoneVerify();
         status.textContent = '';
     }
 
@@ -266,9 +247,8 @@ function bindAccountProfile() {
 
     /**
      * Saves team, car and billing address, then the phone number, from the Edit
-     * profile form. Resolves { phoneCodeSent } when an SMS code is waiting. Throws an
-     * Error whose message is safe to show. Refuses to save when the current details
-     * were never loaded, so an empty form cannot wipe them.
+     * profile form. Throws an Error whose message is safe to show. Refuses to save
+     * when the current details were never loaded, so an empty form cannot wipe them.
      */
     async function save() {
         const owner = auth.currentUser?.uid;
@@ -285,13 +265,10 @@ function bindAccountProfile() {
             if (formStatus) formStatus.textContent = message;
             throw new Error(message);
         }
-        if (!form.elements.phone_number || typeof auth.setPhoneNumber !== 'function') return { phoneCodeSent: false };
+        if (!form.elements.phone_number || typeof auth.setPhoneNumber !== 'function') return;
         try {
-            const result = await auth.setPhoneNumber(form.elements.phone_number.value);
-            if (auth.currentUser?.uid !== owner) return { phoneCodeSent: false };
-            renderDetails(detailsList, describeAccount(current, livePhone()).details);
-            showPhoneVerify();
-            return { phoneCodeSent: !!result?.codeSent };
+            await auth.setPhoneNumber(form.elements.phone_number.value);
+            if (auth.currentUser?.uid === owner) renderDetails(detailsList, describeAccount(current, livePhone()).details);
         } catch (error) {
             const message = `Phone number not saved. ${authError(error)}`;
             if (formStatus) formStatus.textContent = message;
@@ -299,43 +276,12 @@ function bindAccountProfile() {
         }
     }
 
-    phoneVerifyButton?.addEventListener('click', async () => {
-        const code = phoneCode?.value.trim() || '';
-        if (!/^\d{6}$/.test(code)) {
-            showPhoneVerify('Enter the 6-digit code from the SMS.');
-            return;
-        }
-        phoneVerifyButton.disabled = true;
-        try {
-            await auth.verifyPhoneCode(code);
-            renderDetails(detailsList, describeAccount(current, livePhone()).details);
-            showPhoneVerify();
-            if (formStatus) formStatus.textContent = 'Phone number verified.';
-        } catch (error) {
-            showPhoneVerify(authError(error));
-        } finally {
-            phoneVerifyButton.disabled = false;
-        }
-    });
-    phoneResendButton?.addEventListener('click', async () => {
-        phoneResendButton.disabled = true;
-        try {
-            await auth.sendPhoneCode();
-            showPhoneVerify(`A new code was sent to ${auth.currentUser?.phoneNumber || 'your phone'}.`);
-        } catch (error) {
-            showPhoneVerify(authError(error));
-        } finally {
-            phoneResendButton.disabled = false;
-        }
-    });
-
     window.RaAccountProfile = Object.freeze({ save });
 
     for (const id of ['nav-profile-btn', 'mobile-nav-profile-btn']) document.getElementById(id)?.addEventListener('click', load);
     document.querySelectorAll('a[href="#profile"]').forEach((link) => link.addEventListener('click', load));
     document.getElementById('edit-profile-btn')?.addEventListener('click', () => {
         fillForm(form, current, auth.currentUser?.phoneNumber);
-        showPhoneVerify();
         if (formStatus) formStatus.textContent = current ? '' : 'Account details are still loading.';
     });
     auth.onAuthStateChanged((user) => {
@@ -346,7 +292,6 @@ function bindAccountProfile() {
             currentOwner = null;
             status.textContent = '';
             fillForm(form, null, '');
-            showPhoneVerify();
         }
     });
 }

@@ -211,7 +211,7 @@
     
     <!-- Local Stylesheets -->
     <link rel="stylesheet" href="css/main.css?v=224f5cfa5c">
-    <link rel="stylesheet" href="css/race-insight.css?v=6cc4374e1c">
+    <link rel="stylesheet" href="css/race-insight.css?v=5548b48036">
     <link rel="stylesheet" href="css/cloud.css?v=947ae16b12">
     
     <!-- Polyfills for Edge compatibility -->
@@ -796,14 +796,6 @@
                                     <input type="tel" id="account-phone" name="phone_number" maxlength="20" autocomplete="tel" inputmode="tel" placeholder="+91 98765 43210">
                                 </div>
                             </div>
-                            <div id="phone-verify" class="phone-verify" hidden>
-                                <p id="phone-verify-text" class="account-hint" role="status"></p>
-                                <div class="phone-verify__row">
-                                    <input type="text" id="phone-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6-digit code" aria-label="SMS verification code">
-                                    <button type="button" id="phone-verify-btn" class="btn btn-primary">Verify</button>
-                                    <button type="button" id="phone-resend-btn" class="btn btn-secondary">Send new code</button>
-                                </div>
-                            </div>
                             <div class="form-group">
                                 <label for="account-street">Street address</label>
                                 <input type="text" id="account-street" name="street" maxlength="200" autocomplete="street-address">
@@ -826,7 +818,7 @@
                                     <input type="text" id="account-country" name="country" maxlength="2" autocomplete="country" placeholder="IN">
                                 </div>
                             </div>
-                            <p class="account-hint">Leave a field empty to remove it. A new phone number is verified with a code sent by SMS. Use the two-letter country code for the address, for example IN, GB or US.</p>
+                            <p class="account-hint">Leave a field empty to remove it. Use the two-letter country code for the address, for example IN, GB or US.</p>
                             <p id="account-details-form-status" class="account-status" role="status"></p>
                         </fieldset>
                         <div class="form-actions">
@@ -1178,7 +1170,7 @@
     <!-- Sign-in: AWS Cognito -->
     <script src="js/vendor/amazon-cognito-identity.min.js?v=32811f6945"></script>
     <script src="js/cognito-config.js?v=e785b5d04f"></script>
-    <script src="js/cognito-auth.js?v=c2c99eb17a"></script>
+    <script src="js/cognito-auth.js?v=e832b211b6"></script>
     <script src="js/cloud-config.js?v=a077f17e8a"></script>
     <script src="js/cloud-sync.js?v=4b4427f2f4"></script>
     <script src="js/cloud-demo.js?v=c904281c9f"></script>
@@ -1187,9 +1179,9 @@
     <script src="js/cloud-app.js?v=549e0422c4"></script>
     <!-- race-insight.js loads after the sign-in scripts -->
     <script src="js/release-feed.js?v=097a367787"></script>
-    <script defer src="js/race-insight.js?v=ed05ac4559"></script>
+    <script defer src="js/race-insight.js?v=ca121104f4"></script>
     <script type="module" src="js/beta-checkout.js?v=b3b09d9430"></script>
-    <script type="module" src="js/account-profile.js?v=241f541a77"></script>
+    <script type="module" src="js/account-profile.js?v=f69e6d5bcf"></script>
 
     <footer class="site-footer" style="margin-top: auto; padding: 2rem 0; border-top: 1px solid rgba(255, 255, 255, 0.1);">
         <div class="footer-bottom" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; gap: 1.5rem;">

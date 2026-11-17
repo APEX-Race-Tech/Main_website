@@ -1435,15 +1435,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // (js/account-profile.js). Keep the form open if that save fails.
                 if (window.RaAccountProfile) {
                     try {
-                        const saved = await window.RaAccountProfile.save();
-                        if (saved?.phoneCodeSent) {
-                            await loadProfileData(RaAuth.currentUser || user);
-                            alert('Profile saved. Enter the code we sent by SMS to verify your phone number.');
-                            return;
-                        }
+                        await window.RaAccountProfile.save();
                     } catch (accountError) {
                         await loadProfileData(RaAuth.currentUser || user);
-                        alert(`Profile updated, but team, car and billing address were not saved. ${accountError.message}`);
+                        alert(`Profile updated, but team, car, phone and billing address were not saved. ${accountError.message}`);
                         return;
                     }
                 }

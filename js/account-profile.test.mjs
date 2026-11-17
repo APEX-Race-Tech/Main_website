@@ -83,7 +83,7 @@ test('describes details, licences, services and billing for display', () => {
         ['Team', 'APEX Race Tech'],
         ['Car', 'Formula Vee'],
         ['Class', 'FV1600'],
-        ['Phone', '+919876543210 (not verified)'],
+        ['Phone', '+919876543210'],
         ['Billing address', '1 Pit Lane, Chennai, 600001, IN'],
     ]);
     assert.deepEqual(shown.licences, [
@@ -100,5 +100,5 @@ test('describes details, licences, services and billing for display', () => {
     assert.equal(empty.details[5][1], 'Not set');
     assert.equal(empty.details[4][1], 'Not set');
     // The live Cognito user wins over the stored token copy, which lags until the token refreshes.
-    assert.equal(describeAccount(view, { number: '+919876543210', verified: true }).details[4][1], '+919876543210 (verified)');
+    assert.equal(describeAccount(view, { number: '+447700900123', verified: false }).details[4][1], '+447700900123');
 });

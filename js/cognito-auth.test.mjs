@@ -52,17 +52,6 @@ function makeSdk(overrides = {}) {
             stored.attrs = stored.attrs.filter((x) => !names.includes(x.Name));
             cb(null, 'SUCCESS');
         }
-        getAttributeVerificationCode(name, cb) {
-            calls.codeRequested = name;
-            if (overrides.codeError) return cb.onFailure(overrides.codeError);
-            cb.onSuccess({ CodeDeliveryDetails: { Destination: '+*******3210' } });
-        }
-        verifyAttribute(name, code, cb) {
-            calls.verified = [name, code];
-            if (code !== '123456') return cb.onFailure({ code: 'CodeMismatchException', message: 'Invalid code' });
-            stored.attrs = stored.attrs.filter((x) => x.Name !== 'phone_number_verified').concat(attr('phone_number_verified', 'true'));
-            cb.onSuccess('SUCCESS');
-        }
         changePassword(o, n, cb) { calls.changePassword = [o, n]; cb(null, 'SUCCESS'); }
         deleteUser(cb) { calls.deleted = true; cb(null, 'SUCCESS'); }
         signOut() { calls.signedOut = true; }
@@ -234,15 +223,15 @@ test('getAccessToken returns the access token, or null when signed out', async (
     assert.equal(await createRaAuth(null, null).getAccessToken(), null);
 });
 
-test('setPhoneNumber normalises to E.164, saves it unverified and sends an SMS code', async () => {
+test('setPhoneNumber normalises to E.164 and saves it without sending an SMS code', async () => {
     const { createRaAuth } = loadModule();
     const { sdk, calls } = makeSdk();
     const auth = createRaAuth(sdk, config);
     await firstState(auth);
-    const result = await auth.setPhoneNumber(' +91 98765-43210 ');
+    const user = await auth.setPhoneNumber(' +91 98765-43210 ');
     assert.deepEqual(JSON.parse(JSON.stringify(calls.updateAttributes.at(-1))), [['phone_number', '+919876543210']]);
-    assert.equal(calls.codeRequested, 'phone_number');
-    assert.equal(result.codeSent, true);
+    assert.equal(calls.codeRequested, undefined);
+    assert.equal(user.phoneNumber, '+919876543210');
     assert.equal(auth.currentUser.phoneNumber, '+919876543210');
     assert.equal(auth.currentUser.phoneVerified, false);
 });
@@ -255,27 +244,8 @@ test('setPhoneNumber refuses numbers without a country code, and an empty value 
     await assert.rejects(auth.setPhoneNumber('98765 43210'), (e) => e.code === 'InvalidPhoneNumber');
     assert.equal(calls.updateAttributes.length, 0);
     await auth.setPhoneNumber('+919876543210');
-    const result = await auth.setPhoneNumber('');
+    const cleared = await auth.setPhoneNumber('');
     assert.deepEqual(JSON.parse(JSON.stringify(calls.deleteAttributes.at(-1))), ['phone_number']);
-    assert.equal(result.codeSent, false);
+    assert.equal(cleared.phoneNumber, '');
 });
 
-test('verifyPhoneCode confirms the number; a wrong code is reported in plain text', async () => {
-    const { createRaAuth, friendlyError } = loadModule();
-    const { sdk, calls } = makeSdk();
-    const auth = createRaAuth(sdk, config);
-    await firstState(auth);
-    await auth.setPhoneNumber('+919876543210');
-    await assert.rejects(auth.verifyPhoneCode('000000'), (e) => friendlyError(e) === 'That verification code is wrong.');
-    const user = await auth.verifyPhoneCode(' 123456 ');
-    assert.deepEqual(calls.verified, ['phone_number', '123456']);
-    assert.equal(user.phoneVerified, true);
-});
-
-test('a missing SMS setup is explained instead of showing the Cognito error', async () => {
-    const { createRaAuth, friendlyError } = loadModule();
-    const { sdk } = makeSdk({ codeError: { code: 'InvalidSmsRoleTrustRelationshipException', message: 'Role does not have a trust relationship' } });
-    const auth = createRaAuth(sdk, config);
-    await firstState(auth);
-    await assert.rejects(auth.setPhoneNumber('+919876543210'), (e) => /not available yet/.test(friendlyError(e)));
-});

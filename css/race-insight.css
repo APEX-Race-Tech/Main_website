@@ -1862,27 +1862,6 @@ select option {
   text-transform: uppercase;
 }
 
-.phone-verify {
-  margin: 0 0 1.5rem;
-}
-
-.phone-verify[hidden] {
-  display: none;
-}
-
-.phone-verify__row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-.profile-edit-form .phone-verify__row input {
-  flex: 1 1 8rem;
-  width: auto;
-  letter-spacing: 0.2em;
-}
-
 .account-form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
