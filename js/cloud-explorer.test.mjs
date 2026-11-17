@@ -16,7 +16,7 @@ const cx = load();
 const plain = (value) => JSON.parse(JSON.stringify(value));
 
 test('fileCategory: RACE Insight formats, previews and other files', () => {
-    for (const name of ['lap.ibt', 'RUN.LD', 'a.xrk', 'a.drk', 'a.vbox', 'data.csv', 'session_ab.risession']) {
+    for (const name of ['lap.ibt', 'RUN.LD', 'a.xrk', 'a.drk', 'a.vbox', 'data.csv', 'session_ab.risession', 'abc123.apx']) {
         assert.equal(cx.fileCategory(name), 'race', name);
     }
     assert.equal(cx.fileCategory('onboard.MP4'), 'video');
@@ -32,6 +32,7 @@ test('fileCategory: RACE Insight formats, previews and other files', () => {
 test('typeLabel names the format', () => {
     assert.equal(cx.typeLabel('lap.ibt'), 'iRacing telemetry');
     assert.equal(cx.typeLabel('x.risession'), 'RACE Insight session');
+    assert.equal(cx.typeLabel('abc123.apx'), 'RACE Insight session data');
     assert.equal(cx.typeLabel('a.png'), 'PNG image');
     assert.equal(cx.typeLabel('a.pdf'), 'PDF document');
     assert.equal(cx.typeLabel('a.zip'), 'ZIP file');

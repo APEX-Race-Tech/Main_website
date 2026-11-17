@@ -15,7 +15,7 @@
     var LIBRARY_PROJECT_ID = '_library';
 
     /** Formats RACE Insight opens directly (logger files and its own session files). */
-    var RACE_EXTENSIONS = ['ibt', 'ld', 'xrk', 'drk', 'vbox', 'csv', 'risession'];
+    var RACE_EXTENSIONS = ['apx', 'ibt', 'ld', 'xrk', 'drk', 'vbox', 'csv', 'risession'];
 
     /**
      * Files the browser can preview. SVG and HTML are left out on purpose:
@@ -33,7 +33,7 @@
 
     var TYPE_LABELS = {
         ibt: 'iRacing telemetry', ld: 'MoTeC log', xrk: 'AiM log', drk: 'AiM log', vbox: 'VBOX log',
-        csv: 'CSV data', risession: 'RACE Insight session'
+        csv: 'CSV data', risession: 'RACE Insight session', apx: 'RACE Insight session data'
     };
 
     function extension(name) {
