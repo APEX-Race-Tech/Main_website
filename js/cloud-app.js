@@ -4,7 +4,8 @@
  * shared with them, and the sessions they shared with others.
  *
  * Opens RACE Insight files in the desktop app, previews images, videos and
- * PDFs, downloads verified files, shares sessions and uploads a logger file.
+ * PDFs, downloads verified files and shares sessions. Sessions are created
+ * by the desktop app only (it writes the .apx file the cloud stores).
  * Exposes window.RaCloudApp ({ open, close }). The folder shown is kept in the
  * URL hash ("#cloud", "#cloud/p=<id>", ...), so links and the back button work.
  * All text from the service is set with textContent, never as HTML.
@@ -426,7 +427,6 @@
         var inShare = loc.type === 'share';
         show('cx-open-btn', inSession || (inShare && isAccepted(loc.id)));
         show('cx-share-btn', inSession);
-        $('cx-upload-label').hidden = loc.type === 'shared' || loc.type === 'outgoing' || inShare;
     }
 
     function empty(text) {
@@ -460,7 +460,7 @@
                     date: formatDate(p.updated_at)
                 }));
             });
-            if (!model.projects.length) empty('Nothing synced yet. Sync from the desktop app, or upload a logger file.');
+            if (!model.projects.length) empty('Nothing synced yet. Turn on cloud sync in the RACE Insight desktop app.');
             return;
         }
 
@@ -623,22 +623,6 @@
                 return load().then(function (state) { if (state) renderRecipients(shareTarget.id); });
             })
             .catch(function (err) { shareError(sync.friendlyError(err)); });
-    });
-
-    /* ---- Upload ---- */
-
-    $('cloud-upload-input').addEventListener('change', function (event) {
-        var file = event.target.files && event.target.files[0];
-        event.target.value = '';
-        if (!file) return;
-        setError(null);
-        show('cloud-upload-status', true);
-        sync.uploadSession(file, function (step) { $('cloud-upload-status').textContent = step + '…'; })
-            .then(function (result) {
-                $('cloud-upload-status').textContent = 'Uploaded ' + file.name + ' to Library.';
-                return load().then(function () { if (result && result.sessionId) navigate({ type: 'session', id: result.sessionId }); });
-            })
-            .catch(function (err) { show('cloud-upload-status', false); setError(err); });
     });
 
     /* ---- Access and loading ---- */

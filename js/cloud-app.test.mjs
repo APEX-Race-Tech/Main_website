@@ -69,7 +69,6 @@ function fakeSync({ configured = true, account = SUBSCRIBED, units = UNITS, shar
         createShare: (...args) => answer(`createShare:${args[0]}:${args[1].join(',')}`, {}),
         acceptShare: (id) => answer(`accept:${id}`, {}),
         removeShare: (id) => answer(`remove:${id}`, {}),
-        uploadSession: () => answer('upload', { sessionId: 's2' }),
         friendlyError: (err) => (err && err.message) || 'Cloud sync failed.'
     };
 }
@@ -108,14 +107,14 @@ function fakeDom() {
     }
     ['cloud-modal', 'cloud-modal-close', 'cloud-demo-badge', 'cloud-status', 'cloud-error', 'cloud-locked',
         'cloud-signin-btn', 'cloud-account', 'cloud-edition', 'cloud-quota-text', 'cloud-quota-bar',
-        'cloud-consent', 'cloud-explorer', 'cx-breadcrumbs', 'cx-open-btn', 'cx-share-btn', 'cx-upload-label',
-        'cloud-upload-input', 'cloud-upload-status', 'cx-tree', 'cx-list', 'cx-empty',
+        'cloud-consent', 'cloud-explorer', 'cx-breadcrumbs', 'cx-open-btn', 'cx-share-btn',
+        'cx-tree', 'cx-list', 'cx-empty',
         'cx-viewer', 'cx-viewer-title', 'cx-viewer-body', 'cx-viewer-download', 'cx-viewer-close',
         'cx-open-dialog', 'cx-open-text', 'cx-open-get', 'nav-signin-btn',
         'cloud-share-dialog', 'cloud-share-name', 'cloud-share-emails', 'cloud-share-ai', 'cloud-share-expires',
         'cloud-share-error', 'cloud-share-recipients', 'cloud-share-submit'].forEach((id) => make('div', id));
     ['cloud-account', 'cloud-explorer', 'cloud-locked', 'cloud-signin-btn', 'cloud-error', 'cloud-consent',
-        'cloud-upload-status', 'cx-open-btn', 'cx-share-btn', 'cx-empty', 'cloud-demo-badge'].forEach((id) => { nodes.get(id).hidden = true; });
+        'cx-open-btn', 'cx-share-btn', 'cx-empty', 'cloud-demo-badge'].forEach((id) => { nodes.get(id).hidden = true; });
     nodes.get('cloud-status')._text = 'Loading…';
     const document = {
         getElementById: (id) => nodes.get(id) || null,
@@ -376,4 +375,10 @@ test('popup: a late close event after reopening does not clear the new view', as
     await settle();
     assert.equal(modal.open, true);
     assert.equal(app.location.hash, '#cloud/s=s1');
+});
+
+test('popup: there is no upload control (sessions come from the desktop app)', async () => {
+    const app = await runApp({ auth: fakeAuth({ user: ADA }), sync: fakeSync({ units: { projects: [], sessions: [] } }), hash: '#cloud' });
+    assert.equal(app.n('cx-upload-label'), undefined);
+    assert.match(app.n('cx-empty').textContent, /desktop app/);
 });

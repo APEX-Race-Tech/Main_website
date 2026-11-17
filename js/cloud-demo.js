@@ -52,31 +52,33 @@
         var now = Date.now();
         var iso = function (daysAgo) { return new Date(now - daysAgo * DAY).toISOString(); };
 
+        // Real session units hold <session id>.apx and the .risession document.
+        // Race 1 also carries a video, a PDF, an image and a note so the
+        // previewer can be tried; synced sessions do not include such files today.
         var sessionFiles = {
             s1: [
+                { name: 's1.apx', sha256: sha('b'), size: 31500000, storage: 'standard' },
                 { name: 'session_spa_r1.risession', sha256: sha('e'), size: 182000, storage: 'standard' },
-                { name: 'Spa_Race1_Stint1.ibt', sha256: sha('b'), size: 48500000, storage: 'standard' },
-                { name: 'Spa_Race1_Stint2.ibt', sha256: sha('9'), size: 51200000, storage: 'standard' },
                 { name: 'onboard_cam.mp4', sha256: sha('a'), size: 310000000, storage: 'standard' },
                 { name: 'setup_sheet.pdf', sha256: sha('f'), size: 2400, storage: 'standard' },
                 { name: 'pit_board.png', sha256: sha('c'), size: 141000, storage: 'standard' },
                 { name: 'notes.txt', sha256: sha('7'), size: 1200, storage: 'standard' }
             ],
             s2: [
-                { name: 'session_spa_q.risession', sha256: sha('6'), size: 95000, storage: 'standard' },
-                { name: 'Spa_Quali.ld', sha256: sha('5'), size: 22000000, storage: 'standard' },
-                { name: 'Spa_Quali.ldx', sha256: sha('4'), size: 3000, storage: 'standard' }
+                { name: 's2.apx', sha256: sha('5'), size: 14800000, storage: 'standard' },
+                { name: 'session_spa_q.risession', sha256: sha('6'), size: 95000, storage: 'standard' }
             ],
             s3: [
-                { name: 'session_spa_fp2.risession', sha256: sha('3'), size: 88000, storage: 'standard' },
-                { name: 'Spa_FP2.xrk', sha256: sha('2'), size: 17000000, storage: 'standard' }
+                { name: 's3.apx', sha256: sha('2'), size: 11200000, storage: 'standard' },
+                { name: 'session_spa_fp2.risession', sha256: sha('3'), size: 88000, storage: 'standard' }
             ],
             s4: [
-                { name: 'Anglesey_lap.vbox', sha256: sha('1'), size: 900000, storage: 'standard' }
+                { name: 's4.apx', sha256: sha('1'), size: 600000, storage: 'standard' },
+                { name: 'session_anglesey.risession', sha256: sha('8'), size: 41000, storage: 'standard' }
             ],
             s5: [
-                { name: 'Monza_long_run.ibt', sha256: sha('0'), size: 61000000, storage: 'standard' },
-                { name: '2025_test_day.ld', sha256: sha('d'), size: 9000000, storage: 'archived' }
+                { name: 's5.apx', sha256: sha('0'), size: 40100000, storage: 'standard' },
+                { name: 'session_monza_long_run.risession', sha256: sha('d'), size: 120000, storage: 'archived' }
             ]
         };
 
@@ -167,7 +169,6 @@
                 shares.pending = shares.pending.filter(function (s) { return s.share_id !== id; });
                 return later({ share_id: id });
             },
-            uploadSession: function () { return fail('Uploads are off in the preview.'); },
             friendlyError: function (err) { return (err && err.message) || 'Cloud sync failed.'; }
         };
 

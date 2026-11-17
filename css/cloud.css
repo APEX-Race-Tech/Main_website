@@ -32,7 +32,6 @@
 .cloud-quota__bar--full { background: #ff6b6b; }
 
 .cloud-btn { padding: 0.45rem 0.9rem; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.4rem; }
-.cloud-upload { cursor: pointer; }
 
 .cloud-features { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.7rem; }
 .cloud-features li { display: flex; align-items: center; gap: 0.7rem; color: var(--text-color); font-size: 0.92rem; }
