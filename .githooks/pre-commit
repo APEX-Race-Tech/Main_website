@@ -1,0 +1,5 @@
+#!/bin/sh
+# Keeps the ?v= cache tags on script and stylesheet links equal to a hash of
+# each file, for the content being committed. See scripts/asset-versions.mjs.
+# Enable once per clone:  git config core.hooksPath .githooks
+exec node scripts/asset-versions.mjs --staged
