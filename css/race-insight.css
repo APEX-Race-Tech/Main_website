@@ -3823,87 +3823,97 @@ select option {
     padding: 0.4rem 0.7rem;
   }
 }
-/* --- Download section: choose the system, buy early access, download --- */
+/* --- Download section: choose the system, buy early access, download ---
+   Reuses the page's own patterns: a section-title header with a step eyebrow
+   (.ri-feature__step), a two-column row with a top divider (.ri-feature),
+   the dark formats surface (.ri-formats), update-card hover borders and the
+   standard .btn-primary. */
 #download .download-section {
-  position: relative;
-  max-width: 560px;
-  margin: 3rem auto 0;
-  padding: 2.75rem 2.5rem 2rem;
-  overflow: hidden;
-  background: linear-gradient(180deg, rgba(30, 30, 30, 0.82), rgba(12, 12, 12, 0.82));
-  border: 1px solid var(--border-color);
-  border-radius: 16px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
-  text-align: center;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  text-align: left;
 }
 
-#download .download-section::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 2px;
-  background: var(--primary-gradient);
+#download .download-header {
+  margin: 0 0 2rem;
 }
 
+/* Same look as .ri-feature__step */
 #download .download-eyebrow {
-  margin: 0 0 0.6rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  margin: 0 0 0.5rem;
   color: var(--primary-color);
-}
-
-#download .download-section h3 {
-  margin: 0 0 0.75rem;
-  font-size: clamp(1.6rem, 3vw, 2rem);
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: var(--text-color);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 #download .download-lede {
-  max-width: 27rem;
-  margin: 0 auto 2rem;
-  font-size: 0.95rem;
+  max-width: 40rem;
+  margin: 0.5rem 0 0;
   line-height: 1.6;
-  color: var(--text-color-secondary);
 }
 
+/* Two columns with a top divider, like a features step */
+#download .download-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: 2.5rem;
+  align-items: start;
+  padding: 2.5rem 0 0;
+  border-top: 1px solid var(--border-color);
+}
+
+/* Same surface as the supported formats box */
+#download .download-panel {
+  padding: 1.25rem 1.4rem 1.4rem;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: rgba(14, 14, 14, 0.92);
+}
+
+/* Same look as .ri-formats__title */
 #download .download-step-label {
-  margin: 0 0 0.7rem;
-  font-size: 0.72rem;
+  margin: 0 0 0.85rem;
+  color: var(--text-color-secondary);
+  font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--text-muted);
 }
 
 #download .platform-options {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.6rem;
-  margin: 0 0 1.75rem;
+  margin: 0 0 1.25rem;
 }
 
+/* Small update cards: same fill, border, radius and hover border */
 #download .platform-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 0.3rem;
-  min-height: 5.25rem;
-  padding: 0.85rem 0.5rem;
-  background: rgba(255, 255, 255, 0.03);
+  min-height: 4.75rem;
+  padding: 0.75rem 0.5rem;
+  background: rgba(20, 20, 20, 0.6);
   border: 1px solid var(--border-color);
-  border-radius: 10px;
+  border-radius: 12px;
   color: var(--text-color-secondary);
   font: inherit;
   font-size: 0.9rem;
   font-weight: 600;
   box-shadow: none;
   cursor: pointer;
-  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+  transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
 }
 
 #download .platform-btn i {
@@ -3911,16 +3921,14 @@ select option {
 }
 
 #download .platform-btn:hover:not(:disabled) {
-  border-color: rgba(255, 255, 255, 0.28);
-  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--primary-color);
   color: var(--text-color);
 }
 
 #download .platform-btn.selected {
   border-color: var(--primary-color);
-  background: color-mix(in srgb, var(--primary-color) 12%, transparent);
+  background: rgba(0, 210, 255, 0.1);
   color: var(--text-color);
-  box-shadow: inset 0 0 0 1px var(--primary-color);
 }
 
 #download .platform-btn.selected i {
@@ -3936,7 +3944,7 @@ select option {
   white-space: nowrap;
   font-size: 0.68rem;
   font-weight: 500;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   color: var(--text-muted);
 }
 
@@ -3966,6 +3974,7 @@ select option {
   display: none;
 }
 
+/* The standard .btn-primary, full width */
 #download .btn-buy {
   display: flex;
   flex-wrap: wrap;
@@ -3974,9 +3983,8 @@ select option {
   /* inline-flex drops the spaces between the label and the prices, so space them with a gap. */
   gap: 0.6em;
   width: 100%;
-  padding: 1rem 1.5rem;
-  border-radius: 10px;
-  font-size: 1.05rem;
+  padding: 0.9rem 1.5rem;
+  font-size: 1rem;
   white-space: normal;
 }
 
@@ -3992,10 +4000,7 @@ select option {
 }
 
 #download .btn-buy .sale-price {
-  padding: 0.1rem 0.5rem;
-  border-radius: 6px;
-  background: rgba(0, 0, 0, 0.2);
-  font-weight: 800;
+  font-weight: 700;
 }
 
 #download .btn-buy:disabled {
@@ -4018,13 +4023,12 @@ select option {
 
 /* Message after the buyer returns from checkout */
 #download .download-notice {
-  margin: 1.25rem 0 0;
-  padding: 0.9rem 1rem;
-  background: rgba(255, 255, 255, 0.03);
+  margin: 1rem 0 0;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-left: 3px solid var(--border-color);
-  border-radius: 10px;
-  text-align: left;
+  border-radius: 8px;
   font-size: 0.9rem;
   line-height: 1.55;
   color: var(--text-color);
@@ -4049,6 +4053,7 @@ select option {
   color: var(--text-color);
   text-decoration: underline;
   text-underline-offset: 3px;
+  cursor: pointer;
 }
 
 #download .download-again:hover {
@@ -4056,9 +4061,10 @@ select option {
 }
 
 #download .download-licensed {
-  margin: 1.1rem 0 0;
+  margin: 1rem 0 0;
   font-size: 0.85rem;
   color: var(--text-muted);
+  text-align: center;
 }
 
 #download .download-link-btn {
@@ -4078,28 +4084,28 @@ select option {
 }
 
 #download .download-opening {
-  margin: 1rem auto 0;
+  max-width: none;
+  margin: 0.75rem 0 0;
   font-size: 0.85rem;
+  text-align: center;
 }
 
-/* Small notes under the buttons: plain bullets, no panels */
+/* Small notes beside the panel: plain bullets, no boxes */
 #download .download-notes {
-  margin: 2rem 0 0;
-  padding: 1.25rem 0 0 1.1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin: 0;
+  padding: 0 0 0 1.1rem;
   list-style: disc;
-  text-align: left;
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   line-height: 1.6;
   color: var(--text-muted);
 }
 
 #download .download-notes li {
-  margin: 0.3rem 0;
+  margin: 0 0 0.45rem;
 }
 
 #download .download-notes li::marker {
-  color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.3);
 }
 
 #download .download-notes li:empty {
@@ -4108,7 +4114,7 @@ select option {
 
 #download .download-notes .download-version {
   min-height: 0;
-  margin: 0.3rem 0;
+  margin: 0 0 0.45rem;
   font-size: inherit;
   color: var(--text-color-secondary);
   text-align: left;
@@ -4130,17 +4136,22 @@ select option {
   color: var(--text-color);
 }
 
+/* The install guide opens like an FAQ entry */
 #download .beta-install-guide {
   max-width: none;
-  margin: 0.75rem 0 0;
-  text-align: left;
-  font-size: 0.78rem;
+  margin: 1.25rem 0 0;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  font-size: 0.85rem;
   line-height: 1.6;
   color: var(--text-muted);
 }
 
 #download .beta-install-guide summary {
-  color: var(--text-color-secondary);
+  color: var(--text-color);
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -4163,16 +4174,29 @@ select option {
   font-size: 0.72rem;
 }
 
+@media (max-width: 900px) {
+  #download .download-layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding-top: 2rem;
+  }
+}
+
+/* Phones: the fixed social bar would cover the panel and notes (js/race-insight.js sets the class). */
+@media (max-width: 768px) {
+  body.download-in-view .social-media-bar {
+    display: none;
+  }
+}
+
 @media (max-width: 600px) {
-  #download .download-section {
-    margin-top: 2rem;
-    padding: 2.25rem 1.25rem 1.5rem;
-    border-radius: 14px;
+  #download .download-panel {
+    padding: 1rem;
   }
 
   #download .platform-btn {
-    min-height: 4.75rem;
-    padding: 0.75rem 0.25rem;
+    min-height: 4.5rem;
+    padding: 0.7rem 0.25rem;
     font-size: 0.85rem;
   }
 
@@ -4180,8 +4204,9 @@ select option {
     font-size: 0.6rem;
     letter-spacing: 0;
   }
+}
 
-  #download .btn-buy {
-    font-size: 1rem;
-  }
+/* The FAQ sits directly above the feedback form, so it takes only its own height. */
+#faq.full-page-section {
+  min-height: auto;
 }

@@ -967,6 +967,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const platformBtns = document.querySelectorAll('.platform-btn');
     let selectedPlatform = null;
 
+    // On a phone the fixed social bar would sit on top of the purchase panel and notes, so the
+    // page hides it while the download content is on screen (css: body.download-in-view).
+    const downloadContent = document.querySelector('#download .download-section');
+    if (downloadContent && 'IntersectionObserver' in window) {
+        new IntersectionObserver((entries) => {
+            entries.forEach(entry => document.body.classList.toggle('download-in-view', entry.isIntersecting));
+        }).observe(downloadContent);
+    }
+
     // Downloads stay closed until the early access opens (#download[data-downloads-open-at]).
     // This only hides the button: the installer files on the release address stay reachable.
     const downloadsOpenAt = document.getElementById('download')?.dataset.downloadsOpenAt;

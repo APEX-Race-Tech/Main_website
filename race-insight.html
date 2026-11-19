@@ -211,7 +211,7 @@
     
     <!-- Local Stylesheets -->
     <link rel="stylesheet" href="css/main.css?v=224f5cfa5c">
-    <link rel="stylesheet" href="css/race-insight.css?v=0aa3f4bdc0">
+    <link rel="stylesheet" href="css/race-insight.css?v=d8e9da6a82">
     <link rel="stylesheet" href="css/cloud.css?v=947ae16b12">
     
     <!-- Polyfills for Edge compatibility -->
@@ -542,6 +542,64 @@
         </div>
     </section>
 
+    <section id="download" class="full-page-section" data-downloads-open-at="2027-01-01T00:00:00+05:30">
+        <div class="section-content">
+            <div class="download-section" aria-labelledby="download-title">
+                <header class="download-header">
+                    <p class="download-eyebrow">Early access</p>
+                    <h2 id="download-title" class="section-title">Get RACE Insight</h2>
+                    <p class="download-lede section-subtitle">Telemetry analysis for sim and real-world racing. Choose your system, buy once, and the installer downloads straight after payment.</p>
+                </header>
+
+                <div class="download-layout">
+                    <div class="download-panel">
+                        <p class="download-step-label" id="platform-label">Operating system</p>
+                        <div class="platform-options" role="group" aria-labelledby="platform-label">
+                            <button type="button" class="platform-btn" data-platform="windows" aria-pressed="true"><i class="fab fa-windows" aria-hidden="true"></i> Windows</button>
+                            <button type="button" class="platform-btn disabled" data-platform="linux" disabled title="Coming soon"><i class="fab fa-linux" aria-hidden="true"></i> Linux <span class="platform-soon">Coming soon</span></button>
+                            <button type="button" class="platform-btn disabled" data-platform="apple" disabled title="Coming soon"><i class="fab fa-apple" aria-hidden="true"></i> Mac <span class="platform-soon">Coming soon</span></button>
+                        </div>
+
+                        <div id="beta-checkout" class="beta-checkout" data-accounts-api="https://taztnz6mkd.execute-api.eu-central-1.amazonaws.com" data-checkout-mode="live" data-beta-opens-at="2027-01-01T00:00:00+05:30" data-beta-ends-at="2027-03-31T23:59:59+05:30" hidden>
+                            <button id="buy-beta-licence" type="button" class="btn btn-primary btn-buy" aria-label="Buy early access, US$15, regular price US$35"><span class="btn-buy__label">Buy early access</span> <span class="btn-buy__price"><s class="regular-price">US$35</s> <span class="sale-price">US$15</span></span></button>
+                            <p id="beta-checkout-status" class="beta-checkout-status" role="status"></p>
+                        </div>
+
+                        <div id="download-notice" class="download-notice" role="status" aria-live="polite" hidden>
+                            <p id="download-notice-message"></p>
+                            <a id="download-again" class="download-again" hidden>Download again</a>
+                        </div>
+
+                        <p id="download-licensed" class="download-licensed">Already have a licence? <button id="download-btn" type="button" class="download-link-btn">Download</button></p>
+                        <p id="download-opening" class="download-opening" role="status" hidden></p>
+                    </div>
+
+                    <div class="download-details">
+                        <ul class="download-notes">
+                            <li id="download-version" class="download-version" aria-live="polite"></li>
+                            <li>Windows 10 or 11, 64-bit. One-time payment, before tax. Includes version 1 and the cloud services plan during the early access, which runs 1 January to 31 March 2027 and may be extended.</li>
+                            <li>Sign in to the desktop app with the same RACE Insight account you buy with. Verify your email when you create the account; accounts from before 15 November 2026 must be created again.</li>
+                            <li>The early access installer is unsigned. If Windows SmartScreen appears, check the download source and checksum, then choose <strong>More info</strong> and <strong>Run anyway</strong>.</li>
+                            <li><a href="https://docs.apexracetech.in">User guide</a> · <a href="race-insight/privacy-policy.html">Privacy policy</a> · <a href="race-insight/eula.html">Licence agreement</a></li>
+                        </ul>
+
+                        <details class="beta-install-guide">
+                            <summary>Install, update and send feedback</summary>
+                            <ul>
+                                <li>Check the installer before running it. In PowerShell, run <code>Get-FileHash "$env:USERPROFILE\Downloads\RACE-Insight-Setup-0.3.0-beta.1.exe" -Algorithm SHA256</code> with the actual downloaded filename and compare the result with the checksum below.</li>
+                                <li>Import a telemetry file, promote the session, then open Analysis. Keep copies of your original telemetry and saved projects.</li>
+                                <li>Early access usage analytics, error reports and masked session replay are on by default. Turn them off on the sign-in screen or in <strong>Settings &gt; Analytics &amp; Privacy</strong>. Text and inputs are masked in replay.</li>
+                                <li>Send feedback from <strong>Feedback and Suggestions</strong> in the app menu, with the app version, steps and expected result. If analytics are off, use <strong>Open Email</strong>. Review any log file before attaching it; export logs with <strong>Settings &gt; Logging &gt; Share Logs</strong>.</li>
+                                <li>For beta.1 and older builds, return here to download updates manually. Save your work and close the app before installing. Follow your organisation's software policy.</li>
+                            </ul>
+                            <pre id="download-checksum" aria-live="polite">Loading checksum…</pre>
+                        </details>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section id="faq" class="full-page-section">
         <div class="section-content">
             <h2 class="section-title">Frequently Asked Questions</h2>
@@ -574,56 +632,6 @@
                 <details>
                     <summary>Can I export my analysis from Race Insight?</summary>
                     <p>Yes. Race Insight exports your data to CSV. The next release adds lossless native CSV, Parquet, HTML session reports, Summary JSON, PNG graph images and SVG track maps.</p>
-                </details>
-            </div>
-        </div>
-    </section>
-
-    <section id="download" class="full-page-section" data-downloads-open-at="2027-01-01T00:00:00+05:30">
-        <div class="section-content">
-            <div class="download-section" aria-labelledby="download-title">
-                <p class="download-eyebrow">Early access</p>
-                <h3 id="download-title">Get RACE Insight</h3>
-                <p class="download-lede">Telemetry analysis for sim and real-world racing. Choose your system, buy once, and the installer downloads straight after payment.</p>
-
-                <p class="download-step-label" id="platform-label">Operating system</p>
-                <div class="platform-options" role="group" aria-labelledby="platform-label">
-                    <button type="button" class="platform-btn" data-platform="windows" aria-pressed="true"><i class="fab fa-windows" aria-hidden="true"></i> Windows</button>
-                    <button type="button" class="platform-btn disabled" data-platform="linux" disabled title="Coming soon"><i class="fab fa-linux" aria-hidden="true"></i> Linux <span class="platform-soon">Coming soon</span></button>
-                    <button type="button" class="platform-btn disabled" data-platform="apple" disabled title="Coming soon"><i class="fab fa-apple" aria-hidden="true"></i> Mac <span class="platform-soon">Coming soon</span></button>
-                </div>
-
-                <div id="beta-checkout" class="beta-checkout" data-accounts-api="https://taztnz6mkd.execute-api.eu-central-1.amazonaws.com" data-checkout-mode="live" data-beta-opens-at="2027-01-01T00:00:00+05:30" data-beta-ends-at="2027-03-31T23:59:59+05:30" hidden>
-                    <button id="buy-beta-licence" type="button" class="btn btn-primary btn-buy" aria-label="Buy early access, US$15, regular price US$35"><span class="btn-buy__label">Buy early access</span> <span class="btn-buy__price"><s class="regular-price">US$35</s> <span class="sale-price">US$15</span></span></button>
-                    <p id="beta-checkout-status" class="beta-checkout-status" role="status"></p>
-                </div>
-
-                <div id="download-notice" class="download-notice" role="status" aria-live="polite" hidden>
-                    <p id="download-notice-message"></p>
-                    <a id="download-again" class="download-again" hidden>Download again</a>
-                </div>
-
-                <p id="download-licensed" class="download-licensed">Already have a licence? <button id="download-btn" type="button" class="download-link-btn">Download</button></p>
-                <p id="download-opening" class="download-opening" role="status" hidden></p>
-
-                <ul class="download-notes">
-                    <li id="download-version" class="download-version" aria-live="polite"></li>
-                    <li>Windows 10 or 11, 64-bit. One-time payment, before tax. Includes version 1 and the cloud services plan during the early access, which runs 1 January to 31 March 2027 and may be extended.</li>
-                    <li>Sign in to the desktop app with the same RACE Insight account you buy with. Verify your email when you create the account; accounts from before 15 November 2026 must be created again.</li>
-                    <li>The early access installer is unsigned. If Windows SmartScreen appears, check the download source and checksum, then choose <strong>More info</strong> and <strong>Run anyway</strong>.</li>
-                    <li><a href="https://docs.apexracetech.in">User guide</a> · <a href="race-insight/privacy-policy.html">Privacy policy</a> · <a href="race-insight/eula.html">Licence agreement</a></li>
-                </ul>
-
-                <details class="beta-install-guide">
-                    <summary>Install, update and send feedback</summary>
-                    <ul>
-                        <li>Check the installer before running it. In PowerShell, run <code>Get-FileHash "$env:USERPROFILE\Downloads\RACE-Insight-Setup-0.3.0-beta.1.exe" -Algorithm SHA256</code> with the actual downloaded filename and compare the result with the checksum below.</li>
-                        <li>Import a telemetry file, promote the session, then open Analysis. Keep copies of your original telemetry and saved projects.</li>
-                        <li>Early access usage analytics, error reports and masked session replay are on by default. Turn them off on the sign-in screen or in <strong>Settings &gt; Analytics &amp; Privacy</strong>. Text and inputs are masked in replay.</li>
-                        <li>Send feedback from <strong>Feedback and Suggestions</strong> in the app menu, with the app version, steps and expected result. If analytics are off, use <strong>Open Email</strong>. Review any log file before attaching it; export logs with <strong>Settings &gt; Logging &gt; Share Logs</strong>.</li>
-                        <li>For beta.1 and older builds, return here to download updates manually. Save your work and close the app before installing. Follow your organisation's software policy.</li>
-                    </ul>
-                    <pre id="download-checksum" aria-live="polite">Loading checksum…</pre>
                 </details>
             </div>
         </div>
@@ -1180,7 +1188,7 @@
     <!-- race-insight.js loads after the sign-in scripts -->
     <script src="js/release-feed.js?v=cda430f08c"></script>
     <script src="js/download-flow.js?v=0737a3451b"></script>
-    <script defer src="js/race-insight.js?v=86f522d7d7"></script>
+    <script defer src="js/race-insight.js?v=ffc6908fdb"></script>
     <script type="module" src="js/beta-checkout.js?v=c1ca52164a"></script>
     <script type="module" src="js/account-profile.js?v=97f9dfcca5"></script>
 
