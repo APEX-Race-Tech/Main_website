@@ -112,3 +112,10 @@ test('the buy button shows the struck regular price with an accessible label', a
     assert.match(tag, /aria-label="Buy early access licence, US\$15, regular price US\$35"/);
     assert.match(tag, /<s class="regular-price">US\$35<\/s> US\$15/);
 });
+
+test('the buy button is spaced with a gap because inline-flex drops the spaces between label and prices', async () => {
+    const { readFile } = await import('node:fs/promises');
+    const css = await readFile(new URL('../css/race-insight.css', import.meta.url), 'utf8');
+    const rule = css.match(/.beta-checkout #buy-beta-licence {[^}]*}/)[0];
+    assert.match(rule, /gap:\s*0\.6em/);
+});
