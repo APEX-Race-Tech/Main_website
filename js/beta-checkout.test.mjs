@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { betaPhase, requestBetaCheckout, unavailableMessage } from './beta-checkout.js';
+import { ALREADY_LICENSED_MESSAGE, betaPhase, rememberSelectedPlatform, requestBetaCheckout, unavailableMessage } from './beta-checkout.js';
 
 const api = 'https://accounts.example.com';
 const hosted = 'https://test.checkout.dodopayments.com/session/cks_example';
@@ -109,13 +109,43 @@ test('the buy button shows the struck regular price with an accessible label', a
     const { readFile } = await import('node:fs/promises');
     const html = await readFile(new URL('../race-insight.html', import.meta.url), 'utf8');
     const tag = html.match(/<button id="buy-beta-licence"[^>]*>[^]*?<\/button>/)[0];
-    assert.match(tag, /aria-label="Buy early access licence, US\$15, regular price US\$35"/);
-    assert.match(tag, /<s class="regular-price">US\$35<\/s> US\$15/);
+    assert.match(tag, /aria-label="Buy early access, US\$15, regular price US\$35"/);
+    assert.match(tag, />Buy early access</);
+    assert.match(tag, /<s class="regular-price">US\$35<\/s> <span class="sale-price">US\$15<\/span>/);
+});
+
+test('the separate licence box and its price paragraph are gone: the price is only on the button', async () => {
+    const { readFile } = await import('node:fs/promises');
+    const html = await readFile(new URL('../race-insight.html', import.meta.url), 'utf8');
+    const section = html.match(/<section id="download"[^]*?<\/section>/)[0];
+    assert.doesNotMatch(section, /early access licence<\/h4>/);
+    const withoutButton = section.replace(/<button id="buy-beta-licence"[^]*?<\/button>/, '');
+    assert.doesNotMatch(withoutButton, /US\$15|US\$35/);
 });
 
 test('the buy button is spaced with a gap because inline-flex drops the spaces between label and prices', async () => {
     const { readFile } = await import('node:fs/promises');
     const css = await readFile(new URL('../css/race-insight.css', import.meta.url), 'utf8');
-    const rule = css.match(/.beta-checkout #buy-beta-licence {[^}]*}/)[0];
+    const rule = css.match(/#download \.btn-buy {[^}]*}/)[0];
     assert.match(rule, /gap:\s*0\.6em/);
+});
+
+test('an existing licence points the buyer to the direct download link', async () => {
+    const conflict = async () => Response.json({ error: 'already_licensed' }, { status: 409 });
+    await assert.rejects(requestBetaCheckout(api, 'test', 'id-token', conflict), (error) => {
+        assert.equal(error.cause, 'already_licensed');
+        assert.equal(error.message, ALREADY_LICENSED_MESSAGE);
+        assert.match(error.message, /Already have a licence\? Download/);
+        return true;
+    });
+});
+
+test('remembers the selected operating system before leaving for checkout', () => {
+    const remembered = [];
+    const flow = { rememberPlatform: (_storage, platform) => { remembered.push(platform); return true; } };
+    const doc = { querySelector: (selector) => (selector === '.platform-btn.selected' ? { dataset: { platform: 'windows' } } : null) };
+    assert.equal(rememberSelectedPlatform(doc, flow), true);
+    assert.deepEqual(remembered, ['windows']);
+    assert.equal(rememberSelectedPlatform({ querySelector: () => null }, flow), false);
+    assert.equal(rememberSelectedPlatform(doc, undefined), false);
 });

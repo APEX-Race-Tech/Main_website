@@ -958,7 +958,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // The public download total is not shown: releases are served from S3/CloudFront, which has no
-    // per-file counter. The container stays hidden (display: none in the page).
+    // per-file counter.
 
     // --- Download Logic ---
     const downloadBtn = document.getElementById('download-btn');
@@ -976,10 +976,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         return Number.isNaN(opens.getTime()) ? '' : opens.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata' });
     })();
     if (!downloadsAvailable()) {
-        if (downloadBtn) {
-            downloadBtn.disabled = true;
-            downloadBtn.textContent = openingDateText ? `Available ${openingDateText}` : 'Not available yet';
-        }
+        if (downloadBtn) downloadBtn.disabled = true;
+        // "Already have a licence? Download" makes no sense before the opening; the date shows instead.
+        const licensedEl = document.getElementById('download-licensed');
+        if (licensedEl) licensedEl.hidden = true;
         const openingEl = document.getElementById('download-opening');
         if (openingEl) {
             openingEl.textContent = openingDateText
@@ -992,41 +992,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Auto-select Windows on page load
-    const windowsBtn = document.querySelector('.platform-btn[data-platform="windows"]');
-    if (windowsBtn) {
-        windowsBtn.classList.add('selected');
-        selectedPlatform = 'windows';
+    // The operating system is remembered (js/download-flow.js) so it survives the checkout
+    // redirect: the installer for it downloads when the buyer comes back from payment.
+    const downloadFlow = window.RaDownloadFlow;
+    const flowStorage = (() => {
+        try { return window.localStorage; } catch (error) { return null; }
+    })();
+    function selectPlatform(btn) {
+        platformBtns.forEach(b => {
+            const active = b === btn;
+            b.classList.toggle('selected', active);
+            if (!b.disabled) b.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
+        selectedPlatform = btn.dataset.platform;
+        downloadFlow?.rememberPlatform(flowStorage, selectedPlatform);
     }
 
-    // Ensure platform buttons are clickable
+    // Select the remembered operating system, or Windows, on page load
+    const rememberedPlatform = downloadFlow ? downloadFlow.recallPlatform(flowStorage, 'windows') : 'windows';
+    const initialPlatformBtn = document.querySelector(`.platform-btn[data-platform="${rememberedPlatform}"]:not(:disabled)`)
+        || document.querySelector('.platform-btn[data-platform="windows"]');
+    if (initialPlatformBtn) selectPlatform(initialPlatformBtn);
+
     platformBtns.forEach(btn => {
-        // Remove any pointer-events blocking
-        btn.style.pointerEvents = 'auto';
-        btn.style.cursor = 'pointer';
-        btn.style.position = 'relative';
-        btn.style.zIndex = '10';
-        
-        // Remove disabled attribute if it exists (except for actually disabled buttons)
-        if (!btn.classList.contains('disabled') && btn.dataset.platform === 'windows') {
-            btn.disabled = false;
-        }
-        
         btn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             // Prevent clicking on disabled buttons
-            if (btn.disabled || btn.classList.contains('disabled')) {
-                console.log('Button is disabled, ignoring click');
-                return;
-            }
-            platformBtns.forEach(b => {
-                if (b !== btn) b.classList.remove('selected');
-            });
-            btn.classList.add('selected');
-            selectedPlatform = btn.dataset.platform;
+            if (btn.disabled || btn.classList.contains('disabled')) return;
+            selectPlatform(btn);
             updateChecksum();
-            console.log('Platform selected:', selectedPlatform);
         });
         
         // Also handle mousedown for better responsiveness
@@ -1148,6 +1143,49 @@ document.addEventListener('DOMContentLoaded', async () => {
             .catch(() => {
                 downloadVersionEl.textContent = 'Latest version: not available yet';
             });
+    }
+
+    // ===== Return from the Dodo checkout =====
+    // On status=succeeded the installer for the remembered operating system downloads once per
+    // payment. A failed, cancelled or pending payment shows a calm message and keeps the button.
+    const noticeEl = document.getElementById('download-notice');
+    const noticeMessageEl = document.getElementById('download-notice-message');
+    const downloadAgainEl = document.getElementById('download-again');
+
+    function showDownloadNotice(outcome, message) {
+        if (!noticeEl || !noticeMessageEl) return;
+        noticeMessageEl.textContent = message;
+        noticeEl.dataset.outcome = outcome;
+        noticeEl.hidden = false;
+    }
+
+    async function startPurchasedDownload(platform) {
+        try {
+            const latest = await RaRelease.fetchLatest();
+            const download = RaRelease.pickDownload(latest, platform);
+            if (!download) throw new Error('No installer for ' + platform);
+            if (downloadAgainEl) {
+                downloadAgainEl.href = download.url;
+                downloadAgainEl.hidden = false;
+            }
+            // A navigation to the installer downloads it and leaves this page open. A new window
+            // would be blocked here because the download starts without a click.
+            window.location.assign(download.url);
+        } catch (error) {
+            console.error('Purchased download failed:', error);
+            showDownloadNotice('succeeded', 'Thanks for your purchase. The installer could not be fetched just now: use "Already have a licence? Download" below in a few minutes, or write to info@apexracetech.in.');
+        }
+    }
+
+    if (downloadFlow) {
+        const outcome = downloadFlow.handleCheckoutReturn({
+            location: window.location,
+            history: window.history,
+            storage: flowStorage,
+            start: startPurchasedDownload,
+            show: showDownloadNotice
+        });
+        if (outcome) document.getElementById('download')?.scrollIntoView({ behavior: 'smooth' });
     }
 
     // Helper function to show thank you modal

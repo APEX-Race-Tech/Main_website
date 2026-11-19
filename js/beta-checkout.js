@@ -3,6 +3,20 @@ const checkoutHosts = {
     live: 'checkout.dodopayments.com',
 };
 
+export const ALREADY_LICENSED_MESSAGE = 'Your account already has an early access licence. Use "Already have a licence? Download" below.';
+
+/**
+ * Stores the selected operating system before leaving for checkout, so the page can start that
+ * installer when Dodo sends the buyer back (js/download-flow.js reads it).
+ */
+export function rememberSelectedPlatform(doc, flow) {
+    const platform = doc.querySelector?.('.platform-btn.selected')?.dataset?.platform;
+    if (!platform || !flow) return false;
+    let storage = null;
+    try { storage = globalThis.localStorage; } catch { storage = null; }
+    return flow.rememberPlatform(storage, platform);
+}
+
 /**
  * The server decides whether the early access is open. This only chooses what the page
  * shows, so a visitor with a wrong clock cannot buy early or late.
@@ -29,7 +43,7 @@ export async function requestBetaCheckout(apiUrl, mode, idToken, fetchCheckout =
     });
     const result = await response.json().catch(() => null);
     if (response.status === 409 && result?.error === 'already_licensed') {
-        throw new Error('Your account already has an early access licence.', { cause: 'already_licensed' });
+        throw new Error(ALREADY_LICENSED_MESSAGE, { cause: 'already_licensed' });
     }
     if (response.status === 403 && result?.error === 'beta_not_open') {
         throw new Error('Early access purchases open on 1 January 2027.', { cause: 'beta_not_open' });
@@ -103,6 +117,7 @@ function bindBetaCheckout() {
                 return;
             }
             status.textContent = '';
+            rememberSelectedPlatform(document, window.RaDownloadFlow);
             window.location.assign(url);
         } catch (error) {
             status.textContent = error instanceof Error && ['already_licensed', 'signed_out', 'email_unverified', 'beta_not_open', 'beta_closed'].includes(error.cause)
