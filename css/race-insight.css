@@ -3842,6 +3842,9 @@ select option {
 }
 
 .beta-checkout #buy-beta-licence {
+    /* inline-flex drops the spaces between the label and the prices, so space them with a gap. */
+    gap: 0.6em;
+    flex-wrap: wrap;
     background: #06b6d4;
     color: #030712;
 }
