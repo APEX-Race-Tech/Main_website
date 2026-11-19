@@ -117,5 +117,5 @@ test('the buy button is spaced with a gap because inline-flex drops the spaces b
     const { readFile } = await import('node:fs/promises');
     const css = await readFile(new URL('../css/race-insight.css', import.meta.url), 'utf8');
     const rule = css.match(/.beta-checkout #buy-beta-licence {[^}]*}/)[0];
-    assert.match(rule, /gap:s*0.6em/);
+    assert.match(rule, /gap:\s*0\.6em/);
 });
