@@ -3918,7 +3918,7 @@ select option {
 
 #download .platform-btn.selected {
   border-color: var(--primary-color);
-  background: rgba(245, 53, 24, 0.12);
+  background: color-mix(in srgb, var(--primary-color) 12%, transparent);
   color: var(--text-color);
   box-shadow: inset 0 0 0 1px var(--primary-color);
 }
@@ -3933,6 +3933,7 @@ select option {
 }
 
 #download .platform-soon {
+  white-space: nowrap;
   font-size: 0.68rem;
   font-weight: 500;
   letter-spacing: 0.04em;
@@ -3977,14 +3978,6 @@ select option {
   border-radius: 10px;
   font-size: 1.05rem;
   white-space: normal;
-}
-
-#download .btn-buy:not(:disabled) {
-  box-shadow: 0 4px 15px rgba(245, 53, 24, 0.3);
-}
-
-#download .btn-buy:hover:not(:disabled) {
-  box-shadow: 0 6px 20px rgba(245, 53, 24, 0.5);
 }
 
 #download .btn-buy__price {
@@ -4179,7 +4172,13 @@ select option {
 
   #download .platform-btn {
     min-height: 4.75rem;
+    padding: 0.75rem 0.25rem;
     font-size: 0.85rem;
+  }
+
+  #download .platform-soon {
+    font-size: 0.6rem;
+    letter-spacing: 0;
   }
 
   #download .btn-buy {

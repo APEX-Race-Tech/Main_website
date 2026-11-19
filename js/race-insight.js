@@ -1157,6 +1157,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         noticeMessageEl.textContent = message;
         noticeEl.dataset.outcome = outcome;
         noticeEl.hidden = false;
+        // After a successful payment the buy button is no longer needed; on any other outcome it stays.
+        if (outcome === 'succeeded') {
+            const checkoutPanel = document.getElementById('beta-checkout');
+            if (checkoutPanel) checkoutPanel.hidden = true;
+        }
     }
 
     async function startPurchasedDownload(platform) {

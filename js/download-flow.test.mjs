@@ -149,6 +149,12 @@ test('the page offers "Already have a licence? Download" outside the purchase pa
     assert.match(page, /downloadBtn\.addEventListener\('click'[^]*?triggerDownload\(\)/);
 });
 
+test('"Download again" starts with no address so the page-wide #download handlers leave it alone', () => {
+    const link = section.match(/<a id="download-again"[^>]*>/)[0];
+    assert.doesNotMatch(link, /href=/);
+    assert.match(link, /hidden/);
+});
+
 test('the section reads: heading, operating system, buy button, licence link, notes', () => {
     const order = ['id="download-title"', 'class="platform-options"', 'id="buy-beta-licence"', 'id="download-notice"', 'id="download-licensed"', 'class="download-notes"'];
     const positions = order.map((marker) => section.indexOf(marker));
