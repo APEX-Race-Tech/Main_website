@@ -8,7 +8,7 @@
     'use strict';
 
     // The release feed address (latest.json on the release hosting). Kept empty until the
-    // beta opens on 1 January 2027 so the page does not reveal where installers live.
+    // early access opens on 1 January 2027 so the page does not reveal where installers live.
     // Set it back to the release address's latest.json when downloads open.
     var FEED_URL = '';
 
@@ -51,7 +51,7 @@
     }
 
     /**
-     * True once the beta has opened. opensAt is an ISO time with an offset, from
+     * True once the early access has opened. opensAt is an ISO time with an offset, from
      * #download[data-downloads-open-at]. A missing or unreadable value keeps downloads closed.
      */
     function downloadsOpen(opensAt, now) {

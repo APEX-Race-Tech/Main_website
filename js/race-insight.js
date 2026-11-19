@@ -967,7 +967,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const platformBtns = document.querySelectorAll('.platform-btn');
     let selectedPlatform = null;
 
-    // Downloads stay closed until the beta opens (#download[data-downloads-open-at]).
+    // Downloads stay closed until the early access opens (#download[data-downloads-open-at]).
     // This only hides the button: the installer files on the release address stay reachable.
     const downloadsOpenAt = document.getElementById('download')?.dataset.downloadsOpenAt;
     const downloadsAvailable = () => RaRelease.downloadsOpen(downloadsOpenAt);
@@ -983,12 +983,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const openingEl = document.getElementById('download-opening');
         if (openingEl) {
             openingEl.textContent = openingDateText
-                ? `The RACE Insight beta opens on ${openingDateText}. Downloads start then.`
+                ? `The RACE Insight early access opens on ${openingDateText}. Downloads start then.`
                 : 'Downloads are not available yet.';
             openingEl.hidden = false;
         }
         document.querySelectorAll('.hero-badge[href="#download"]').forEach(badge => {
-            badge.textContent = openingDateText ? `Beta opens ${openingDateText}` : 'Beta coming soon';
+            badge.textContent = openingDateText ? `Early access opens ${openingDateText}` : 'Early access coming soon';
         });
     }
 

@@ -87,10 +87,10 @@ test('describes details, licences, services and billing for display', () => {
         ['Billing address', '1 Pit Lane, Chennai, 600001, IN'],
     ]);
     assert.deepEqual(shown.licences, [
-        { title: 'Beta licence (versions 0 and 1)', state: 'Active', date: 'Issued 2 Jan 2027' },
+        { title: 'Early access licence (versions 0 and 1)', state: 'Active', date: 'Issued 2 Jan 2027' },
         { title: 'Version 1 licence', state: 'Revoked', date: 'Revoked 5 Dec 2026' },
     ]);
-    assert.equal(shown.services, 'Services plan included with the beta until 31 Mar 2027');
+    assert.equal(shown.services, 'Services plan included with the early access until 31 Mar 2027');
     assert.equal(shown.billing, 'Vignesh D · Chennai, Tamil Nadu, 600001, IN');
 
     const empty = describeAccount({ details: {}, billing: null, summary: { active_licences: 0, licences: [], services: { plan: null, until: null } } });

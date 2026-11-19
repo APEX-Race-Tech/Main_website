@@ -4,7 +4,7 @@ const checkoutHosts = {
 };
 
 /**
- * The server decides whether the beta is open. This only chooses what the page
+ * The server decides whether the early access is open. This only chooses what the page
  * shows, so a visitor with a wrong clock cannot buy early or late.
  */
 export function betaPhase(opensAt, endsAt, now = new Date()) {
@@ -29,13 +29,13 @@ export async function requestBetaCheckout(apiUrl, mode, idToken, fetchCheckout =
     });
     const result = await response.json().catch(() => null);
     if (response.status === 409 && result?.error === 'already_licensed') {
-        throw new Error('Your account already has a beta licence.', { cause: 'already_licensed' });
+        throw new Error('Your account already has an early access licence.', { cause: 'already_licensed' });
     }
     if (response.status === 403 && result?.error === 'beta_not_open') {
-        throw new Error('Beta purchases open on 1 January 2027.', { cause: 'beta_not_open' });
+        throw new Error('Early access purchases open on 1 January 2027.', { cause: 'beta_not_open' });
     }
     if (response.status === 403 && result?.error === 'beta_closed') {
-        throw new Error('The beta has ended. The full licence will be on sale after the beta.', { cause: 'beta_closed' });
+        throw new Error('The early access has ended. The full licence will be on sale after the early access.', { cause: 'beta_closed' });
     }
     if (response.status === 401) throw new Error('Sign in again, then retry checkout.', { cause: 'signed_out' });
     if (response.status === 403 && result?.error === 'email_unverified') {
@@ -52,26 +52,36 @@ export async function requestBetaCheckout(apiUrl, mode, idToken, fetchCheckout =
     return checkout.href;
 }
 
+/** Status text for the panel when the buy button cannot open checkout. */
+export function unavailableMessage(phase, checkoutConfigured) {
+    if (phase === 'not_open') return 'Early access purchases open on 1 January 2027.';
+    if (phase === 'closed') return 'The early access has ended. The full licence will be on sale after the early access.';
+    return checkoutConfigured ? '' : 'Online checkout opens soon. Until then, email info@apexracetech.in to buy a licence.';
+}
+
 function bindBetaCheckout() {
     const panel = document.getElementById('beta-checkout');
-    const apiUrl = panel?.dataset.accountsApi;
-    const mode = panel?.dataset.checkoutMode;
-    const auth = window.RaAuth;
-    if (!panel || !apiUrl || !Object.hasOwn(checkoutHosts, mode) || !auth?.configured) return;
-
     const button = document.getElementById('buy-beta-licence');
     const status = document.getElementById('beta-checkout-status');
-    if (!button || !status) return;
+    if (!panel || !button || !status) return;
+    const apiUrl = panel.dataset.accountsApi;
+    const mode = panel.dataset.checkoutMode;
+    const auth = window.RaAuth;
+    const checkoutConfigured = Boolean(apiUrl) && Object.hasOwn(checkoutHosts, mode) && Boolean(auth?.configured);
+
+    // The panel (opening date and price) shows even without checkout; only the button stays disabled.
     panel.hidden = false;
     const phase = betaPhase(panel.dataset.betaOpensAt, panel.dataset.betaEndsAt);
-    if (phase !== 'open') {
+    if (phase !== 'open' || !checkoutConfigured) {
         button.disabled = true;
-        status.textContent = phase === 'not_open'
-            ? 'Beta purchases open on 1 January 2027.'
-            : 'The beta has ended. The full licence will be on sale after the beta.';
+        status.textContent = unavailableMessage(phase, checkoutConfigured);
         return;
     }
-    if (mode === 'test') button.textContent = 'Open test checkout';
+    if (mode === 'test') {
+        // Test checkout drops the price so the label does not promise a real charge.
+        button.textContent = 'Open test checkout';
+        button.removeAttribute?.('aria-label');
+    }
     button.addEventListener('click', async () => {
         button.disabled = true;
         status.textContent = 'Opening checkout…';

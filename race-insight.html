@@ -165,7 +165,7 @@
                 "name": "Is Race Insight free?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "The RACE Insight beta licence costs US$15 one time before tax and includes version 1 when released. Online checkout opens soon. Until then, email info@apexracetech.in to buy a licence. Sign in with the same RACE Insight account you use in the desktop app."
+                    "text": "The RACE Insight early access licence costs US$15 one time before tax and includes version 1 when released. Online checkout opens soon. Until then, email info@apexracetech.in to buy a licence. Sign in with the same RACE Insight account you use in the desktop app."
                 }
             },
             {
@@ -211,7 +211,7 @@
     
     <!-- Local Stylesheets -->
     <link rel="stylesheet" href="css/main.css?v=224f5cfa5c">
-    <link rel="stylesheet" href="css/race-insight.css?v=5548b48036">
+    <link rel="stylesheet" href="css/race-insight.css?v=cd5e7b5325">
     <link rel="stylesheet" href="css/cloud.css?v=947ae16b12">
     
     <!-- Polyfills for Edge compatibility -->
@@ -358,7 +358,7 @@
                         <a href="#download" class="btn btn-primary" aria-label="Get started with Race Insight download">Get Started</a>
                         <a href="#features" class="btn btn-secondary" aria-label="Learn more about Race Insight features">Learn More</a>
                     </div>
-                    <a href="#download" class="hero-badge" style="cursor: pointer; text-decoration: none; display: inline-block;" aria-label="Download Race Insight Beta">Now Available in Beta</a>
+                    <a href="#download" class="hero-badge" style="cursor: pointer; text-decoration: none; display: inline-block;" aria-label="Download Race Insight Early Access">Now Available in Early Access</a>
                 </div>
             </div>
         </div>
@@ -561,7 +561,7 @@
                 </details>
                 <details>
                     <summary>Is Race Insight free?</summary>
-                    <p>The RACE Insight beta licence costs US$15 one time before tax and includes version 1 when released. Online checkout opens soon. Until then, email info@apexracetech.in to buy a licence. Sign in with the same RACE Insight account you use in the desktop app.</p>
+                    <p>The RACE Insight early access licence costs US$15 one time before tax and includes version 1 when released. Online checkout opens soon. Until then, email info@apexracetech.in to buy a licence. Sign in with the same RACE Insight account you use in the desktop app.</p>
                 </details>
                 <details>
                     <summary>What are the system requirements for Race Insight?</summary>
@@ -583,7 +583,7 @@
         <div class="section-content">
             <div class="download-section">
                 <h3>Download Race Insight</h3>
-                <p>Beta for Windows 10/11 x64. Read the installation and account instructions below.</p>
+                <p>Early access for Windows 10/11 x64. Read the installation and account instructions below.</p>
 
                 <div class="download-card" style="margin-bottom: 3rem;">
                 <div id="total-download-container" class="counter-container" style="margin-bottom: 2rem; padding: 1.5rem; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); display: none;">
@@ -606,19 +606,19 @@
                 </div>
                 <p id="download-opening" class="download-opening" role="status" hidden></p>
                 <div id="beta-checkout" class="beta-checkout" data-accounts-api="" data-checkout-mode="live" data-beta-opens-at="2027-01-01T00:00:00+05:30" data-beta-ends-at="2027-03-31T23:59:59+05:30" hidden>
-                    <h4>RACE Insight beta licence</h4>
-                    <p><strong>US$15</strong> one time, before tax. Includes version 1 and the cloud services plan during the beta. The beta runs 1 January to 31 March 2027 and may be extended.</p>
-                    <button id="buy-beta-licence" type="button" class="btn btn-primary">Buy beta licence</button>
+                    <h4>RACE Insight early access licence</h4>
+                    <p><strong>US$15</strong> one time, before tax. Includes version 1 and the cloud services plan during the early access. The early access runs 1 January to 31 March 2027 and may be extended.</p>
+                    <button id="buy-beta-licence" type="button" class="btn btn-primary" aria-label="Buy early access licence, US$15, regular price US$35">Buy early access licence <s class="regular-price">US$35</s> US$15</button>
                     <p id="beta-checkout-status" class="beta-checkout-status" role="status"></p>
                 </div>
                 <details class="beta-install-guide">
                     <summary>Install, update and send feedback</summary>
                     <ol>
                         <li>Download the Windows installer from this page. In PowerShell, run <code>Get-FileHash "$env:USERPROFILE\Downloads\RACE-Insight-Setup-0.3.0-beta.1.exe" -Algorithm SHA256</code> and compare the result with the checksum below. Use the actual downloaded filename for later versions.</li>
-                        <li>This beta installer is unsigned. Windows cannot verify its publisher. After confirming the download source and checksum, SmartScreen's <strong>More info</strong>, then <strong>Run anyway</strong> opens the installer. Follow your organisation's software policy.</li>
+                        <li>This early access installer is unsigned. Windows cannot verify its publisher. After confirming the download source and checksum, SmartScreen's <strong>More info</strong>, then <strong>Run anyway</strong> opens the installer. Follow your organisation's software policy.</li>
                         <li>Create a RACE Insight account with your email address and verify the email. Accounts from before 15 November 2026 must be created again. Use the same account in the desktop app.</li>
                         <li>Import a telemetry file, promote the session, then open Analysis. Keep copies of your original telemetry and saved projects.</li>
-                        <li>Beta usage analytics, error reports and masked session replay are on by default. Turn them off on the sign-in screen or in <strong>Settings &gt; Analytics &amp; Privacy</strong>. Text and inputs are masked in replay.</li>
+                        <li>Early access usage analytics, error reports and masked session replay are on by default. Turn them off on the sign-in screen or in <strong>Settings &gt; Analytics &amp; Privacy</strong>. Text and inputs are masked in replay.</li>
                         <li>Open <strong>Feedback and Suggestions</strong> from the app menu. Include the app version, steps and expected result. If analytics are off, use <strong>Open Email</strong>. Review any log file before attaching it. Export logs with <strong>Settings &gt; Logging &gt; Share Logs</strong>.</li>
                         <li>For beta.1 and older builds, return here to download updates manually. Save your work and close the app before installing.</li>
                     </ol>
@@ -1178,10 +1178,10 @@
     <script src="js/cloud-explorer.js?v=6b99fc221a"></script>
     <script src="js/cloud-app.js?v=549e0422c4"></script>
     <!-- race-insight.js loads after the sign-in scripts -->
-    <script src="js/release-feed.js?v=097a367787"></script>
-    <script defer src="js/race-insight.js?v=ca121104f4"></script>
-    <script type="module" src="js/beta-checkout.js?v=b3b09d9430"></script>
-    <script type="module" src="js/account-profile.js?v=f69e6d5bcf"></script>
+    <script src="js/release-feed.js?v=cda430f08c"></script>
+    <script defer src="js/race-insight.js?v=20d3399edb"></script>
+    <script type="module" src="js/beta-checkout.js?v=8c1b3a39b5"></script>
+    <script type="module" src="js/account-profile.js?v=97f9dfcca5"></script>
 
     <footer class="site-footer" style="margin-top: auto; padding: 2rem 0; border-top: 1px solid rgba(255, 255, 255, 0.1);">
         <div class="footer-bottom" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; gap: 1.5rem;">

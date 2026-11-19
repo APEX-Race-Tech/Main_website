@@ -15,7 +15,7 @@ const MESSAGES = {
 
 const DETAIL_FIELDS = ['full_name', 'team', 'car', 'racing_class'];
 const ADDRESS_FIELDS = ['street', 'city', 'state', 'postal_code', 'country'];
-const PRODUCT_NAMES = { desktop_beta: 'Beta licence', desktop_v1: 'Version 1 licence' };
+const PRODUCT_NAMES = { desktop_beta: 'Early access licence', desktop_v1: 'Version 1 licence' };
 
 /** GET (body null) or PUT (body = details) /me/profile. Returns the profile view. */
 export async function requestAccountProfile(apiUrl, idToken, body, fetchProfile = fetch) {
@@ -118,8 +118,8 @@ export function describeAccount(view, phone) {
         services:
             services.plan === 'beta_included'
                 ? services.until
-                    ? `Services plan included with the beta until ${formatDate(services.until)}`
-                    : 'Services plan included with the beta'
+                    ? `Services plan included with the early access until ${formatDate(services.until)}`
+                    : 'Services plan included with the early access'
                 : 'No services plan',
         billing: billing ? [billing.customer_name, billingPlace].filter(Boolean).join(' · ') || null : null,
     };

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { betaPhase, requestBetaCheckout } from './beta-checkout.js';
+import { betaPhase, requestBetaCheckout, unavailableMessage } from './beta-checkout.js';
 
 const api = 'https://accounts.example.com';
 const hosted = 'https://test.checkout.dodopayments.com/session/cks_example';
@@ -25,10 +25,37 @@ test('rejects sandbox checkout in live mode and rejects an untrusted checkout ho
 
 test('reports a verified existing licence without starting another checkout', async () => {
     const conflict = async () => Response.json({ error: 'already_licensed' }, { status: 409 });
-    await assert.rejects(requestBetaCheckout(api, 'test', 'id-token', conflict), /already has a beta licence/i);
+    await assert.rejects(requestBetaCheckout(api, 'test', 'id-token', conflict), /already has an early access licence/i);
 });
 
-test('keeps checkout hidden without config and opens existing sign-in for a signed-out buyer', async () => {
+test('shows the panel without a buy action when checkout is not configured', async () => {
+    const panel = { hidden: true, dataset: { accountsApi: '', checkoutMode: 'live', betaOpensAt: '2027-01-01T00:00:00+05:30' } };
+    const button = { addEventListener: (_type, onClick) => { button.onClick = onClick; } };
+    const status = { textContent: '' };
+    const nodes = { 'beta-checkout': panel, 'buy-beta-licence': button, 'beta-checkout-status': status };
+    globalThis.document = { getElementById: (id) => nodes[id] };
+    globalThis.window = {};
+    try {
+        await import('./beta-checkout.js?no-api');
+        assert.equal(panel.hidden, false);
+        assert.equal(button.disabled, true);
+        assert.equal(button.onClick, undefined);
+        assert.ok(status.textContent.length > 0);
+    } finally {
+        delete globalThis.document;
+        delete globalThis.window;
+    }
+});
+
+test('explains why the buy button is disabled', () => {
+    assert.match(unavailableMessage('not_open', false), /open on 1 January 2027/);
+    assert.match(unavailableMessage('not_open', true), /open on 1 January 2027/);
+    assert.match(unavailableMessage('closed', false), /early access has ended/);
+    assert.match(unavailableMessage('open', false), /checkout opens soon.*info@apexracetech\.in/);
+    assert.equal(unavailableMessage('open', true), '');
+});
+
+test('opens existing sign-in for a signed-out buyer once checkout is configured', async () => {
     let signInOpened = false;
     const panel = { hidden: true, dataset: { accountsApi: '', checkoutMode: 'live' } };
     const button = { addEventListener: (_type, onClick) => { button.onClick = onClick; } };
@@ -43,9 +70,11 @@ test('keeps checkout hidden without config and opens existing sign-in for a sign
     globalThis.window = { RaAuth: { configured: true, currentUser: null, getIdToken: async () => null } };
     try {
         await import('./beta-checkout.js?unconfigured');
-        assert.equal(panel.hidden, true);
+        assert.equal(panel.hidden, false);
+        assert.equal(button.disabled, true);
         assert.equal(button.onClick, undefined);
 
+        button.disabled = false;
         panel.dataset = { accountsApi: api, checkoutMode: 'test' };
         await import('./beta-checkout.js?configured');
         assert.equal(panel.hidden, false);
@@ -64,7 +93,7 @@ test('maps the server beta window errors to clear messages', async () => {
     const notOpen = async () => Response.json({ error: 'beta_not_open' }, { status: 403 });
     await assert.rejects(requestBetaCheckout(api, 'test', 'id-token', notOpen), /open on 1 January 2027/);
     const closed = async () => Response.json({ error: 'beta_closed' }, { status: 403 });
-    await assert.rejects(requestBetaCheckout(api, 'test', 'id-token', closed), /beta has ended/);
+    await assert.rejects(requestBetaCheckout(api, 'test', 'id-token', closed), /early access has ended/);
 });
 
 test('chooses the page phase from the beta window', () => {
@@ -74,4 +103,12 @@ test('chooses the page phase from the beta window', () => {
     assert.equal(betaPhase(opens, ends, new Date('2026-12-31T18:30:00Z')), 'open');
     assert.equal(betaPhase(opens, ends, new Date('2027-03-31T18:30:00Z')), 'closed');
     assert.equal(betaPhase('', '', new Date('2030-01-01T00:00:00Z')), 'open');
+});
+
+test('the buy button shows the struck regular price with an accessible label', async () => {
+    const { readFile } = await import('node:fs/promises');
+    const html = await readFile(new URL('../race-insight.html', import.meta.url), 'utf8');
+    const tag = html.match(/<button id="buy-beta-licence"[^>]*>[^]*?<\/button>/)[0];
+    assert.match(tag, /aria-label="Buy early access licence, US\$15, regular price US\$35"/);
+    assert.match(tag, /<s class="regular-price">US\$35<\/s> US\$15/);
 });

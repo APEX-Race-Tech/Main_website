@@ -3853,3 +3853,8 @@ select option {
 .beta-checkout-status:empty {
     display: none;
 }
+
+.beta-checkout #buy-beta-licence .regular-price {
+    opacity: 0.6;
+    font-weight: 400;
+}
