@@ -105,17 +105,11 @@ test('chooses the page phase from the beta window', () => {
     assert.equal(betaPhase('', '', new Date('2030-01-01T00:00:00Z')), 'open');
 });
 
-test('the buy button shows the struck regular price with an accessible label', async () => {
+test('the pre-release page has no early access licence card or buy button', async () => {
     const { readFile } = await import('node:fs/promises');
     const html = await readFile(new URL('../race-insight.html', import.meta.url), 'utf8');
-    const tag = html.match(/<button id="buy-beta-licence"[^>]*>[^]*?<\/button>/)[0];
-    assert.match(tag, /aria-label="Buy early access licence, US\$15, regular price US\$35"/);
-    assert.match(tag, /<s class="regular-price">US\$35<\/s> US\$15/);
-});
-
-test('the buy button is spaced with a gap because inline-flex drops the spaces between label and prices', async () => {
-    const { readFile } = await import('node:fs/promises');
+    assert.doesNotMatch(html, /id="beta-checkout"/);
+    assert.doesNotMatch(html, /id="buy-beta-licence"/);
     const css = await readFile(new URL('../css/race-insight.css', import.meta.url), 'utf8');
-    const rule = css.match(/.beta-checkout #buy-beta-licence {[^}]*}/)[0];
-    assert.match(rule, /gap:\s*0\.6em/);
+    assert.doesNotMatch(css, /\.beta-checkout/);
 });
