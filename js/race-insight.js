@@ -984,22 +984,40 @@ document.addEventListener('DOMContentLoaded', async () => {
         const opens = new Date(downloadsOpenAt || '');
         return Number.isNaN(opens.getTime()) ? '' : opens.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata' });
     })();
-    if (!downloadsAvailable()) {
-        if (downloadBtn) downloadBtn.disabled = true;
+    // Applied on load, at the opening instant and whenever the visitor returns to the tab, so a
+    // tab opened before the opening does not stay closed. The server stays the authority.
+    let downloadsGateOpen = null;
+    function applyDownloadsGate() {
+        const open = downloadsAvailable();
+        if (open === downloadsGateOpen) return;
+        const wasClosed = downloadsGateOpen === false;
+        downloadsGateOpen = open;
+        if (downloadBtn) downloadBtn.disabled = !open;
         // "Already have a licence? Download" makes no sense before the opening; the date shows instead.
         const licensedEl = document.getElementById('download-licensed');
-        if (licensedEl) licensedEl.hidden = true;
+        if (licensedEl) licensedEl.hidden = !open;
         const openingEl = document.getElementById('download-opening');
         if (openingEl) {
-            openingEl.textContent = openingDateText
+            openingEl.textContent = open ? '' : (openingDateText
                 ? `The RACE Insight early access opens on ${openingDateText}. Downloads start then.`
-                : 'Downloads are not available yet.';
-            openingEl.hidden = false;
+                : 'Downloads are not available yet.');
+            openingEl.hidden = open;
         }
         document.querySelectorAll('.hero-badge[href="#download"]').forEach(badge => {
-            badge.textContent = openingDateText ? `Early access opens ${openingDateText}` : 'Early access coming soon';
+            if (badge.dataset.openText === undefined) badge.dataset.openText = badge.textContent;
+            badge.textContent = open
+                ? badge.dataset.openText
+                : (openingDateText ? `Early access opens ${openingDateText}` : 'Early access coming soon');
         });
+        // Opening while the page is open: fill in the version label and checksum now.
+        if (open && wasClosed) loadReleaseDetails();
     }
+    applyDownloadsGate();
+    RaRelease.scheduleAt(downloadsOpenAt, applyDownloadsGate);
+    window.addEventListener('pageshow', applyDownloadsGate);
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState !== 'hidden') applyDownloadsGate();
+    });
 
     // The operating system is remembered (js/download-flow.js) so it survives the checkout
     // redirect: the installer for it downloads when the buyer comes back from payment.
@@ -1142,65 +1160,119 @@ document.addEventListener('DOMContentLoaded', async () => {
             checksumEl.textContent = 'Checksum unavailable. Try again before installing.';
         });
     }
-    updateChecksum();
-    if (downloadVersionEl && downloadsAvailable()) {
-        RaRelease.fetchLatest()
-            .then(latest => {
-                downloadVersionEl.textContent = RaRelease.describeVersion(latest, iso =>
-                    new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }));
-            })
-            .catch(() => {
-                downloadVersionEl.textContent = 'Latest version: not available yet';
-            });
+    // A failed or stalled feed request is not cached (js/release-feed.js), so calling this again
+    // retries; the Download button and the purchase retry button also fetch again.
+    function loadReleaseDetails() {
+        updateChecksum();
+        if (downloadVersionEl && downloadsAvailable()) {
+            RaRelease.fetchLatest()
+                .then(latest => {
+                    downloadVersionEl.textContent = RaRelease.describeVersion(latest, iso =>
+                        new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }));
+                })
+                .catch(() => {
+                    downloadVersionEl.textContent = 'Latest version: not available yet';
+                });
+        }
     }
+    loadReleaseDetails();
 
     // ===== Return from the Dodo checkout =====
-    // On status=succeeded the installer for the remembered operating system downloads once per
-    // payment. A failed, cancelled or pending payment shows a calm message and keeps the button.
+    // js/download-flow.js waits for the licence (GET /me/entitlements on the accounts API), then
+    // downloads the installer for the remembered operating system once per payment. A failed,
+    // cancelled or unconfirmed payment shows a calm message; phones and tablets never download.
     const noticeEl = document.getElementById('download-notice');
     const noticeMessageEl = document.getElementById('download-notice-message');
     const downloadAgainEl = document.getElementById('download-again');
+    const downloadRetryEl = document.getElementById('download-retry');
+    const flowSession = (() => {
+        try { return window.sessionStorage; } catch (error) { return null; }
+    })();
+    let checkoutReturn = null;
 
-    function showDownloadNotice(outcome, message) {
+    function showDownloadNotice(state, message, _platform, actions) {
         if (!noticeEl || !noticeMessageEl) return;
         noticeMessageEl.textContent = message;
-        noticeEl.dataset.outcome = outcome;
+        noticeEl.dataset.state = state;
+        noticeEl.dataset.outcome = downloadFlow ? downloadFlow.noticeTone(state) : state;
         noticeEl.hidden = false;
-        // After a successful payment the buy button is no longer needed; on any other outcome it stays.
-        if (outcome === 'succeeded') {
+        const retryLabel = actions && actions.retry;
+        if (downloadRetryEl) {
+            downloadRetryEl.textContent = retryLabel || '';
+            downloadRetryEl.hidden = !retryLabel;
+            downloadRetryEl.disabled = false;
+        }
+        // After a payment the buy button is no longer needed; after a failed or cancelled one it stays.
+        if (state !== 'failed' && state !== 'cancelled') {
             const checkoutPanel = document.getElementById('beta-checkout');
             if (checkoutPanel) checkoutPanel.hidden = true;
         }
     }
 
+    /** Fetches the installer address for the platform and shows it as "Download again". */
+    async function preparePurchasedDownload(platform) {
+        const latest = await RaRelease.fetchLatest();
+        const download = RaRelease.pickDownload(latest, platform);
+        if (!download) throw new Error('No installer for ' + platform);
+        if (downloadAgainEl) {
+            downloadAgainEl.href = download.url;
+            downloadAgainEl.hidden = false;
+        }
+        return download.url;
+    }
+
     async function startPurchasedDownload(platform) {
         try {
-            const latest = await RaRelease.fetchLatest();
-            const download = RaRelease.pickDownload(latest, platform);
-            if (!download) throw new Error('No installer for ' + platform);
-            if (downloadAgainEl) {
-                downloadAgainEl.href = download.url;
-                downloadAgainEl.hidden = false;
-            }
+            const url = await preparePurchasedDownload(platform);
             // A navigation to the installer downloads it and leaves this page open. A new window
             // would be blocked here because the download starts without a click.
-            window.location.assign(download.url);
+            window.location.assign(url);
+            return true;
         } catch (error) {
             console.error('Purchased download failed:', error);
-            showDownloadNotice('succeeded', 'Thanks for your purchase. The installer could not be fetched just now: use "Already have a licence? Download" below in a few minutes, or write to info@apexracetech.in.');
+            return false;
+        }
+    }
+
+    async function offerPurchasedDownload(platform) {
+        try {
+            await preparePurchasedDownload(platform);
+            return true;
+        } catch (error) {
+            console.error('Purchased download link failed:', error);
+            return false;
         }
     }
 
     if (downloadFlow) {
-        const outcome = downloadFlow.handleCheckoutReturn({
+        const accountsApi = document.getElementById('beta-checkout')?.dataset.accountsApi || '';
+        checkoutReturn = downloadFlow.handleCheckoutReturn({
             location: window.location,
             history: window.history,
             storage: flowStorage,
+            session: flowSession,
             start: startPurchasedDownload,
-            show: showDownloadNotice
+            offer: offerPurchasedDownload,
+            show: showDownloadNotice,
+            checkLicence: accountsApi && RaAuth.configured
+                ? downloadFlow.createLicenceCheck({ apiUrl: accountsApi, getIdToken: () => RaAuth.getIdToken() })
+                : null,
+            isMobile: downloadFlow.isMobileDevice(window.navigator,
+                typeof window.matchMedia === 'function' ? (query) => window.matchMedia(query).matches : null)
         });
-        if (outcome) document.getElementById('download')?.scrollIntoView({ behavior: 'smooth' });
+        if (checkoutReturn) document.getElementById('download')?.scrollIntoView({ behavior: 'smooth' });
     }
+    if (downloadRetryEl) {
+        downloadRetryEl.addEventListener('click', () => {
+            if (!checkoutReturn) return;
+            downloadRetryEl.disabled = true;
+            checkoutReturn.retry();
+        });
+    }
+    // A buyer who signs in after coming back from checkout picks up the licence check again.
+    RaAuth.onAuthStateChanged((user) => {
+        if (user && checkoutReturn && checkoutReturn.state === 'sign_in') checkoutReturn.retry();
+    });
 
     // Helper function to show thank you modal
     function showThankYouModal() {
@@ -1214,11 +1286,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function triggerDownload() {
         if (!downloadsAvailable()) return;
-        // Detect Edge browser
-        const isEdge = /Edg/.test(navigator.userAgent);
-        const isIE = /Trident/.test(navigator.userAgent);
-        const isOldEdge = /Edge/.test(navigator.userAgent) && !isEdge;
-        
         // ===== Release feed (see js/release-feed.js) =====
         let downloadUrl = null;
 
@@ -1235,39 +1302,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log(`Downloading ${download.file} (v${latest.version})`);
         } catch (error) {
             console.error('Release feed error:', error);
-            alert('The download is temporarily unavailable. Please try again in a few minutes, or write to info@apexracetech.in.');
+            alert('The download is temporarily unavailable. Select Download to try again, or write to info@apexracetech.in if it keeps failing.');
             return;
         }
 
-        // Edge-compatible download method
-        // Edge and IE have issues with programmatic link clicks for cross-origin downloads
-        if (isEdge || isOldEdge || isIE) {
-            // For Edge, use window.location or window.open directly
-            console.log('Using Edge-compatible download method');
-            window.location.href = downloadUrl;
-        } else {
-            // For other browsers, try programmatic link click
-            try {
-                const link = document.createElement('a');
-                link.href = downloadUrl;
-                link.target = '_blank';
-                link.rel = 'noopener noreferrer';
-                // Don't set download attribute for cross-origin - Edge doesn't support it
-                document.body.appendChild(link);
-                link.click();
-                // Remove link after a short delay to ensure click is processed
-                setTimeout(() => {
-                    if (link.parentNode) {
-                        document.body.removeChild(link);
-                    }
-                }, 100);
-            } catch (linkError) {
-                // Fallback for browsers that block programmatic clicks
-                console.warn('Programmatic click failed, using window.location:', linkError);
-                window.location.href = downloadUrl;
-            }
-        }
-            
+        // Same-tab navigation to the installer: the browser downloads it and keeps this page.
+        // A new-window link clicked after the feed request would no longer count as the
+        // visitor's click, and popup blockers can drop it without telling anyone.
+        window.location.assign(downloadUrl);
+
         // Do async operations after opening the download (non-blocking)
         try {
             // Show thank you modal

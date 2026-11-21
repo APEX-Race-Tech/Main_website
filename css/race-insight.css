@@ -4017,6 +4017,13 @@ select option {
   color: var(--text-color-secondary);
 }
 
+#download .beta-checkout-platform {
+  margin: 0.5rem 0 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
 #download .beta-checkout-status:empty {
   display: none;
 }
@@ -4058,6 +4065,11 @@ select option {
 
 #download .download-again:hover {
   color: var(--primary-color);
+}
+
+/* Retry after a slow licence or a failed installer fetch */
+#download .download-notice .download-link-btn {
+  margin-top: 0.5rem;
 }
 
 #download .download-licensed {

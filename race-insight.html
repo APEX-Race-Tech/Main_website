@@ -211,7 +211,7 @@
     
     <!-- Local Stylesheets -->
     <link rel="stylesheet" href="css/main.css?v=224f5cfa5c">
-    <link rel="stylesheet" href="css/race-insight.css?v=d8e9da6a82">
+    <link rel="stylesheet" href="css/race-insight.css?v=15f6545804">
     <link rel="stylesheet" href="css/cloud.css?v=947ae16b12">
     
     <!-- Polyfills for Edge compatibility -->
@@ -562,12 +562,14 @@
 
                         <div id="beta-checkout" class="beta-checkout" data-accounts-api="https://taztnz6mkd.execute-api.eu-central-1.amazonaws.com" data-checkout-mode="live" data-beta-opens-at="2027-01-01T00:00:00+05:30" data-beta-ends-at="2027-03-31T23:59:59+05:30" hidden>
                             <button id="buy-beta-licence" type="button" class="btn btn-primary btn-buy" aria-label="Buy early access, US$15, regular price US$35"><span class="btn-buy__label">Buy early access</span> <span class="btn-buy__price"><s class="regular-price">US$35</s> <span class="sale-price">US$15</span></span></button>
+                            <p class="beta-checkout-platform">Windows 10/11 desktop app</p>
                             <p id="beta-checkout-status" class="beta-checkout-status" role="status"></p>
                         </div>
 
                         <div id="download-notice" class="download-notice" role="status" aria-live="polite" hidden>
                             <p id="download-notice-message"></p>
                             <a id="download-again" class="download-again" hidden>Download again</a>
+                            <button id="download-retry" type="button" class="download-link-btn" hidden></button>
                         </div>
 
                         <p id="download-licensed" class="download-licensed">Already have a licence? <button id="download-btn" type="button" class="download-link-btn">Download</button></p>
@@ -1187,8 +1189,8 @@
     <script src="js/cloud-app.js?v=549e0422c4"></script>
     <!-- race-insight.js loads after the sign-in scripts -->
     <script src="js/release-feed.js?v=c74577dd40"></script>
-    <script src="js/download-flow.js?v=0737a3451b"></script>
-    <script defer src="js/race-insight.js?v=ffc6908fdb"></script>
+    <script src="js/download-flow.js?v=8a57fee9ce"></script>
+    <script defer src="js/race-insight.js?v=2df96c00c7"></script>
     <script type="module" src="js/beta-checkout.js?v=bf0c1aca0f"></script>
     <script type="module" src="js/account-profile.js?v=97f9dfcca5"></script>
 
