@@ -45,11 +45,26 @@
         return 'An error occurred. Please try again.';
     }
 
+    /**
+     * True when an error proves the stored session is dead: a rejected or expired refresh token,
+     * or a deleted account. Anything else (no connection, throttling, a Cognito outage) keeps the
+     * stored session so a later retry can restore it.
+     */
+    function isDefinitiveAuthFailure(err) {
+        var code = err && (err.code || err.name);
+        if (code === 'NotAuthorizedException' || code === 'UserNotFoundException') return true;
+        var message = err && err.message ? String(err.message) : '';
+        return /refresh token/i.test(message) && /invalid|expired|revoked/i.test(message);
+    }
+
+    // Waits before restoring the stored session again after a transient failure.
+    var RESTORE_RETRY_DELAYS_MS = [3000, 10000, 30000];
+
     function normalizeEmail(email) {
         return String(email || '').trim().toLowerCase();
     }
 
-    function createRaAuth(sdk, config) {
+    function createRaAuth(sdk, config, options) {
         var configured = !!(sdk && config && config.region && config.userPoolId && config.clientId);
         var pool = configured
             ? new sdk.CognitoUserPool({ UserPoolId: config.userPoolId, ClientId: config.clientId })
@@ -58,6 +73,11 @@
         var currentUser = null;
         var ready = false;
         var listeners = [];
+        var retryDelays = options && Array.isArray(options.restoreRetryDelaysMs) ? options.restoreRetryDelaysMs : RESTORE_RETRY_DELAYS_MS;
+        var restorePending = false;
+        var restoreAttempt = 0;
+        var restoreTimer = null;
+        var restoring = null;
 
         function notify() {
             listeners.slice().forEach(function (cb) {
@@ -120,23 +140,77 @@
             });
         }
 
-        // Restore the stored session once, then tell listeners.
+        /** The user from the attributes; on a transient error, from the ID token's claims. */
+        function restoreUser(cognitoUser, session) {
+            return new Promise(function (resolve, reject) {
+                cognitoUser.getUserAttributes(function (err, list) {
+                    var payload = session.getIdToken().decodePayload();
+                    var sub = String(payload.sub);
+                    if (!err) { resolve(buildUser(sub, attributesToMap(list))); return; }
+                    if (isDefinitiveAuthFailure(err)) { reject(err); return; }
+                    // The ID token carries the same attributes, so the visitor stays signed in.
+                    resolve(buildUser(sub, payload));
+                });
+            });
+        }
+
+        function scheduleRestoreRetry() {
+            if (restoreTimer !== null || restoreAttempt >= retryDelays.length) return;
+            restoreTimer = setTimeout(function () {
+                restoreTimer = null;
+                restore();
+            }, retryDelays[restoreAttempt]);
+            restoreAttempt += 1;
+            if (restoreTimer && typeof restoreTimer.unref === 'function') restoreTimer.unref();
+        }
+
+        // Restore the stored session, then tell listeners. A transient failure keeps the stored
+        // session and retries a few times (and when the browser comes back online).
         function restore() {
-            activeSession()
-                .then(function (s) { return loadUser(s.cognitoUser, s.session); })
-                .then(function (user) { currentUser = user; })
+            if (restoring) return restoring;
+            var before = currentUser;
+            restoring = activeSession()
+                .then(function (s) { return restoreUser(s.cognitoUser, s.session); })
+                .then(function (user) {
+                    currentUser = user;
+                    restorePending = false;
+                    restoreAttempt = 0;
+                })
                 .catch(function (err) {
-                    if (pool && err && err.code !== 'NotConfigured') {
-                        var stale = pool.getCurrentUser();
-                        // A rejected refresh token means the stored session is dead.
-                        if (stale && err.message && err.message !== 'Not signed in') stale.signOut();
+                    var stale = pool && err && err.code !== 'NotConfigured' ? pool.getCurrentUser() : null;
+                    if (!stale || isDefinitiveAuthFailure(err)) {
+                        if (stale) stale.signOut();
+                        currentUser = null;
+                        restorePending = false;
+                        return;
                     }
-                    currentUser = null;
+                    restorePending = true;
+                    scheduleRestoreRetry();
                 })
                 .then(function () {
+                    restoring = null;
+                    var first = !ready;
                     ready = true;
-                    notify();
+                    if (first || currentUser !== before) notify();
+                    return currentUser;
                 });
+            return restoring;
+        }
+
+        /** Tries to restore the stored session again now, for example after a network error. */
+        function retryRestore() {
+            if (!configured) return Promise.resolve(currentUser);
+            if (restoreTimer !== null) {
+                clearTimeout(restoreTimer);
+                restoreTimer = null;
+            }
+            return restore();
+        }
+
+        if (configured && typeof root.addEventListener === 'function') {
+            root.addEventListener('online', function () {
+                if (restorePending) retryRestore();
+            });
         }
 
         function signIn(email, password) {
@@ -335,6 +409,9 @@
         return {
             get configured() { return configured; },
             get currentUser() { return currentUser; },
+            /** True while a stored session could not be restored for a transient reason. */
+            get restorePending() { return restorePending; },
+            retryRestore: retryRestore,
             onAuthStateChanged: onAuthStateChanged,
             signIn: signIn,
             signUp: signUp,
@@ -354,7 +431,7 @@
     }
 
     if (typeof module !== 'undefined' && module.exports) {
-        module.exports = { createRaAuth: createRaAuth, friendlyError: friendlyError };
+        module.exports = { createRaAuth: createRaAuth, friendlyError: friendlyError, isDefinitiveAuthFailure: isDefinitiveAuthFailure };
     } else {
         root.RaAuth = createRaAuth(root.AmazonCognitoIdentity, root.RACE_INSIGHT_COGNITO);
     }

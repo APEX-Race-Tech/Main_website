@@ -7,7 +7,7 @@ import vm from 'node:vm';
 const source = readFileSync(new URL('./cognito-auth.js', import.meta.url), 'utf8');
 
 function loadModule() {
-    const sandbox = { module: { exports: {} }, console, setTimeout, Promise };
+    const sandbox = { module: { exports: {} }, console, setTimeout, clearTimeout, Promise };
     vm.runInNewContext(source, sandbox);
     return sandbox.module.exports;
 }
@@ -38,8 +38,8 @@ function makeSdk(overrides = {}) {
             stored.user = this;
             cb.onSuccess(session());
         }
-        getSession(cb) { cb(overrides.sessionError || null, overrides.sessionError ? null : session()); }
-        getUserAttributes(cb) { cb(null, stored.attrs); }
+        getSession(cb) { cb(overrides.sessionError || null, overrides.sessionError ? null : session(overrides.payload)); }
+        getUserAttributes(cb) { cb(overrides.attributesError || null, overrides.attributesError ? null : stored.attrs); }
         updateAttributes(list, cb) {
             calls.updateAttributes.push(list.map((a) => [a.Name, a.Value]));
             list.forEach((a) => {
@@ -249,3 +249,68 @@ test('setPhoneNumber refuses numbers without a country code, and an empty value 
     assert.equal(cleared.phoneNumber, '');
 });
 
+
+test('a network error while restoring keeps the stored session and retries later', async () => {
+    const { createRaAuth } = loadModule();
+    const overrides = { sessionError: { code: 'NetworkError', name: 'NetworkError', message: 'Network error' } };
+    const { sdk, calls } = makeSdk(overrides);
+    const auth = createRaAuth(sdk, config);
+    assert.equal(await firstState(auth), null);
+    assert.equal(calls.signedOut, undefined, 'a network error must not sign the user out');
+    assert.equal(auth.restorePending, true);
+    // Connection back: the retry restores the same account without a new sign-in.
+    delete overrides.sessionError;
+    const user = await auth.retryRestore();
+    assert.equal(user.email, 'ada@example.com');
+    assert.equal(auth.currentUser.uid, 'sub-1');
+    assert.equal(auth.restorePending, false);
+});
+
+test('throttling while restoring keeps the stored session', async () => {
+    const { createRaAuth } = loadModule();
+    for (const code of ['TooManyRequestsException', 'LimitExceededException', 'InternalErrorException']) {
+        const { sdk, calls } = makeSdk({ sessionError: { code, message: 'Rate exceeded' } });
+        assert.equal(await firstState(createRaAuth(sdk, config)), null);
+        assert.equal(calls.signedOut, undefined, code);
+    }
+});
+
+test('a network error reading the attributes keeps the user signed in from the ID token', async () => {
+    const { createRaAuth } = loadModule();
+    const overrides = {
+        attributesError: { code: 'NetworkError', message: 'Network error' },
+        payload: { sub: 'sub-1', email: 'ada@example.com', name: 'Ada', 'custom:simulator': 'iRacing' },
+    };
+    const { sdk, calls } = makeSdk(overrides);
+    const user = await firstState(createRaAuth(sdk, config));
+    assert.equal(calls.signedOut, undefined);
+    assert.equal(user.uid, 'sub-1');
+    assert.equal(user.email, 'ada@example.com');
+    assert.equal(user.profile.simulator, 'iRacing');
+});
+
+test('a deleted account or an invalid refresh token still clears the stored session', async () => {
+    const { createRaAuth } = loadModule();
+    for (const overrides of [
+        { attributesError: { code: 'UserNotFoundException', message: 'User does not exist.' } },
+        { sessionError: { code: 'NotAuthorizedException', message: 'Invalid Refresh Token' } },
+        { sessionError: { code: 'NotAuthorizedException', message: 'Refresh Token has been revoked' } },
+    ]) {
+        const { sdk, calls } = makeSdk(overrides);
+        assert.equal(await firstState(createRaAuth(sdk, config)), null);
+        assert.equal(calls.signedOut, true, JSON.stringify(overrides));
+    }
+});
+
+test('restoring retries on its own after a transient failure', async () => {
+    const { createRaAuth } = loadModule();
+    const overrides = { sessionError: { code: 'NetworkError', message: 'Network error' } };
+    const { sdk } = makeSdk(overrides);
+    const auth = createRaAuth(sdk, config, { restoreRetryDelaysMs: [5] });
+    const seen = [];
+    auth.onAuthStateChanged((user) => seen.push(user && user.email));
+    await firstState(auth);
+    delete overrides.sessionError;
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    assert.ok(seen.includes('ada@example.com'), JSON.stringify(seen));
+});
