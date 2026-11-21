@@ -28,6 +28,8 @@ body {
 :root {
   --primary-color: #00d2ff;
   --primary-gradient: linear-gradient(135deg, #00d2ff 0%, #0078ff 100%);
+  /* One fill for every box on the page: cards, FAQ rows, formats, download panel */
+  --ri-panel-bg: rgba(6, 6, 6, 0.94);
 }
 
 #race-insight-hero .tagline {
@@ -635,8 +637,7 @@ body {
 }
 
 .update-card {
-  background: rgba(20, 20, 20, 0.6);
--webkit-backdrop-filter: blur();-filter: blur();
+  background: var(--ri-panel-bg);
   border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 2rem;
@@ -3573,7 +3574,7 @@ select option {
   overflow-x: auto;
   border: 1px solid var(--border-color);
   border-radius: 999px;
-  background: rgba(10, 10, 10, 0.9);
+  background: var(--ri-panel-bg);
 }
 
 .ri-steps a {
@@ -3713,7 +3714,7 @@ select option {
   padding: 1.25rem 1.4rem;
   border: 1px solid var(--border-color);
   border-radius: 12px;
-  background: rgba(14, 14, 14, 0.92);
+  background: var(--ri-panel-bg);
 }
 
 .ri-formats__title {
@@ -3875,7 +3876,7 @@ select option {
   padding: 1.25rem 1.4rem 1.4rem;
   border: 1px solid var(--border-color);
   border-radius: 12px;
-  background: rgba(14, 14, 14, 0.92);
+  background: var(--ri-panel-bg);
 }
 
 /* Same look as .ri-formats__title */
@@ -3904,7 +3905,7 @@ select option {
   gap: 0.3rem;
   min-height: 4.75rem;
   padding: 0.75rem 0.5rem;
-  background: rgba(20, 20, 20, 0.6);
+  background: var(--ri-panel-bg);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   color: var(--text-color-secondary);
@@ -4141,8 +4142,8 @@ select option {
   max-width: none;
   margin: 1.25rem 0 0;
   padding: 0.75rem 1rem;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--ri-panel-bg);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 0.85rem;
   line-height: 1.6;
@@ -4209,4 +4210,9 @@ select option {
 /* The FAQ sits directly above the feedback form, so it takes only its own height. */
 #faq.full-page-section {
   min-height: auto;
+}
+
+#faq .faq-list details {
+  background: var(--ri-panel-bg);
+  border-color: var(--border-color);
 }
