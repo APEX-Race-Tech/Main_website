@@ -22,7 +22,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const PAGES = [
-    'race-insight.html', 'index.html', 'kineticsports.html', 'racing.html', 'cloud.html',
+    'race-insight.html', 'index.html', 'kineticsports.html', 'racing.html', 'cloud.html', 'links.html',
     'race-insight/eula.html', 'race-insight/terms.html', 'race-insight/privacy-policy.html',
     'race-insight/third-party-licenses.html'
 ];
