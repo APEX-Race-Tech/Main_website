@@ -61,26 +61,112 @@
         return (now || new Date()).getTime() >= opens;
     }
 
-    var pending = null;
+    // A feed request that has not answered after this long is given up, so a stalled request
+    // cannot keep the Download button waiting for the rest of the page view.
+    var FEED_TIMEOUT_MS = 10000;
+    // Longest single timer for scheduleAt. setTimeout overflows above 2^31-1 ms (about 24.8 days)
+    // and then fires at once, so long waits are split into steps of at most a day.
+    var MAX_TIMER_MS = 24 * 3600 * 1000;
 
-    /** Fetches the feed once per page load. A failure clears the cache so a later click can retry. */
-    function fetchLatest() {
-        if (!FEED_URL) return Promise.reject(new Error('Release feed not published yet'));
-        if (!pending) {
-            pending = fetch(FEED_URL, { cache: 'no-store' })
+    /**
+     * A feed reader that fetches once per page view and shares the answer. A failure or a
+     * timeout clears the cache, so a later call (a retry) starts a fresh request.
+     *   options.url        the feed address
+     *   options.fetch      fetch implementation (tests)
+     *   options.timeoutMs  how long to wait for an answer (default 10 s)
+     */
+    function createFeedClient(options) {
+        var url = options.url;
+        var timeoutMs = typeof options.timeoutMs === 'number' ? options.timeoutMs : FEED_TIMEOUT_MS;
+        var doFetch = options.fetch || function (address, init) { return root.fetch(address, init); };
+        var pending = null;
+
+        function request() {
+            var controller = typeof AbortController === 'function' ? new AbortController() : null;
+            var timer = null;
+            var timedOut = new Promise(function (_resolve, reject) {
+                timer = setTimeout(function () {
+                    if (controller) controller.abort();
+                    reject(new Error('Release feed timed out'));
+                }, timeoutMs);
+            });
+            var init = { cache: 'no-store' };
+            if (controller) init.signal = controller.signal;
+            var answer = Promise.resolve()
+                .then(function () { return doFetch(url, init); })
                 .then(function (response) {
                     if (!response.ok) throw new Error('Release feed error: ' + response.status);
                     return response.json();
-                })
-                .catch(function (error) {
-                    pending = null;
+                });
+            return Promise.race([answer, timedOut]).then(function (latest) {
+                clearTimeout(timer);
+                return latest;
+            }, function (error) {
+                clearTimeout(timer);
+                throw error;
+            });
+        }
+
+        function fetchLatest() {
+            if (!url) return Promise.reject(new Error('Release feed not published yet'));
+            if (!pending) {
+                var current = request().catch(function (error) {
+                    if (pending === current) pending = null;
                     throw error;
                 });
+                pending = current;
+            }
+            return pending;
         }
-        return pending;
+
+        return { fetchLatest: fetchLatest };
     }
 
-    var api = { pickDownload: pickDownload, describeVersion: describeVersion, describeChecksum: describeChecksum, downloadsOpen: downloadsOpen, fetchLatest: fetchLatest, FEED_URL: FEED_URL };
+    /**
+     * Calls callback once at the given time (ISO string or epoch ms), for page controls that
+     * change at a fixed moment such as the early access opening. Long waits are split into
+     * timers of at most a day and re-checked against the clock, so a tab left open for weeks
+     * still changes on time. Returns a cancel function. A past or unreadable time does nothing:
+     * the caller's first check already covers it.
+     *   env.now, env.setTimeout, env.clearTimeout  (tests)
+     */
+    function scheduleAt(at, callback, env) {
+        env = env || {};
+        var now = env.now || function () { return Date.now(); };
+        var set = env.setTimeout || setTimeout;
+        var clear = env.clearTimeout || clearTimeout;
+        var target = typeof at === 'number' ? at : (typeof at === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(at) ? new Date(at).getTime() : NaN);
+        var cancelled = false;
+        var timer = null;
+        function cancel() {
+            cancelled = true;
+            if (timer !== null) clear(timer);
+            timer = null;
+        }
+        if (isNaN(target) || target <= now()) return cancel;
+        function arm() {
+            timer = null;
+            if (cancelled) return;
+            var delay = target - now();
+            if (delay <= 0) {
+                cancelled = true;
+                callback();
+                return;
+            }
+            timer = set(arm, Math.min(delay, MAX_TIMER_MS));
+        }
+        arm();
+        return cancel;
+    }
+
+    var feed = createFeedClient({ url: FEED_URL });
+
+    /** Fetches the feed once per page load. A failure or timeout clears the cache so a later click can retry. */
+    function fetchLatest() {
+        return feed.fetchLatest();
+    }
+
+    var api = { pickDownload: pickDownload, describeVersion: describeVersion, describeChecksum: describeChecksum, downloadsOpen: downloadsOpen, fetchLatest: fetchLatest, createFeedClient: createFeedClient, scheduleAt: scheduleAt, FEED_URL: FEED_URL };
 
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
     else root.RaRelease = api;

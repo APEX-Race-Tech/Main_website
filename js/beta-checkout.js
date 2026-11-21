@@ -73,30 +73,73 @@ export function unavailableMessage(phase, checkoutConfigured) {
     return checkoutConfigured ? '' : 'Online checkout opens soon. Until then, email info@apexracetech.in to buy a licence.';
 }
 
-function bindBetaCheckout() {
-    const panel = document.getElementById('beta-checkout');
-    const button = document.getElementById('buy-beta-licence');
-    const status = document.getElementById('beta-checkout-status');
+/**
+ * Shows the panel and keeps the buy button in step with the early access window. A tab opened
+ * before the opening (or left open past the end) changes at that instant, and again whenever the
+ * visitor comes back to the tab, because timers can stop while a computer sleeps.
+ *   env.document, env.window  the page (tests pass fakes)
+ *   env.now                   function returning the current Date (tests)
+ *   env.schedule              function (isoTime, callback) returning a cancel function;
+ *                             defaults to RaRelease.scheduleAt from js/release-feed.js
+ */
+export function bindBetaCheckout(env = {}) {
+    const doc = env.document ?? globalThis.document;
+    const win = env.window ?? globalThis.window;
+    const now = env.now ?? (() => new Date());
+    const panel = doc.getElementById('beta-checkout');
+    const button = doc.getElementById('buy-beta-licence');
+    const status = doc.getElementById('beta-checkout-status');
     if (!panel || !button || !status) return;
     const apiUrl = panel.dataset.accountsApi;
     const mode = panel.dataset.checkoutMode;
-    const auth = window.RaAuth;
+    const auth = win?.RaAuth;
     const checkoutConfigured = Boolean(apiUrl) && Object.hasOwn(checkoutHosts, mode) && Boolean(auth?.configured);
+    const opensAt = panel.dataset.betaOpensAt;
+    const endsAt = panel.dataset.betaEndsAt;
 
     // The panel (opening date and price) shows even without checkout; only the button stays disabled.
     panel.hidden = false;
-    const phase = betaPhase(panel.dataset.betaOpensAt, panel.dataset.betaEndsAt);
-    if (phase !== 'open' || !checkoutConfigured) {
+    if (!checkoutConfigured) {
         button.disabled = true;
-        status.textContent = unavailableMessage(phase, checkoutConfigured);
+        status.textContent = unavailableMessage(betaPhase(opensAt, endsAt, now()), checkoutConfigured);
         return;
     }
-    if (mode === 'test') {
-        // Test checkout drops the price so the label does not promise a real charge.
-        button.textContent = 'Open test checkout';
-        button.removeAttribute?.('aria-label');
+
+    let busy = false;
+    let labelled = false;
+    let shownPhase = null;
+    // The server decides; this only chooses whether the button can be pressed right now.
+    function applyPhase() {
+        const phase = betaPhase(opensAt, endsAt, now());
+        if (phase !== 'open') {
+            button.disabled = true;
+            status.textContent = unavailableMessage(phase, checkoutConfigured);
+        } else {
+            if (!busy) button.disabled = false;
+            if (shownPhase !== 'open') status.textContent = '';
+            if (mode === 'test' && !labelled) {
+                // Test checkout drops the price so the label does not promise a real charge.
+                button.textContent = 'Open test checkout';
+                button.removeAttribute?.('aria-label');
+                labelled = true;
+            }
+        }
+        shownPhase = phase;
+        return phase;
     }
+    applyPhase();
+    const schedule = env.schedule ?? win?.RaRelease?.scheduleAt;
+    if (typeof schedule === 'function') {
+        for (const at of [opensAt, endsAt]) if (at) schedule(at, applyPhase);
+    }
+    win?.addEventListener?.('pageshow', applyPhase);
+    doc.addEventListener?.('visibilitychange', () => {
+        if (doc.visibilityState !== 'hidden') applyPhase();
+    });
+
     button.addEventListener('click', async () => {
+        if (busy || applyPhase() !== 'open') return;
+        busy = true;
         button.disabled = true;
         status.textContent = 'Opening checkout…';
         const buyer = auth.currentUser?.uid;
@@ -104,7 +147,7 @@ function bindBetaCheckout() {
             const idToken = await auth.getIdToken();
             if (!buyer || !idToken) {
                 status.textContent = 'Sign in, then select the checkout button again.';
-                document.getElementById('nav-signin-btn')?.click();
+                doc.getElementById('nav-signin-btn')?.click();
                 return;
             }
             if (auth.currentUser?.uid !== buyer) {
@@ -117,14 +160,15 @@ function bindBetaCheckout() {
                 return;
             }
             status.textContent = '';
-            rememberSelectedPlatform(document, window.RaDownloadFlow);
-            window.location.assign(url);
+            rememberSelectedPlatform(doc, win?.RaDownloadFlow);
+            win.location.assign(url);
         } catch (error) {
             status.textContent = error instanceof Error && ['already_licensed', 'signed_out', 'email_unverified', 'beta_not_open', 'beta_closed'].includes(error.cause)
                 ? error.message
                 : 'Could not open checkout. Sign in again or try shortly.';
         } finally {
-            button.disabled = false;
+            busy = false;
+            if (betaPhase(opensAt, endsAt, now()) === 'open') button.disabled = false;
         }
     });
 }

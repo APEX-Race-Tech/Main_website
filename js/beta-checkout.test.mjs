@@ -149,3 +149,47 @@ test('remembers the selected operating system before leaving for checkout', () =
     assert.equal(rememberSelectedPlatform({ querySelector: () => null }, flow), false);
     assert.equal(rememberSelectedPlatform(doc, undefined), false);
 });
+
+test('a tab opened before the opening enables the buy button at the opening instant and on return to the tab', async () => {
+    const { bindBetaCheckout } = await import('./beta-checkout.js');
+    const opensAt = '2027-01-01T00:00:00+05:30';
+    let now = new Date('2026-12-31T18:29:00Z');
+    const scheduled = [];
+    const listeners = {};
+    const panel = { hidden: true, dataset: { accountsApi: api, checkoutMode: 'live', betaOpensAt: opensAt, betaEndsAt: '2027-03-31T23:59:59+05:30' } };
+    const button = { disabled: false, addEventListener: (_type, onClick) => { button.onClick = onClick; } };
+    const status = { textContent: '' };
+    const nodes = { 'beta-checkout': panel, 'buy-beta-licence': button, 'beta-checkout-status': status };
+    const doc = {
+        getElementById: (id) => nodes[id],
+        visibilityState: 'visible',
+        addEventListener: (type, fn) => { listeners[type] = fn; },
+    };
+    const win = {
+        RaAuth: { configured: true, currentUser: null, getIdToken: async () => null },
+        addEventListener: (type, fn) => { listeners[type] = fn; },
+    };
+    bindBetaCheckout({ document: doc, window: win, now: () => now, schedule: (at, fn) => { scheduled.push({ at, fn }); return () => {}; } });
+    assert.equal(button.disabled, true);
+    assert.match(status.textContent, /open on 1 January 2027/);
+    assert.ok(scheduled.some((entry) => entry.at === opensAt), 'a timer is set for the opening');
+    // A click before the opening does nothing.
+    if (button.onClick) await button.onClick();
+    assert.equal(button.disabled, true);
+
+    // The opening instant passes while the tab stays open.
+    now = new Date('2026-12-31T18:30:00Z');
+    scheduled.find((entry) => entry.at === opensAt).fn();
+    assert.equal(button.disabled, false);
+    assert.equal(status.textContent, '');
+    assert.equal(typeof button.onClick, 'function');
+
+    // After the end, coming back to the tab (pageshow or visibilitychange) disables it again.
+    now = new Date('2027-04-01T00:00:00Z');
+    listeners.visibilitychange();
+    assert.equal(button.disabled, true);
+    assert.match(status.textContent, /early access has ended/);
+    now = new Date('2026-12-31T18:31:00Z');
+    listeners.pageshow();
+    assert.equal(button.disabled, false);
+});

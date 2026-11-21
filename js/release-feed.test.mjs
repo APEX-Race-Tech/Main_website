@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
 const source = readFileSync(new URL('./release-feed.js', import.meta.url), 'utf8');
-const sandbox = { module: { exports: {} } };
+const sandbox = { module: { exports: {} }, setTimeout, clearTimeout, AbortController, Promise };
 vm.runInNewContext(source, sandbox);
 const { pickDownload, describeVersion, describeChecksum } = sandbox.module.exports;
 
@@ -82,4 +82,92 @@ test('no release address is in the site before the beta opens, and fetchLatest r
   assert.equal(sandbox.module.exports.FEED_URL, '');
   assert.doesNotMatch(source, /cloudfront\.net/);
   await assert.rejects(sandbox.module.exports.fetchLatest(), /not published yet/);
+});
+
+const { createFeedClient, scheduleAt } = sandbox.module.exports;
+const okResponse = (body) => ({ ok: true, status: 200, json: async () => body });
+
+test('a stalled feed request is given up after the timeout, and the next call fetches again', async () => {
+  let calls = 0;
+  const fetchFeed = (_url, options) => {
+    calls += 1;
+    if (calls === 1) {
+      // Never answers; only the abort signal ends it.
+      return new Promise((_resolve, reject) => options.signal.addEventListener('abort', () => reject(new Error('aborted'))));
+    }
+    return Promise.resolve(okResponse({ version: '1.0.0' }));
+  };
+  const client = createFeedClient({ url: 'https://feed.example/latest.json', fetch: fetchFeed, timeoutMs: 20 });
+  await assert.rejects(client.fetchLatest(), /timed out|aborted/);
+  assert.equal((await client.fetchLatest()).version, '1.0.0');
+  assert.equal(calls, 2);
+});
+
+test('a request that ignores the abort signal still times out and is not cached', async () => {
+  let calls = 0;
+  const fetchFeed = () => {
+    calls += 1;
+    return calls === 1 ? new Promise(() => {}) : Promise.resolve(okResponse({ version: '2.0.0' }));
+  };
+  const client = createFeedClient({ url: 'https://feed.example/latest.json', fetch: fetchFeed, timeoutMs: 20 });
+  await assert.rejects(client.fetchLatest(), /timed out/);
+  assert.equal((await client.fetchLatest()).version, '2.0.0');
+});
+
+test('a server error clears the cache; a good answer is reused for the page view', async () => {
+  let calls = 0;
+  const fetchFeed = async () => {
+    calls += 1;
+    return calls === 1 ? { ok: false, status: 503, json: async () => null } : okResponse({ version: '3.0.0' });
+  };
+  const client = createFeedClient({ url: 'https://feed.example/latest.json', fetch: fetchFeed, timeoutMs: 1000 });
+  await assert.rejects(client.fetchLatest(), /503/);
+  assert.equal((await client.fetchLatest()).version, '3.0.0');
+  assert.equal((await client.fetchLatest()).version, '3.0.0');
+  assert.equal(calls, 2);
+});
+
+function fakeClock(start) {
+  let now = start;
+  const timers = [];
+  return {
+    now: () => now,
+    setTimeout: (fn, ms) => { timers.push({ at: now + ms, ms, fn }); return timers.length; },
+    clearTimeout: (id) => { if (timers[id - 1]) timers[id - 1].fn = null; },
+    timers,
+    /** Moves the clock to the next timer and runs it. */
+    tick() {
+      const timer = timers.filter((t) => t.fn).sort((a, b) => a.at - b.at)[0];
+      if (!timer) return false;
+      now = timer.at;
+      const fn = timer.fn;
+      timer.fn = null;
+      fn();
+      return true;
+    },
+  };
+}
+
+test('scheduleAt fires at the opening instant even days ahead, without a timer delay that overflows', () => {
+  const opensAt = '2027-01-01T00:00:00+05:30';
+  const clock = fakeClock(new Date('2026-12-28T18:30:00Z').getTime());
+  let fired = 0;
+  scheduleAt(opensAt, () => { fired += 1; }, clock);
+  assert.ok(clock.timers[0].ms <= 24 * 3600 * 1000, 'each timer is capped');
+  while (clock.tick()) { /* run all re-armed timers */ }
+  assert.equal(fired, 1);
+  assert.equal(clock.now(), new Date(opensAt).getTime());
+  assert.ok(clock.timers.every((t) => t.ms < 2 ** 31 - 1));
+});
+
+test('scheduleAt can be cancelled, and does nothing for a past or unreadable time', () => {
+  const clock = fakeClock(new Date('2026-12-31T00:00:00Z').getTime());
+  let fired = 0;
+  const cancel = scheduleAt('2027-01-01T00:00:00+05:30', () => { fired += 1; }, clock);
+  cancel();
+  while (clock.tick()) { /* nothing left */ }
+  scheduleAt('2026-01-01T00:00:00Z', () => { fired += 1; }, clock);
+  scheduleAt('soon', () => { fired += 1; }, clock);
+  while (clock.tick()) { /* nothing */ }
+  assert.equal(fired, 0);
 });
