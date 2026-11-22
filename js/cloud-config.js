@@ -4,5 +4,5 @@
 // preview builds) are refused by the browser. Set to '' to switch Cloud files
 // to "not available yet".
 window.RACE_INSIGHT_SYNC = {
-    apiUrl: 'https://xjisar81m7.execute-api.eu-central-1.amazonaws.com'
+    apiUrl: 'https://hwxohz3qtd.execute-api.eu-central-1.amazonaws.com'
 };

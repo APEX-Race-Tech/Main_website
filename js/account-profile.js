@@ -15,6 +15,7 @@ const MESSAGES = {
 
 const DETAIL_FIELDS = ['full_name', 'team', 'car', 'racing_class'];
 const ADDRESS_FIELDS = ['street', 'city', 'state', 'postal_code', 'country'];
+const SOURCE_LABELS = { purchase: 'Bought', staff_issued: 'Issued by APEX Race Tech', trial: 'Trial' };
 const PRODUCT_NAMES = { desktop_beta: 'Early access licence', desktop_v1: 'Version 1 licence' };
 
 /** GET (body null) or PUT (body = details) /me/profile. Returns the profile view. */
@@ -81,6 +82,26 @@ function licenceTitle(licence) {
     return name;
 }
 
+function sourceLabel(source) {
+    return Object.hasOwn(SOURCE_LABELS, source) ? SOURCE_LABELS[source] : '';
+}
+
+function pluralize(count, word) {
+    return `${count} ${word}${count === 1 ? '' : 's'}`;
+}
+
+/** "2 licences · Computers: 4" from the counts the API sends; null when it sends neither. */
+function describeCounts(view) {
+    const summary = view?.summary || {};
+    const pick = (key) => (Number.isInteger(view?.[key]) ? view[key] : Number.isInteger(summary[key]) ? summary[key] : null);
+    const licences = pick('licence_count');
+    const computers = pick('max_devices');
+    const parts = [];
+    if (licences !== null) parts.push(pluralize(licences, 'licence'));
+    if (computers !== null) parts.push(`Computers: ${computers}`);
+    return parts.length > 0 ? parts.join(' · ') : null;
+}
+
 function describePhone(phone) {
     return phone?.number || 'Not set';
 }
@@ -113,8 +134,11 @@ export function describeAccount(view, phone) {
                 title: licenceTitle(licence),
                 state: revoked ? 'Revoked' : 'Active',
                 date: revoked ? `Revoked ${formatDate(licence.revoked_at)}` : `Issued ${formatDate(licence.issued_at)}`,
+                source: sourceLabel(licence.source),
+                expiry: licence.expired === true ? `Expired on ${formatDate(licence.not_after) || 'an earlier date'}` : '',
             };
         }),
+        counts: describeCounts(view),
         services:
             services.plan === 'beta_included'
                 ? services.until
@@ -163,7 +187,7 @@ function renderLicences(list, licences) {
             state.className = `profile-badge account-state account-state--${licence.state.toLowerCase()}`;
             state.textContent = licence.state;
             const date = document.createElement('small');
-            date.textContent = licence.date;
+            date.textContent = [licence.source, licence.date, licence.expiry].filter(Boolean).join(' · ');
             item.append(title, state, date);
             return item;
         }),
@@ -188,6 +212,7 @@ function bindAccountProfile() {
     const detailsList = document.getElementById('account-details-list');
     const licenceList = document.getElementById('account-licences');
     const servicesLine = document.getElementById('account-services');
+    const countsLine = document.getElementById('account-computers');
     const billingLine = document.getElementById('account-billing');
     // The fields sit inside the Edit profile form; js/race-insight.js calls save() on submit.
     const fields = document.getElementById('account-details-fields');
@@ -213,6 +238,10 @@ function bindAccountProfile() {
         renderDetails(detailsList, shown.details);
         renderLicences(licenceList, shown.licences);
         servicesLine.textContent = shown.services;
+        if (countsLine) {
+            countsLine.textContent = shown.counts || '';
+            countsLine.hidden = !shown.counts;
+        }
         billingLine.textContent = shown.billing || 'No payment yet.';
         fillForm(form, view, auth.currentUser?.phoneNumber);
         status.textContent = '';

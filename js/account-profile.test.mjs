@@ -87,9 +87,10 @@ test('describes details, licences, services and billing for display', () => {
         ['Billing address', '1 Pit Lane, Chennai, 600001, IN'],
     ]);
     assert.deepEqual(shown.licences, [
-        { title: 'Early access licence (versions 0 and 1)', state: 'Active', date: 'Issued 2 Jan 2027' },
-        { title: 'Version 1 licence', state: 'Revoked', date: 'Revoked 5 Dec 2026' },
+        { title: 'Early access licence (versions 0 and 1)', state: 'Active', date: 'Issued 2 Jan 2027', source: '', expiry: '' },
+        { title: 'Version 1 licence', state: 'Revoked', date: 'Revoked 5 Dec 2026', source: '', expiry: '' },
     ]);
+    assert.equal(shown.counts, null);
     assert.equal(shown.services, 'Services plan included with the early access until 31 Mar 2027');
     assert.equal(shown.billing, 'Vignesh D · Chennai, Tamil Nadu, 600001, IN');
 
@@ -101,4 +102,26 @@ test('describes details, licences, services and billing for display', () => {
     assert.equal(empty.details[4][1], 'Not set');
     // The live Cognito user wins over the stored token copy, which lags until the token refreshes.
     assert.equal(describeAccount(view, { number: '+447700900123', verified: false }).details[4][1], '+447700900123');
+});
+
+test('describes licence count, computers, source and expiry', () => {
+    const shown = describeAccount({
+        licence_count: 3,
+        max_devices: 6,
+        details: {},
+        billing: null,
+        summary: {
+            licences: [
+                { product: 'desktop_v1', state: 'active', source: 'purchase', issued_at: '2027-01-02T10:00:00.000Z', expired: false },
+                { product: 'desktop_v1', state: 'active', source: 'staff_issued', issued_at: '2027-01-03T10:00:00.000Z', expired: false },
+                { product: 'desktop_v1', state: 'active', source: 'trial', issued_at: '2027-01-04T10:00:00.000Z', expired: true, not_after: '2027-01-19T10:00:00.000Z' },
+                { product: 'desktop_v1', state: 'active', source: 'unknown_kind', issued_at: '2027-01-05T10:00:00.000Z' },
+            ],
+            services: { plan: null, until: null },
+        },
+    });
+    assert.equal(shown.counts, '3 licences · Computers: 6');
+    assert.deepEqual(shown.licences.map((licence) => licence.source), ['Bought', 'Issued by APEX Race Tech', 'Trial', '']);
+    assert.deepEqual(shown.licences.map((licence) => licence.expiry), ['', '', 'Expired on 19 Jan 2027', '']);
+    assert.equal(describeAccount({ summary: { licence_count: 1, max_devices: 2 } }).counts, '1 licence · Computers: 2');
 });

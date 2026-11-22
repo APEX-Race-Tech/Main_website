@@ -1,17 +1,17 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { ALREADY_LICENSED_MESSAGE, betaPhase, rememberSelectedPlatform, requestBetaCheckout, unavailableMessage } from './beta-checkout.js';
+import { ALREADY_LICENSED_MESSAGE, BUY_ANOTHER_LABEL, PURCHASES_PAUSED_MESSAGE, betaPhase, bindBetaCheckout, purchaseState, rememberSelectedPlatform, requestBetaCheckout, requestEntitlements, unavailableMessage } from './beta-checkout.js';
 
 const api = 'https://accounts.example.com';
 const hosted = 'https://test.checkout.dodopayments.com/session/cks_example';
 
-test('submits the beta product with the current ID token to the accounts API', async () => {
+test('submits the v1 product with the current ID token to the accounts API', async () => {
     const fetchCheckout = async (url, options) => {
         assert.equal(url, `${api}/checkout`);
         assert.equal(options.method, 'POST');
         assert.equal(options.redirect, 'error');
         assert.equal(options.headers.Authorization, 'Bearer id-token');
-        assert.deepEqual(JSON.parse(options.body), { product: 'desktop_beta' });
+        assert.deepEqual(JSON.parse(options.body), { product: 'desktop_v1' });
         return Response.json({ url: hosted }, { status: 201 });
     };
     assert.equal(await requestBetaCheckout(api, 'test', 'id-token', fetchCheckout), hosted);
@@ -25,7 +25,7 @@ test('rejects sandbox checkout in live mode and rejects an untrusted checkout ho
 
 test('reports a verified existing licence without starting another checkout', async () => {
     const conflict = async () => Response.json({ error: 'already_licensed' }, { status: 409 });
-    await assert.rejects(requestBetaCheckout(api, 'test', 'id-token', conflict), /already has an early access licence/i);
+    await assert.rejects(requestBetaCheckout(api, 'test', 'id-token', conflict), /one licence per account/i);
 });
 
 test('shows the panel without a buy action when checkout is not configured', async () => {
@@ -135,9 +135,104 @@ test('an existing licence points the buyer to the direct download link', async (
     await assert.rejects(requestBetaCheckout(api, 'test', 'id-token', conflict), (error) => {
         assert.equal(error.cause, 'already_licensed');
         assert.equal(error.message, ALREADY_LICENSED_MESSAGE);
-        assert.match(error.message, /Already have a licence\? Download/);
         return true;
     });
+});
+
+test('shows the server message for a 409 already_licensed', async () => {
+    const conflict = async () => Response.json({ error: 'already_licensed', message: 'Early access allows one licence per account.' }, { status: 409 });
+    await assert.rejects(requestBetaCheckout(api, 'test', 'id-token', conflict), (error) => {
+        assert.equal(error.cause, 'already_licensed');
+        assert.equal(error.message, 'Early access allows one licence per account.');
+        return true;
+    });
+    const custom = async () => Response.json({ error: 'already_licensed', message: 'Server says no.' }, { status: 409 });
+    await assert.rejects(requestBetaCheckout(api, 'test', 'id-token', custom), /Server says no./);
+});
+
+test('maps a missing early access discount to a friendly paused message', async () => {
+    const paused = async () => Response.json({ error: 'early_access_discount_missing' }, { status: 503 });
+    await assert.rejects(requestBetaCheckout(api, 'test', 'id-token', paused), (error) => {
+        assert.equal(error.cause, 'paused');
+        assert.equal(error.message, PURCHASES_PAUSED_MESSAGE);
+        return true;
+    });
+});
+
+test('chooses the buy button state from the entitlements', () => {
+    assert.equal(purchaseState(null), 'buy');
+    assert.equal(purchaseState({ licence_count: 0, additional_licence_available: false }), 'buy');
+    assert.equal(purchaseState({ licence_count: 1, additional_licence_available: false }), 'blocked');
+    assert.equal(purchaseState({ licence_count: 2 }), 'blocked');
+    assert.equal(purchaseState({ licence_count: 1, additional_licence_available: true }), 'buy_another');
+});
+
+test('reads entitlements with the ID token and returns null on any failure', async () => {
+    const ok = async (url, options) => {
+        assert.equal(url, `${api}/me/entitlements`);
+        assert.equal(options.headers.Authorization, 'Bearer id-token');
+        return Response.json({ licence_count: 1 });
+    };
+    assert.deepEqual(await requestEntitlements(api, 'id-token', ok), { licence_count: 1 });
+    assert.equal(await requestEntitlements(api, 'id-token', async () => new Response('{}', { status: 500 })), null);
+    assert.equal(await requestEntitlements(api, 'id-token', async () => { throw new Error('offline'); }), null);
+    assert.equal(await requestEntitlements('http://insecure.example.com', 'id-token', ok), null);
+    assert.equal(await requestEntitlements(api, '', ok), null);
+});
+
+async function bindWithEntitlements(entitlements) {
+    const realFetch = globalThis.fetch;
+    globalThis.fetch = async () => Response.json(entitlements);
+    const listeners = [];
+    const label = { textContent: 'Buy early access' };
+    const panel = { hidden: true, dataset: { accountsApi: api, checkoutMode: 'live' } };
+    const button = {
+        disabled: false, hidden: false, textContent: 'unused',
+        addEventListener: (_type, onClick) => { button.onClick = onClick; },
+        querySelector: (selector) => (selector === '.btn-buy__label' ? label : null),
+        removeAttribute: () => {},
+    };
+    const status = { textContent: '' };
+    const nodes = { 'beta-checkout': panel, 'buy-beta-licence': button, 'beta-checkout-status': status };
+    const auth = {
+        configured: true,
+        currentUser: null,
+        getIdToken: async () => 'id-token',
+        onAuthStateChanged: (fn) => { listeners.push(fn); },
+    };
+    const win = { RaAuth: auth };
+    try {
+        bindBetaCheckout({ document: { getElementById: (id) => nodes[id] }, window: win, now: () => new Date('2027-02-01T00:00:00Z'), schedule: () => () => {} });
+        auth.currentUser = { uid: 'user-1' };
+        listeners.forEach((fn) => fn(auth.currentUser));
+        await new Promise((resolve) => setTimeout(resolve, 0));
+    } finally {
+        globalThis.fetch = realFetch;
+    }
+    return { button, label, status };
+}
+
+test('an account without a licence sees the normal buy button', async () => {
+    const { button, label, status } = await bindWithEntitlements({ licence_count: 0, additional_licence_available: false });
+    assert.equal(button.hidden, false);
+    assert.equal(button.disabled, false);
+    assert.equal(label.textContent, 'Buy early access');
+    assert.equal(status.textContent, '');
+});
+
+test('an account with a licence during early access cannot buy and sees why', async () => {
+    const { button, status } = await bindWithEntitlements({ licence_count: 1, additional_licence_available: false });
+    assert.equal(button.hidden, true);
+    assert.equal(button.disabled, true);
+    assert.equal(status.textContent, 'Early access allows one licence per account.');
+});
+
+test('an account with a licence can buy another when it is available', async () => {
+    const { button, label, status } = await bindWithEntitlements({ licence_count: 1, additional_licence_available: true });
+    assert.equal(button.hidden, false);
+    assert.equal(button.disabled, false);
+    assert.equal(label.textContent, BUY_ANOTHER_LABEL);
+    assert.equal(status.textContent, '');
 });
 
 test('remembers the selected operating system before leaving for checkout', () => {
