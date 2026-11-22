@@ -73,7 +73,9 @@ function validatePassword(password) {
     if (!password || typeof password !== 'string') return { valid: false, message: 'Password is required' };
     if (password.length < 8) return { valid: false, message: 'Password must be at least 8 characters long' };
     if (password.length > 128) return { valid: false, message: 'Password must be less than 128 characters' };
-    // Check for at least one letter and one number
+    // Same rules Cognito enforces (upper case, lower case, number), so the message appears before submit
+    const policyMessage = window.RaAuth && window.RaAuth.passwordPolicyError ? window.RaAuth.passwordPolicyError(password) : null;
+    if (policyMessage) return { valid: false, message: policyMessage };
     if (!/[a-zA-Z]/.test(password)) return { valid: false, message: 'Password must contain at least one letter' };
     if (!/[0-9]/.test(password)) return { valid: false, message: 'Password must contain at least one number' };
     return { valid: true, message: '' };
@@ -877,6 +879,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                             logToGoogleSheets(Object.assign({ date: new Date().toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) }, pendingSignupLog));
                             pendingSignupLog = null;
                         }
+                    } catch (error) {
+                        // A password Cognito rejects belongs on step 1, where the password is typed
+                        if (error && error.code === 'InvalidPasswordException') showSignupStep(1);
+                        throw error;
                     } finally {
                         if (signupSubmit) { signupSubmit.disabled = false; signupSubmit.textContent = 'Create Account'; }
                     }

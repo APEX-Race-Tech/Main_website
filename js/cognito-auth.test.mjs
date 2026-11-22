@@ -314,3 +314,13 @@ test('restoring retries on its own after a transient failure', async () => {
     await new Promise((resolve) => setTimeout(resolve, 30));
     assert.ok(seen.includes('ada@example.com'), JSON.stringify(seen));
 });
+
+test('passwordPolicyError enforces the Cognito policy: 8+ chars, upper, lower, digit', () => {
+    const { passwordPolicyError, friendlyError } = loadModule();
+    assert.equal(typeof passwordPolicyError, 'function');
+    const message = friendlyError({ code: 'InvalidPasswordException' });
+    assert.equal(passwordPolicyError('Abcdef12'), null);
+    for (const bad of ['', 'Ab1', 'abcdefgh1', 'ABCDEFGH1', 'Abcdefgh', 'abcdefgh']) {
+        assert.equal(passwordPolicyError(bad), message, bad);
+    }
+});

@@ -38,6 +38,13 @@
         NotConfigured: 'Sign-in is not available right now. Please try again later.'
     };
 
+    /** Returns the sign-up password message when the rules Cognito enforces are not met, else null. */
+    function passwordPolicyError(password) {
+        var ok = typeof password === 'string' && password.length >= 8 &&
+            /[A-Z]/.test(password) && /[a-z]/.test(password) && /[0-9]/.test(password);
+        return ok ? null : MESSAGES.InvalidPasswordException;
+    }
+
     function friendlyError(err) {
         var code = err && (err.code || err.name);
         if (code && MESSAGES[code]) return MESSAGES[code];
@@ -426,12 +433,13 @@
             deleteAccount: deleteAccount,
             getAccessToken: getAccessToken,
             getIdToken: getIdToken,
-            friendlyError: friendlyError
+            friendlyError: friendlyError,
+            passwordPolicyError: passwordPolicyError
         };
     }
 
     if (typeof module !== 'undefined' && module.exports) {
-        module.exports = { createRaAuth: createRaAuth, friendlyError: friendlyError, isDefinitiveAuthFailure: isDefinitiveAuthFailure };
+        module.exports = { createRaAuth: createRaAuth, friendlyError: friendlyError, passwordPolicyError: passwordPolicyError, isDefinitiveAuthFailure: isDefinitiveAuthFailure };
     } else {
         root.RaAuth = createRaAuth(root.AmazonCognitoIdentity, root.RACE_INSIGHT_COGNITO);
     }
