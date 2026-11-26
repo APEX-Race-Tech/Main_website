@@ -10,7 +10,7 @@ const explorerSource = read('./cloud-explorer.js');
 const appSource = read('./cloud-app.js');
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
-const settle = async (n = 10) => { for (let i = 0; i < n; i += 1) await tick(); };
+const settle = async (n = 20) => { for (let i = 0; i < n; i += 1) await tick(); };
 
 function loadModule(source) {
     const sandbox = { module: { exports: {} }, Promise };
@@ -30,26 +30,48 @@ function fakeAuth({ user = null } = {}) {
     };
 }
 
+const GIB = 1024 ** 3;
 const ADA = { uid: 'sub-ada' };
-const SUBSCRIBED = { entitlement: { active: true, edition: 'Pro' }, quota: { bytes_used: 0, limit: 10 * 1024 ** 3 }, consent_version: 1 };
+const SUBSCRIBED = { entitlement: { active: true, edition: 'paid' }, quota: { bytes_used: 0.2 * GIB, limit: 15 * GIB }, consent_version: 1 };
 const LAPSED = { entitlement: { active: false }, quota: {} };
 const SHA = (c) => c.repeat(64);
+const S1 = 'a1'.repeat(32); // session ids are the SHA-256 of the logger file
+const S2 = 'b2'.repeat(32);
 const SHARE_ID = '4'.repeat(32);
+const INVITE_ID = '5'.repeat(32);
 
 const UNITS = {
-    projects: [{ id: '_library', name: '' }, { id: 'p1', name: 'Spa 2026' }],
-    sessions: [{ id: 's1', name: 'Race', project_id: 'p1' }, { id: 's2', name: 'Upload', project_id: '_library' }]
+    projects: [{ id: '_library', name: '' }],
+    sessions: [
+        { id: S1, name: 'Spa-Francorchamps', project_id: '_library', updated_at: '2026-11-20T10:00:00Z' },
+        { id: S2, name: 'Monza', project_id: '_library', updated_at: '2026-11-01T10:00:00Z' }
+    ]
 };
-const FILES = [
-    { name: 'onboard.mp4', sha256: SHA('a'), size: 2048, storage: 'standard' },
-    { name: 'race.ibt', sha256: SHA('b'), size: 4096, storage: 'standard' },
-    { name: 'old.ld', sha256: SHA('c'), size: 10, storage: 'archived' },
-    { name: 'notes.txt', sha256: SHA('d'), size: 10, storage: 'standard' }
-];
+const DOC_S1 = `session_${S1.slice(0, 16)}.risession`;
+const DOC_S2 = `session_${S2.slice(0, 16)}.risession`;
+const DOCS = {
+    [DOC_S1]: { schema: 'race-insight-session', version: 1, file_name: 'spa 2026-11-22 14-05-10_Race_1.ld', laps: [{}, {}, {}],
+        metadata: { Venue: 'Spa-Francorchamps', Vehicle: 'Formula Vee', Driver: 'Ada Driver' } },
+    [DOC_S2]: { schema: 'race-insight-session', version: 1, file_name: 'monza_long_run.ld', laps: [],
+        metadata: { Venue: 'Monza', Vehicle: 'GT3', Driver: 'Bo', Date: '27/10/2026' } }
+};
+const FILES = {
+    [S1]: [
+        { name: `${S1}.apx`, sha256: S1, size: 31 * 1024 * 1024, storage: 'standard' },
+        { name: DOC_S1, sha256: SHA('e'), size: 2048, storage: 'standard' },
+        { name: 'onboard.mp4', sha256: SHA('a'), size: 2048, storage: 'standard' },
+        { name: 'old.ld', sha256: SHA('c'), size: 10, storage: 'archived' }
+    ],
+    [S2]: [
+        { name: `${S2}.apx`, sha256: S2, size: 14 * 1024 * 1024, storage: 'standard' },
+        { name: DOC_S2, sha256: SHA('6'), size: 1024, storage: 'standard' }
+    ]
+};
 
 function syncError(code) { const err = new Error(code); err.code = code; return err; }
 
-function fakeSync({ configured = true, account = SUBSCRIBED, units = UNITS, shares = {}, files = FILES, slowUnits = null, demo = false } = {}) {
+function fakeSync({ configured = true, account = SUBSCRIBED, units = UNITS, shares = {}, files = FILES, sharedFiles = FILES[S2],
+    slowUnits = null, demo = false } = {}) {
     const calls = [];
     const answer = (name, value) => {
         calls.push(name);
@@ -63,9 +85,10 @@ function fakeSync({ configured = true, account = SUBSCRIBED, units = UNITS, shar
         account: () => answer('account', account),
         listUnits: () => answer('listUnits', slowUnits || units),
         listShares: () => answer('listShares', shares),
-        unitFiles: (kind, id) => answer(`unitFiles:${kind}:${id}`, files),
-        sharedFiles: (id) => answer(`sharedFiles:${id}`, files),
-        downloadFile: (file, shareId) => answer(`download:${file.name}:${shareId || ''}`, new ArrayBuffer(file.size)),
+        unitFiles: (kind, id) => answer(`unitFiles:${kind}:${id}`, files[id] || []),
+        sharedFiles: (id) => answer(`sharedFiles:${id}`, sharedFiles),
+        downloadFile: (file, shareId) => answer(`download:${file.name}:${shareId || ''}`, DOCS[file.name]
+            ? new TextEncoder().encode(JSON.stringify(DOCS[file.name])).buffer : new ArrayBuffer(file.size)),
         createShare: (...args) => answer(`createShare:${args[0]}:${args[1].join(',')}`, {}),
         acceptShare: (id) => answer(`accept:${id}`, {}),
         removeShare: (id) => answer(`remove:${id}`, {}),
@@ -80,9 +103,13 @@ function fakeDom() {
     function make(tag, id) {
         const node = {
             tagName: tag, id, hidden: false, className: '', href: '', open: false, value: '', checked: false,
-            disabled: false, type: '', title: '', src: '', alt: '', download: '', rel: '',
+            disabled: false, type: '', title: '', src: '', alt: '', download: '', rel: '', tabIndex: -1,
             children: [], style: {}, listeners: {}, attrs: {}, parent: null,
-            classList: { toggle() {} },
+            classes: new Set(),
+            get classList() {
+                const self = this;
+                return { toggle(name, on) { if (on) self.classes.add(name); else self.classes.delete(name); }, contains: (n) => self.classes.has(n) };
+            },
             get textContent() { return this._text + this.children.map((c) => c.textContent).join(''); },
             set textContent(value) { this._text = String(value); this.children = []; },
             _text: '',
@@ -93,7 +120,7 @@ function fakeDom() {
                 (this.listeners[type] || []).forEach((cb) => cb(event));
             },
             click() {
-                if (this.tagName === 'a') clicked.push(this.href);
+                if (this.tagName === 'a') clicked.push({ href: this.href, download: this.download, parentId: this.parent && this.parent.id });
                 this.dispatch('click');
             },
             querySelector: () => make('div'),
@@ -107,15 +134,16 @@ function fakeDom() {
     }
     ['cloud-modal', 'cloud-modal-close', 'cloud-demo-badge', 'cloud-status', 'cloud-error', 'cloud-locked',
         'cloud-signin-btn', 'cloud-account', 'cloud-edition', 'cloud-quota-text', 'cloud-quota-bar',
-        'cloud-consent', 'cloud-explorer', 'cx-breadcrumbs', 'cx-open-btn', 'cx-share-btn',
-        'cx-tree', 'cx-list', 'cx-empty',
+        'cloud-consent', 'cloud-explorer', 'cx-tree', 'cx-search', 'cx-sort', 'cx-refresh', 'cx-list', 'cx-empty',
+        'cx-details', 'cx-details-back', 'cx-details-body',
         'cx-viewer', 'cx-viewer-title', 'cx-viewer-body', 'cx-viewer-download', 'cx-viewer-close',
-        'cx-open-dialog', 'cx-open-text', 'cx-open-get', 'nav-signin-btn',
+        'cx-open-dialog', 'cx-open-text', 'cx-open-get', 'cx-open-again', 'nav-signin-btn',
         'cloud-share-dialog', 'cloud-share-name', 'cloud-share-emails', 'cloud-share-ai', 'cloud-share-expires',
         'cloud-share-error', 'cloud-share-recipients', 'cloud-share-submit'].forEach((id) => make('div', id));
     ['cloud-account', 'cloud-explorer', 'cloud-locked', 'cloud-signin-btn', 'cloud-error', 'cloud-consent',
-        'cx-open-btn', 'cx-share-btn', 'cx-empty', 'cloud-demo-badge'].forEach((id) => { nodes.get(id).hidden = true; });
+        'cx-empty', 'cloud-demo-badge'].forEach((id) => { nodes.get(id).hidden = true; });
     nodes.get('cloud-status')._text = 'Loading…';
+    nodes.get('cx-sort').value = 'date';
     const document = {
         getElementById: (id) => nodes.get(id) || null,
         createElement: (tag) => make(tag),
@@ -124,6 +152,16 @@ function fakeDom() {
         body: make('body')
     };
     return { nodes, document, clicked };
+}
+
+function find(node, predicate) {
+    if (!node || !node.children) return null;
+    for (const child of node.children) {
+        if (predicate(child)) return child;
+        const hit = find(child, predicate);
+        if (hit) return hit;
+    }
+    return null;
 }
 
 async function runApp({ auth, sync, hash = '' }) {
@@ -150,28 +188,33 @@ async function runApp({ auth, sync, hash = '' }) {
     window.RaCloudExplorer = loadModule(explorerSource);
     const URL = { createObjectURL: () => 'blob:fake', revokeObjectURL: () => {} };
     class Blob { constructor(parts, options) { this.parts = parts; this.type = options && options.type; } }
-    vm.runInNewContext(appSource, { window, document: dom.document, Promise, setTimeout, URL, Blob, Date, Array, Math, String, Set, isNaN });
+    vm.runInNewContext(appSource, { window, document: dom.document, Promise, setTimeout, URL, Blob, Date, Array, Math, String,
+        Set, isNaN, TextDecoder });
     await settle();
     const n = (id) => dom.nodes.get(id);
     const rows = () => n('cx-list').children;
-    const titleOf = (r) => r.children[0].children[1].children[0].textContent;
+    const titleOf = (tr) => tr.children[0].children[0].children[1].children[0].textContent;
     const rowNames = () => rows().map(titleOf);
     const rowByName = (name) => rows().find((r) => titleOf(r) === name);
-    const actionsOf = (row) => row.children[4].children;
-    const treeLabels = () => n('cx-tree').children.filter((c) => c.tagName === 'button').map((b) => b.children[1].textContent);
+    const navLabels = () => n('cx-tree').children.map((b) => b.children[1].textContent);
+    const navButton = (label) => n('cx-tree').children.find((b) => b.children[1].textContent === label);
+    const details = () => n('cx-details-body');
+    const detailButton = (text) => find(details(), (c) => c.tagName === 'button' && c.textContent.trim() === text);
     return {
-        dom, n, rows, rowNames, rowByName, actionsOf, treeLabels, location, window,
+        dom, n, rows, rowNames, rowByName, navLabels, navButton, details, detailButton, location, window,
         status: () => (n('cloud-status').hidden ? '' : n('cloud-status').textContent),
         visible: (id) => !n(id).hidden,
         open: async (loc) => { window.RaCloudApp.open(loc); await settle(); },
         go: async (h) => { location.hash = h; await settle(); },
-        openRow: async (name) => { rowByName(name).children[0].click(); await settle(); }
+        select: async (name) => { rowByName(name).click(); await settle(); },
+        press: async (button) => { button.click(); await settle(); },
+        appLinks: () => dom.clicked.filter((c) => c.href.startsWith('raceinsight:')).map((c) => c.href)
     };
 }
 
 /* ---- Opening and access ---- */
 
-test('popup: stays closed until opened; open() shows My files and sets #cloud', async () => {
+test('popup: stays closed until opened; open() shows the storage bar, folders and My sessions', async () => {
     const sync = fakeSync();
     const app = await runApp({ auth: fakeAuth({ user: ADA }), sync });
     assert.equal(app.n('cloud-modal').open, false);
@@ -179,13 +222,42 @@ test('popup: stays closed until opened; open() shows My files and sets #cloud', 
     await app.open();
     assert.equal(app.n('cloud-modal').open, true);
     assert.equal(app.location.hash, '#cloud');
-    assert.deepEqual(app.rowNames(), ['Library', 'Spa 2026']);
+    assert.equal(app.n('cloud-quota-text').textContent, '0.2 GB of 15 GB');
+    assert.equal(app.n('cloud-edition').textContent, 'Cloud plan');
+    assert.deepEqual(app.navLabels(), ['My sessions', 'Shared with me', 'Shared with others']);
+    assert.equal(app.rows().length, 2);
+    assert.match(app.details().textContent, /Select a session to see its files/);
 });
 
-test('popup: a #cloud link opens it at that folder; closing removes the hash', async () => {
-    const app = await runApp({ auth: fakeAuth({ user: ADA }), sync: fakeSync(), hash: '#cloud/p=p1' });
+test('table: sessions show human names, track and date from their documents, never a hash', async () => {
+    const app = await runApp({ auth: fakeAuth({ user: ADA }), sync: fakeSync(), hash: '#cloud' });
+    assert.deepEqual(app.rowNames(), ['spa 2026-11-22 14-05-10_Race_1', 'monza_long_run'], 'newest first');
+    const spa = app.rowByName('spa 2026-11-22 14-05-10_Race_1');
+    const cells = spa.children.map((td) => td.textContent);
+    assert.equal(cells[1], 'Spa-Francorchamps');
+    assert.match(cells[2], /2026/);
+    assert.equal(cells[3], '31 MB');
+    assert.match(cells[4], /Archived/, 'one of its files is archived');
+    assert.match(app.rowByName('monza_long_run').children[2].textContent, /Oct/);
+    assert.match(app.rowByName('monza_long_run').children[4].textContent, /In cloud/);
+    const tableText = app.n('cx-list').textContent;
+    assert.ok(!tableText.includes(S1) && !tableText.includes('a1a1a1a1'), 'no hash in the table');
+});
+
+test('table: a session whose document is archived keeps its cloud name and shows Archived', async () => {
+    const files = { ...FILES, [S2]: [{ name: `${S2}.apx`, sha256: S2, size: 10, storage: 'standard' },
+        { name: DOC_S2, sha256: SHA('6'), size: 10, storage: 'archived' }] };
+    const app = await runApp({ auth: fakeAuth({ user: ADA }), sync: fakeSync({ files }), hash: '#cloud' });
+    const monza = app.rowByName('Monza');
+    assert.ok(monza, 'falls back to the unit name');
+    assert.match(monza.children[4].textContent, /Archived/);
+});
+
+test('popup: a #cloud/s= link opens with that session selected; closing removes the hash', async () => {
+    const app = await runApp({ auth: fakeAuth({ user: ADA }), sync: fakeSync(), hash: `#cloud/s=${S1}` });
     assert.equal(app.n('cloud-modal').open, true);
-    assert.deepEqual(app.rowNames(), ['Race']);
+    assert.equal(app.rowByName('spa 2026-11-22 14-05-10_Race_1').attrs['aria-selected'], 'true');
+    assert.match(app.details().textContent, /Formula Vee/);
     app.n('cloud-modal-close').click();
     assert.equal(app.n('cloud-modal').open, false);
     assert.equal(app.location.hash, '');
@@ -221,9 +293,9 @@ test('popup: signed out shows the feature list and a Sign in button, and asks fo
     assert.equal(app.n('cloud-modal').open, false);
 });
 
-test('popup: no subscription shows the message and never lists projects or files', async () => {
+test('popup: no subscription shows the message and never lists sessions or files', async () => {
     const sync = fakeSync({ account: LAPSED });
-    const app = await runApp({ auth: fakeAuth({ user: ADA }), sync, hash: '#cloud/s=s1' });
+    const app = await runApp({ auth: fakeAuth({ user: ADA }), sync, hash: `#cloud/s=${S1}` });
     assert.equal(app.status(), 'A RACE Insight subscription is needed to use Cloud files.');
     assert.equal(app.visible('cloud-explorer'), false);
     assert.equal(app.visible('cloud-signin-btn'), false);
@@ -237,11 +309,12 @@ test('popup: subscription_required from the API shows the subscription message',
 
 test('popup: sign-out clears the explorer', async () => {
     const auth = fakeAuth({ user: ADA });
-    const app = await runApp({ auth, sync: fakeSync(), hash: '#cloud' });
+    const app = await runApp({ auth, sync: fakeSync(), hash: `#cloud/s=${S1}` });
     assert.equal(app.rows().length, 2);
     auth.set(null);
     assert.equal(app.visible('cloud-explorer'), false);
     assert.equal(app.rows().length, 0);
+    assert.equal(app.details().children.length, 0);
     assert.match(app.status(), /Sign in/);
 });
 
@@ -263,118 +336,165 @@ test('popup: reopening uses the loaded data', async () => {
     app.n('cloud-modal-close').click();
     await app.open();
     assert.equal(sync.calls.filter((c) => c === 'listUnits').length, 1);
-    assert.deepEqual(app.rowNames(), ['Library', 'Spa 2026']);
+    assert.equal(app.rows().length, 2);
 });
 
-/* ---- Explorer ---- */
+/* ---- Selection and details ---- */
 
-test('explorer: folders open by click; the tree lists both sharing folders', async () => {
-    const sync = fakeSync();
-    const app = await runApp({ auth: fakeAuth({ user: ADA }), sync, hash: '#cloud' });
-    assert.deepEqual(app.treeLabels(), ['My files', 'Library', 'Spa 2026', 'Shared with me', 'Shared with others']);
-    await app.openRow('Spa 2026');
-    assert.equal(app.location.hash, '#cloud/p=p1');
-    await app.openRow('Race');
-    assert.equal(app.location.hash, '#cloud/s=s1');
-    assert.ok(sync.calls.includes('unitFiles:session:s1'));
-    assert.deepEqual(app.rowNames(), ['old.ld', 'race.ibt', 'notes.txt', 'onboard.mp4'], 'RACE Insight files first');
-    assert.equal(app.visible('cx-share-btn'), true);
+test('details: selecting a session shows its facts, files (short hashes only) and actions', async () => {
+    const app = await runApp({ auth: fakeAuth({ user: ADA }), sync: fakeSync(), hash: '#cloud' });
+    await app.select('spa 2026-11-22 14-05-10_Race_1');
+    assert.equal(app.location.hash, `#cloud/s=${S1}`, 'the selection is in the link');
+    const text = app.details().textContent;
+    for (const value of ['Spa-Francorchamps', 'Formula Vee', 'Ada Driver', 'Laps3', 'RACE Insight session data', 'a1a1a1a1…a1a1.apx']) {
+        assert.ok(text.includes(value), value);
+    }
+    assert.ok(app.detailButton('Open in RACE Insight'));
+    assert.ok(app.detailButton('Download'));
+    assert.ok(app.detailButton('Share'));
+    assert.equal(app.n('cloud-explorer').classList.contains('has-selection'), true);
+    app.n('cx-details-back').click();
+    await settle();
+    assert.equal(app.location.hash, '#cloud');
+    assert.match(app.details().textContent, /Select a session/);
 });
 
-test('explorer: a RACE Insight file opens the desktop app', async () => {
-    const app = await runApp({ auth: fakeAuth({ user: ADA }), sync: fakeSync(), hash: '#cloud/s=s1' });
-    await app.openRow('race.ibt');
-    assert.deepEqual(app.dom.clicked, [`raceinsight://cloud/open?session=s1&file=${SHA('b')}`]);
+test('open in app: builds the exact link and names the session, not a hash', async () => {
+    const app = await runApp({ auth: fakeAuth({ user: ADA }), sync: fakeSync(), hash: `#cloud/s=${S1}` });
+    await app.press(app.detailButton('Open in RACE Insight'));
+    assert.deepEqual(app.appLinks(), [`raceinsight://cloud/open?session=${S1}`]);
+    assert.equal(app.dom.clicked.find((c) => c.href.startsWith('raceinsight:')).parentId, 'cx-open-dialog',
+        'clicked inside the open dialog, so the modal popup does not make it inert');
     assert.equal(app.n('cx-open-dialog').open, true);
+    const message = app.n('cx-open-text').textContent;
+    assert.match(message, /spa 2026-11-22 14-05-10_Race_1/);
+    assert.ok(!message.includes(S1), 'no hash in the message');
+    assert.equal(app.n('cx-open-again').href, `raceinsight://cloud/open?session=${S1}`);
+    assert.equal(app.visible('cx-open-again'), true);
 });
 
-test('explorer: with sample data, RACE Insight files do not launch the desktop app', async () => {
-    const app = await runApp({ auth: fakeAuth({ user: ADA }), sync: fakeSync({ demo: true }), hash: '#cloud/s=s1' });
+test('open in app: an id the desktop app would refuse opens nothing and says so', async () => {
+    const units = { projects: [], sessions: [{ id: 'not a valid id!', name: 'Odd', project_id: '_library' }] };
+    const app = await runApp({ auth: fakeAuth({ user: ADA }), sync: fakeSync({ units }), hash: '#cloud' });
+    await app.select('Odd');
+    await app.press(app.detailButton('Open in RACE Insight'));
+    assert.deepEqual(app.appLinks(), []);
+    assert.match(app.n('cx-open-text').textContent, /cannot be opened from the website/);
+    assert.equal(app.visible('cx-open-again'), false);
+});
+
+test('open in app: with sample data the desktop app is not launched', async () => {
+    const app = await runApp({ auth: fakeAuth({ user: ADA }), sync: fakeSync({ demo: true }), hash: `#cloud/s=${S1}` });
     assert.equal(app.visible('cloud-demo-badge'), true);
-    await app.openRow('race.ibt');
-    assert.deepEqual(app.dom.clicked, []);
+    await app.press(app.detailButton('Open in RACE Insight'));
+    assert.deepEqual(app.appLinks(), []);
     assert.match(app.n('cx-open-text').textContent, /With real data/);
 });
 
-test('explorer: a video opens the viewer; archived files have no actions', async () => {
+test('details: Download saves the .apx under the session name; files can be viewed or downloaded', async () => {
     const sync = fakeSync();
-    const app = await runApp({ auth: fakeAuth({ user: ADA }), sync, hash: '#cloud/s=s1' });
-    await app.openRow('onboard.mp4');
+    const app = await runApp({ auth: fakeAuth({ user: ADA }), sync, hash: `#cloud/s=${S1}` });
+    await app.press(app.detailButton('Download'));
+    assert.ok(sync.calls.includes(`download:${S1}.apx:`));
+    assert.equal(app.dom.clicked.at(-1).download, 'spa 2026-11-22 14-05-10_Race_1.apx');
+    const view = find(app.details(), (c) => c.attrs && c.attrs['aria-label'] === 'View onboard.mp4');
+    await app.press(view);
     assert.equal(app.n('cx-viewer').open, true);
     assert.equal(app.n('cx-viewer-body').children[0].tagName, 'video');
     app.n('cx-viewer-close').click();
     assert.equal(app.n('cx-viewer').open, false);
-    const archived = app.rowByName('old.ld');
-    assert.equal(archived.children[0].tagName, 'div');
-    assert.equal(app.actionsOf(archived).length, 0);
+    const archived = find(app.details(), (c) => c.className && c.className.includes('cx-file is-muted'));
+    assert.match(archived.textContent, /Archived/);
+    assert.equal(find(archived, (c) => c.tagName === 'button'), null, 'archived files have no actions');
 });
 
-test('explorer: Share sends invitations for the current session', async () => {
+test('toolbar: search filters by name, track, car and driver; sort by name', async () => {
+    const app = await runApp({ auth: fakeAuth({ user: ADA }), sync: fakeSync(), hash: '#cloud' });
+    app.n('cx-search').value = 'gt3';
+    app.n('cx-search').dispatch('input');
+    assert.deepEqual(app.rowNames(), ['monza_long_run']);
+    app.n('cx-search').value = 'nothing like this';
+    app.n('cx-search').dispatch('input');
+    assert.deepEqual(app.rowNames(), []);
+    assert.equal(app.n('cx-empty').textContent, 'No cloud files match your search.');
+    app.n('cx-search').value = '';
+    app.n('cx-search').dispatch('input');
+    app.n('cx-sort').value = 'name';
+    app.n('cx-sort').dispatch('change');
+    assert.deepEqual(app.rowNames(), ['monza_long_run', 'spa 2026-11-22 14-05-10_Race_1']);
+});
+
+test('share: Share in the details pane sends invitations for that session', async () => {
     const sync = fakeSync();
-    const app = await runApp({ auth: fakeAuth({ user: ADA }), sync, hash: '#cloud/s=s1' });
-    app.n('cx-share-btn').click();
+    const app = await runApp({ auth: fakeAuth({ user: ADA }), sync, hash: `#cloud/s=${S1}` });
+    await app.press(app.detailButton('Share'));
     assert.equal(app.n('cloud-share-dialog').open, true);
+    assert.equal(app.n('cloud-share-name').textContent, 'spa 2026-11-22 14-05-10_Race_1');
     app.n('cloud-share-emails').value = 'Bo@Example.com, bo@example.com';
     app.n('cloud-share-submit').click();
     await settle();
-    assert.ok(sync.calls.includes('createShare:s1:bo@example.com'));
+    assert.ok(sync.calls.includes(`createShare:${S1}:bo@example.com`));
 });
 
-test('explorer: Shared with me lists invitations and shared sessions', async () => {
+test('Shared with me: counts, accepts invitations and opens shared sessions by share id', async () => {
     const shares = {
         inbox: [{ share_id: SHARE_ID, session_name: 'Le Mans', owner_name: 'Ada', status: 'accepted' }],
-        pending: [{ share_id: '5'.repeat(32), session_name: 'Daytona', owner_name: 'Bo' }]
+        pending: [{ share_id: INVITE_ID, session_name: 'Daytona', owner_name: 'Bo' }]
     };
     const sync = fakeSync({ shares });
-    const app = await runApp({ auth: fakeAuth({ user: ADA }), sync, hash: '#cloud/shared' });
-    assert.deepEqual(app.rowNames(), ['Daytona', 'Le Mans']);
-    app.actionsOf(app.rowByName('Daytona'))[0].click(); // Accept
-    await settle();
-    assert.ok(sync.calls.includes(`accept:${'5'.repeat(32)}`));
-    await app.openRow('Le Mans');
+    const app = await runApp({ auth: fakeAuth({ user: ADA }), sync, hash: '#cloud' });
+    assert.equal(app.navButton('Shared with me').children[2].textContent, '2');
+    await app.press(app.navButton('Shared with me'));
+    assert.equal(app.location.hash, '#cloud/shared');
+    assert.deepEqual(app.rowNames(), ['Daytona', 'monza_long_run'], 'invitation first; the shared session shows its document name');
+    await app.select('Daytona');
+    await app.press(app.detailButton('Accept'));
+    assert.ok(sync.calls.includes(`accept:${INVITE_ID}`));
+    await app.select('monza_long_run');
     assert.equal(app.location.hash, `#cloud/sh=${SHARE_ID}`);
-    await app.openRow('race.ibt');
-    assert.deepEqual(app.dom.clicked, [`raceinsight://cloud/open?share=${SHARE_ID}&file=${SHA('b')}`]);
+    assert.match(app.details().textContent, /Shared by Ada/);
+    await app.press(app.detailButton('Open in RACE Insight'));
+    assert.deepEqual(app.appLinks(), [`raceinsight://cloud/open?share=${SHARE_ID}`]);
 });
 
-test('explorer: Shared with others lists your shared sessions and their recipients', async () => {
+test('Shared with others: your shared sessions with recipients you can revoke', async () => {
     const shares = {
         outgoing: [
-            { share_id: '1'.repeat(32), session_id: 's1', status: 'accepted', recipient_email: 'eng@example.com' },
-            { share_id: '2'.repeat(32), session_id: 's1', status: 'pending', recipient_email: 'coach@example.com' },
-            { share_id: '3'.repeat(32), session_id: 's2', status: 'revoked', recipient_email: 'old@example.com' }
+            { share_id: '1'.repeat(32), session_id: S1, status: 'accepted', recipient_email: 'eng@example.com' },
+            { share_id: '2'.repeat(32), session_id: S1, status: 'pending', recipient_email: 'coach@example.com' },
+            { share_id: '3'.repeat(32), session_id: S2, status: 'revoked', recipient_email: 'old@example.com' }
         ]
     };
     const sync = fakeSync({ shares });
     const app = await runApp({ auth: fakeAuth({ user: ADA }), sync, hash: '#cloud/outgoing' });
-    assert.deepEqual(app.rowNames(), ['Race'], 'revoked shares are left out');
-    const race = app.rowByName('Race');
-    assert.match(race.textContent, /eng@example\.com, coach@example\.com \(invited\)/);
-    assert.match(race.textContent, /2 people/);
-    app.actionsOf(race)[0].click(); // Manage sharing
-    await settle();
-    assert.equal(app.n('cloud-share-dialog').open, true);
-    assert.equal(app.n('cloud-share-name').textContent, 'Race');
-    app.n('cloud-share-dialog').close();
-    await app.openRow('Race');
-    assert.equal(app.location.hash, '#cloud/s=s1');
+    assert.deepEqual(app.rowNames(), ['spa 2026-11-22 14-05-10_Race_1'], 'revoked shares are left out');
+    assert.match(app.rows()[0].children[4].textContent, /Shared with 2/);
+    await app.select('spa 2026-11-22 14-05-10_Race_1');
+    assert.equal(app.location.hash, '#cloud/outgoing', 'stays in the folder');
+    const text = app.details().textContent;
+    assert.match(text, /eng@example\.comAccepted/);
+    assert.match(text, /coach@example\.comInvited/);
+    const revoke = find(app.details(), (c) => c.tagName === 'button' && c.textContent === 'Revoke');
+    await app.press(revoke);
+    assert.ok(sync.calls.includes(`remove:${'1'.repeat(32)}`));
 });
 
-test('explorer: an unknown folder in the URL falls back to My files', async () => {
+test('explorer: an unknown session in the URL shows My sessions with nothing selected', async () => {
     const app = await runApp({ auth: fakeAuth({ user: ADA }), sync: fakeSync(), hash: '#cloud/s=gone' });
-    assert.deepEqual(app.rowNames(), ['Library', 'Spa 2026']);
+    assert.equal(app.rows().length, 2);
+    assert.match(app.details().textContent, /Select a session/);
 });
 
 test('popup: a late close event after reopening does not clear the new view', async () => {
-    const app = await runApp({ auth: fakeAuth({ user: ADA }), sync: fakeSync(), hash: '#cloud/p=p1' });
+    const app = await runApp({ auth: fakeAuth({ user: ADA }), sync: fakeSync(), hash: '#cloud' });
     const modal = app.n('cloud-modal');
     // Close without dispatching yet, reopen, then deliver the queued close event.
     modal.open = false;
-    await app.open({ type: 'session', id: 's1' });
+    await app.open({ type: 'session', id: S1 });
     modal.dispatch('close');
     await settle();
     assert.equal(modal.open, true);
-    assert.equal(app.location.hash, '#cloud/s=s1');
+    assert.equal(app.location.hash, `#cloud/s=${S1}`);
 });
 
 test('popup: there is no upload control (sessions come from the desktop app)', async () => {

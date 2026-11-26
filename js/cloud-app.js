@@ -1,13 +1,15 @@
 /*
- * Cloud files popup on the RACE Insight page: a file explorer over the
- * signed-in user's synced projects, sessions and files, the sessions others
- * shared with them, and the sessions they shared with others.
+ * Cloud files popup on the RACE Insight page, in the layout of the desktop
+ * app's Cloud files window: a storage bar, a folder list (My sessions, Shared
+ * with me, Shared with others), a searchable session table and a details pane
+ * with the session's files and actions.
  *
- * Opens RACE Insight files in the desktop app, previews images, videos and
- * PDFs, downloads verified files and shares sessions. Sessions are created
- * by the desktop app only (it writes the .apx file the cloud stores).
- * Exposes window.RaCloudApp ({ open, close }). The folder shown is kept in the
- * URL hash ("#cloud", "#cloud/p=<id>", ...), so links and the back button work.
+ * Sessions show the track, car, driver and date from their .risession
+ * document; raw file hashes appear only in the details pane. Opens sessions
+ * in the desktop app, previews images, videos and PDFs, downloads verified
+ * files and shares sessions. Sessions are created by the desktop app only.
+ * Exposes window.RaCloudApp ({ open, close }). The folder and selection are
+ * kept in the URL hash ("#cloud", "#cloud/s=<id>", ...), so links work.
  * All text from the service is set with textContent, never as HTML.
  */
 (function () {
@@ -22,12 +24,21 @@
     if (!dialog || !sync || !gate || !cx) return;
 
     var GIB = 1024 * 1024 * 1024;
-    var model = null;            // folder model from cx.buildModel
-    var rawShares = {};          // GET /v1/shares, for the share dialog
-    var current = cx.hashToLocation(window.location.hash) || { type: 'mine' };
+    var DETAIL_CONCURRENCY = 3;
+    var model = null;            // from cx.buildModel
+    var rawShares = {};          // GET /v1/shares, for recipients and the share dialog
+    var folder = 'mine';         // 'mine' | 'shared' | 'outgoing'
+    var selectedKey = null;      // row key: 's:<id>', 'sh:<id>', 'inv:<id>', 'out:<id>'
+    var query = '';
+    var sortBy = 'date';
+    var details = {};            // row key -> { files, size, archived, facts } or { error }
+    var detailQueue = [];
+    var detailActive = 0;
+    var detailInFlight = {};
+    var dataToken = 0;           // bumps when the loaded data is replaced or cleared
     var fileCache = {};          // 's:<id>' or 'sh:<id>' -> Promise of files
-    var renderToken = 0;
     var loading = null;          // the load() in flight
+    var renderQueued = false;
     var shareTarget = null;
     var viewer = { token: 0, url: null, file: null, shareId: null, buffer: null };
     var authSubscribed = false;
@@ -45,7 +56,7 @@
     function el(tag, className, text) {
         var node = document.createElement(tag);
         if (className) node.className = className;
-        if (text !== undefined) node.textContent = text;
+        if (text !== undefined && text !== null) node.textContent = text;
         return node;
     }
 
@@ -76,17 +87,36 @@
         return b;
     }
 
+    function badge(text, tone) { return el('span', 'cloud-badge cx-badge cx-badge--' + (tone || 'neutral'), text); }
+
     function formatBytes(bytes) {
         if (bytes >= GIB) return (bytes / GIB).toFixed(bytes >= 10 * GIB ? 0 : 1) + ' GB';
         if (bytes >= 1024 * 1024) return Math.round(bytes / 1024 / 1024) + ' MB';
         return Math.max(0, Math.round(bytes / 1024)) + ' KB';
     }
 
+    /** Storage in GB, as the desktop app shows it: "0.2 GB", "15 GB". */
+    function formatGB(bytes) {
+        var gb = (bytes || 0) / GIB;
+        return (gb >= 10 || gb === Math.round(gb) ? Math.round(gb) : gb.toFixed(1)) + ' GB';
+    }
+
+    /** "Jul 13, 2025" for a "yyyy-mm-dd" day (shown as that day everywhere) or an ISO time. */
     function formatDate(value) {
         if (!value) return '';
-        var date = new Date(value);
+        var dayOnly = /^\d{4}-\d{2}-\d{2}$/.test(value);
+        var date = new Date(dayOnly ? value + 'T00:00:00Z' : value);
         if (isNaN(date.getTime())) return '';
-        return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+        var options = { year: 'numeric', month: 'short', day: 'numeric' };
+        if (dayOnly) options.timeZone = 'UTC';
+        return date.toLocaleDateString(undefined, options);
+    }
+
+    function editionLabel(edition) {
+        if (!edition) return 'No subscription';
+        if (edition === 'student') return 'Student plan';
+        if (edition === 'trial') return 'Trial';
+        return 'Cloud plan';
     }
 
     function save(name, buffer) {
@@ -104,6 +134,49 @@
         return sync.downloadFile(file, shareId).then(function (buffer) { save(file.name, buffer); });
     }
 
+    /* ---- Location: folder and selection in the hash ---- */
+
+    function stateFromLocation(loc) {
+        if (!loc) return;
+        if (loc.type === 'shared' || loc.type === 'outgoing') { folder = loc.type; selectedKey = null; return; }
+        if (loc.type === 'session') { folder = 'mine'; selectedKey = 's:' + loc.id; return; }
+        if (loc.type === 'share') {
+            folder = 'shared';
+            var pending = !!model && model.pending.some(function (p) { return p.share_id === loc.id; });
+            selectedKey = (pending ? 'inv:' : 'sh:') + loc.id;
+            return;
+        }
+        folder = 'mine';
+        selectedKey = null;
+    }
+
+    function locationFor(row) {
+        if (folder === 'shared') return row && row.shareId ? { type: 'share', id: row.shareId } : { type: 'shared' };
+        if (folder === 'outgoing') return { type: 'outgoing' };
+        return row && row.sessionId ? { type: 'session', id: row.sessionId } : { type: 'mine' };
+    }
+
+    /** The location of the current folder and selection (works before anything is loaded). */
+    function stateLocation() {
+        var match = /^(s|sh|inv):(.+)$/.exec(selectedKey || '');
+        if (folder === 'shared') return match && match[1] !== 's' ? { type: 'share', id: match[2] } : { type: 'shared' };
+        if (folder === 'outgoing') return { type: 'outgoing' };
+        return match && match[1] === 's' ? { type: 'session', id: match[2] } : { type: 'mine' };
+    }
+
+    /** Puts the selection in the hash without a new history entry (folders get their own entries). */
+    function replaceHash(loc) {
+        var hash = cx.locationToHash(loc);
+        if (window.location.hash === hash) return;
+        if (window.history && window.history.replaceState) {
+            window.history.replaceState(null, '', window.location.pathname + window.location.search + hash);
+        } else {
+            window.location.hash = hash;
+        }
+    }
+
+    stateFromLocation(cx.hashToLocation(window.location.hash));
+
     /* ---- Opening and closing the popup ---- */
 
     var closingFromHash = false;
@@ -117,10 +190,10 @@
         }
     }
 
-    /** Opens the popup, optionally at a folder. */
+    /** Opens the popup, optionally at a folder or selection. */
     function open(loc) {
-        if (loc) current = loc;
-        var hash = cx.locationToHash(current);
+        if (loc) stateFromLocation(loc);
+        var hash = cx.locationToHash(loc || stateLocation());
         if (window.location.hash !== hash) {
             window.location.hash = hash; // the hashchange listener renders
         }
@@ -153,7 +226,7 @@
             if (dialog.open) { closingFromHash = true; dialog.close(); }
             return;
         }
-        current = loc;
+        stateFromLocation(loc);
         if (!dialog.open) { open(); return; }
         if (model) render();
     });
@@ -184,14 +257,15 @@
         }
     }
 
-    /* ---- Account ---- */
+    /* ---- Storage bar ---- */
 
     function renderAccount(account) {
-        var used = (account.quota.bytes_used || 0) + (account.quota.bytes_reserved || 0);
-        var limit = account.quota.limit || 0;
+        var quota = account.quota || {};
+        var used = (quota.bytes_used || 0) + (quota.bytes_reserved || 0);
+        var limit = quota.limit || 0;
         var percent = limit ? Math.min(100, (used / limit) * 100) : 0;
-        $('cloud-edition').textContent = account.entitlement.edition || 'No subscription';
-        $('cloud-quota-text').textContent = formatBytes(used) + ' of ' + formatBytes(limit) + ' used';
+        $('cloud-edition').textContent = editionLabel(account.entitlement && account.entitlement.edition);
+        $('cloud-quota-text').textContent = formatGB(used) + ' of ' + formatGB(limit);
         $('cloud-quota-bar').style.width = percent + '%';
         $('cloud-quota-bar').classList.toggle('cloud-quota__bar--full', percent >= 90);
         dialog.querySelector('.cloud-quota').setAttribute('aria-valuenow', String(Math.round(percent)));
@@ -199,25 +273,46 @@
         show('cloud-account', true);
     }
 
-    /* ---- Opening files ---- */
+    /* ---- Opening a session in the desktop app ---- */
 
-    /** Asks the desktop app to open a session or one of its files. */
+    /**
+     * Asks the desktop app to open a session. The link is built to the exact
+     * shape the app accepts (cx.openInAppUrl) and clicked from inside the open
+     * confirm dialog, so the modal popup does not make it inert. The dialog
+     * keeps a "Try again" link and the install fallback.
+     */
     function openInApp(target) {
-        if (!sync.demo) {
-            var a = el('a');
-            a.href = cx.openInAppUrl(target);
-            a.rel = 'noopener';
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-        }
-        $('cx-open-text').textContent = sync.demo
-            ? 'With real data, this opens ' + (target.label || 'this file') + ' in the RACE Insight desktop app.'
-            : 'Your browser may ask to open RACE Insight to show ' + (target.label || 'this file') + '. Allow it to continue.';
+        var url = cx.openInAppUrl(target);
+        var label = target.label || 'this session';
+        var text = $('cx-open-text');
+        var again = $('cx-open-again');
+        // race-insight.js renames every "#download" link to "Download" after sign-in; this one is the install fallback.
+        $('cx-open-get').textContent = 'Install or update';
         if (!$('cx-open-dialog').open) $('cx-open-dialog').showModal();
+        if (sync.demo) {
+            text.textContent = 'With real data, this opens “' + label + '” in the RACE Insight desktop app.';
+            show('cx-open-again', false);
+            return;
+        }
+        if (!url) {
+            text.textContent = '“' + label + '” cannot be opened from the website. Open it from Cloud files in the desktop app.';
+            show('cx-open-again', false);
+            return;
+        }
+        text.textContent = 'Your browser may ask to open RACE Insight to show “' + label + '”. Allow it to continue.';
+        again.href = url;
+        show('cx-open-again', true);
+        var a = el('a');
+        a.href = url;
+        a.rel = 'noopener';
+        $('cx-open-dialog').appendChild(a);
+        a.click();
+        a.remove();
     }
 
     $('cx-open-get').addEventListener('click', function () { $('cx-open-dialog').close(); close(); });
+
+    /* ---- Viewer ---- */
 
     function closeViewer() {
         viewer.token += 1;
@@ -288,100 +383,220 @@
         download(viewer.file, viewer.shareId).catch(setError);
     });
 
-    /* ---- Explorer ---- */
+    /* ---- Session files and documents ---- */
 
-    function filesFor(loc) {
-        var key = (loc.type === 'share' ? 'sh:' : 's:') + loc.id;
+    function filesFor(row) {
+        var key = row.kind === 'shared' ? 'sh:' + row.shareId : 's:' + row.sessionId;
         if (!fileCache[key]) {
-            fileCache[key] = (loc.type === 'share' ? sync.sharedFiles(loc.id) : sync.unitFiles('session', loc.id))
+            fileCache[key] = (row.kind === 'shared' ? sync.sharedFiles(row.shareId) : sync.unitFiles('session', row.sessionId))
                 .catch(function (err) { delete fileCache[key]; throw err; });
         }
         return fileCache[key];
     }
 
-    function navigate(loc) {
-        var hash = cx.locationToHash(loc);
-        if (window.location.hash === hash) { current = loc; render(); return; }
+    function needsDetails(row) {
+        return (row.kind === 'own' || (row.kind === 'shared' && row.live)) && !details[row.key] && !detailInFlight[row.key];
+    }
+
+    function scheduleRender() {
+        if (renderQueued) return;
+        renderQueued = true;
+        setTimeout(function () { renderQueued = false; if (model) render(); }, 0);
+    }
+
+    /** Reads a session's file list and its .risession document (track, car, driver, date). */
+    function fetchDetails(row) {
+        var token = dataToken;
+        var unitName = row.kind === 'shared' ? (cx.findShare(model, row.shareId) || {}).name
+            : ((cx.findSession(model, row.sessionId) || {}).session || {}).name;
+        detailInFlight[row.key] = true;
+        return filesFor(row).then(function (files) {
+            var size = files.reduce(function (sum, f) { return sum + (f.size || 0); }, 0);
+            var archived = files.some(function (f) { return !cx.isAvailable(f); });
+            var entry = { files: files, size: size, archived: archived, facts: null };
+            var docFile = files.filter(function (f) {
+                return cx.extension(f.name) === 'risession' && cx.isAvailable(f) && f.size <= cx.MAX_SESSION_DOCUMENT_BYTES;
+            })[0];
+            if (!docFile) return entry;
+            return sync.downloadFile(docFile, row.kind === 'shared' ? row.shareId : null).then(function (buffer) {
+                var doc = cx.parseSessionDocument(new TextDecoder().decode(buffer));
+                if (doc) entry.facts = cx.sessionFacts(doc, unitName);
+                return entry;
+            }, function () { return entry; }); // the list still shows; facts stay from the unit name
+        }).then(function (entry) {
+            if (token !== dataToken) return;
+            if (!entry.facts) delete entry.facts;
+            details[row.key] = entry;
+        }, function (err) {
+            if (token !== dataToken) return;
+            details[row.key] = { error: sync.friendlyError(err) };
+        }).then(function () {
+            if (token !== dataToken) return;
+            delete detailInFlight[row.key];
+            scheduleRender();
+        });
+    }
+
+    function pumpDetails() {
+        while (detailActive < DETAIL_CONCURRENCY && detailQueue.length) {
+            var row = detailQueue.shift();
+            if (!needsDetails(row)) continue;
+            detailActive += 1;
+            var token = dataToken;
+            fetchDetails(row).then(function () {
+                if (token !== dataToken) return;
+                detailActive -= 1;
+                pumpDetails();
+            });
+        }
+    }
+
+    function queueDetails(rows) {
+        rows.forEach(function (row) {
+            var queued = detailQueue.some(function (q) { return q.key === row.key; });
+            if (needsDetails(row) && !queued) detailQueue.push(row);
+        });
+        pumpDetails();
+    }
+
+    /* ---- Rendering ---- */
+
+    function navigate(target) {
+        var hash = cx.locationToHash(target);
+        if (window.location.hash === hash) { stateFromLocation(target); render(); return; }
         window.location.hash = hash; // the hashchange listener renders
     }
 
-    function renderTree() {
-        var tree = $('cx-tree');
-        tree.textContent = '';
-        var activeProject = null;
-        if (current.type === 'project') activeProject = current.id;
-        if (current.type === 'session') {
-            var found = cx.findSession(model, current.id);
-            activeProject = found && found.project.id;
-        }
-        function item(label, iconName, loc, active, depth, count, countClass) {
-            var b = el('button', 'cx-tree__item' + (active ? ' is-active' : '') + (depth ? ' cx-tree__item--child' : ''));
-            b.type = 'button';
-            if (active) b.setAttribute('aria-current', 'true');
-            b.appendChild(icon(iconName));
-            b.appendChild(el('span', 'cx-tree__label', label));
-            if (count) b.appendChild(el('span', 'cx-tree__count' + (countClass ? ' ' + countClass : ''), String(count)));
-            b.addEventListener('click', function () { navigate(loc); });
-            tree.appendChild(b);
-        }
-        item('My files', 'fa-hard-drive', { type: 'mine' }, current.type === 'mine', 0);
-        model.projects.forEach(function (p) {
-            item(p.name, p.id === cx.LIBRARY_PROJECT_ID ? 'fa-book' : 'fa-folder', { type: 'project', id: p.id },
-                activeProject === p.id, 1);
-        });
-        tree.appendChild(el('div', 'cx-tree__divider'));
-        item('Shared with me', 'fa-inbox', { type: 'shared' }, current.type === 'shared' || current.type === 'share', 0,
-            model.pending.length, '');
-        item('Shared with others', 'fa-share-nodes', { type: 'outgoing' }, current.type === 'outgoing', 0,
-            model.outgoing.length, 'cx-tree__count--muted');
+    function select(row) {
+        selectedKey = row ? row.key : null;
+        replaceHash(locationFor(row));
+        render();
+        if (row && needsDetails(row)) fetchDetails(row); // the selected row goes ahead of the queue
     }
 
-    function renderBreadcrumbs(steps) {
-        var nav = $('cx-breadcrumbs');
+    function renderNav() {
+        var nav = $('cx-tree');
         nav.textContent = '';
-        steps.forEach(function (step, index) {
-            if (index) nav.appendChild(icon('fa-chevron-right', 'cx-breadcrumbs__sep'));
-            if (index === steps.length - 1) {
-                var here = el('span', 'cx-breadcrumbs__here', step.label);
-                here.setAttribute('aria-current', 'page');
-                nav.appendChild(here);
-            } else {
-                var b = el('button', 'cx-breadcrumbs__link', step.label);
-                b.type = 'button';
-                b.addEventListener('click', function () { navigate(step.location); });
-                nav.appendChild(b);
-            }
+        function item(label, iconName, target, count) {
+            var active = folder === target.type || (target.type === 'mine' && folder === 'mine');
+            var b = el('button', 'cx-nav__item' + (active ? ' is-active' : ''));
+            b.type = 'button';
+            if (active) b.setAttribute('aria-current', 'page');
+            b.appendChild(icon(iconName));
+            b.appendChild(el('span', 'cx-nav__label', label));
+            if (count !== null) b.appendChild(el('span', 'cx-nav__count', String(count)));
+            b.addEventListener('click', function () { navigate(target); });
+            nav.appendChild(b);
+        }
+        item('My sessions', 'fa-user', { type: 'mine' }, null);
+        item('Shared with me', 'fa-inbox', { type: 'shared' }, model.pending.length + model.shared.length);
+        item('Shared with others', 'fa-share-nodes', { type: 'outgoing' }, model.outgoing.length);
+    }
+
+    function emptyMessage() {
+        if (query.trim()) return 'No cloud files match your search.';
+        if (folder === 'shared') return 'Nobody has shared a session with you yet.';
+        if (folder === 'outgoing') return 'You have not shared any sessions. Select a session and choose Share.';
+        return 'No sessions in the cloud yet. Turn on cloud sync in the RACE Insight desktop app.';
+    }
+
+    function cell(className, text) {
+        var td = el('td', className);
+        td.appendChild(el('span', 'cx-cell__text', text || '—'));
+        if (text) td.title = text;
+        return td;
+    }
+
+    function rowElement(row, index, all) {
+        var tr = el('tr', 'cx-tr' + (row.key === selectedKey ? ' is-selected' : '') + (row.kind === 'shared' && !row.live ? ' is-muted' : ''));
+        tr.tabIndex = 0;
+        tr.setAttribute('aria-selected', row.key === selectedKey ? 'true' : 'false');
+        tr.setAttribute('data-key', row.key);
+        var name = el('td', 'cx-col--name');
+        var wrap = el('div', 'cx-cell__name');
+        wrap.appendChild(icon(row.kind === 'invitation' ? 'fa-envelope' : row.kind === 'shared' ? 'fa-user-group' : 'fa-file-lines',
+            'cx-cell__icon'));
+        var texts = el('div', 'cx-cell__texts');
+        texts.appendChild(el('span', 'cx-cell__title', row.name));
+        if (row.ownerName) texts.appendChild(el('span', 'cx-cell__sub', row.kind === 'invitation' ? row.ownerName + ' invited you' : 'Shared by ' + row.ownerName));
+        var meta = [row.track, formatDate(row.date || row.updated_at)].filter(Boolean).join(' · ');
+        if (meta) texts.appendChild(el('span', 'cx-cell__meta', meta));
+        wrap.appendChild(texts);
+        name.appendChild(wrap);
+        name.title = row.name;
+        tr.appendChild(name);
+        tr.appendChild(cell('cx-col--track', row.track));
+        tr.appendChild(cell('cx-col--date', formatDate(row.date || row.updated_at)));
+        tr.appendChild(cell('cx-col--size', row.size == null ? '' : formatBytes(row.size)));
+        var status = el('td', 'cx-col--status');
+        var badges = el('span', 'cx-badges');
+        badges.appendChild(badge(row.status.label, row.status.tone));
+        if (row.sharedWith > 0) badges.appendChild(badge('Shared with ' + row.sharedWith, 'accent'));
+        status.appendChild(badges);
+        tr.appendChild(status);
+        tr.addEventListener('click', function () { select(row); });
+        tr.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); select(row); return; }
+            if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+            var next = all[index + (event.key === 'ArrowDown' ? 1 : -1)];
+            if (!next) return;
+            event.preventDefault();
+            var node = $('cx-list').querySelector('[data-key="' + next.key + '"]');
+            if (node && node.focus) node.focus();
+        });
+        return tr;
+    }
+
+    function render() {
+        renderNav();
+        var all = cx.buildRows(model, folder, details);
+        var rows = cx.filterAndSort(all, query, sortBy);
+        var selected = rows.filter(function (r) { return r.key === selectedKey; })[0] || null;
+        var list = $('cx-list');
+        list.textContent = '';
+        rows.forEach(function (row, i) { list.appendChild(rowElement(row, i, rows)); });
+        $('cx-empty').textContent = rows.length ? '' : emptyMessage();
+        show('cx-empty', !rows.length);
+        $('cloud-explorer').classList.toggle('has-selection', !!selected);
+        renderDetails(selected);
+        queueDetails(all);
+    }
+
+    /* ---- Details pane ---- */
+
+    function fact(list, label, value) {
+        var row = el('div', 'cx-facts__row');
+        row.appendChild(el('dt', '', label));
+        row.appendChild(el('dd', '', value || '—'));
+        list.appendChild(row);
+    }
+
+    function section(body, title) {
+        var s = el('div', 'cx-details__section');
+        s.appendChild(el('h4', 'cx-details__heading', title));
+        body.appendChild(s);
+        return s;
+    }
+
+    function recipientsOf(sessionId) {
+        return (rawShares.outgoing || []).filter(function (s) {
+            return s.session_id === sessionId && (s.status === 'pending' || s.status === 'accepted');
         });
     }
 
-    /**
-     * One explorer row. options: { iconName, iconClass, name, badge, sub, type,
-     * size, date, onOpen, openLabel, actions: [nodes], muted }
-     */
-    function row(options) {
-        var li = el('li', 'cx-row' + (options.muted ? ' cx-row--muted' : ''));
-        var main = el(options.onOpen ? 'button' : 'div', 'cx-row__main');
-        if (options.onOpen) {
-            main.type = 'button';
-            main.title = options.openLabel || options.name;
-            main.addEventListener('click', function () {
-                Promise.resolve().then(options.onOpen).catch(setError);
-            });
-        }
-        main.appendChild(icon(options.iconName, 'cx-row__icon ' + (options.iconClass || '')));
-        var name = el('span', 'cx-row__name');
-        name.appendChild(el('span', 'cx-row__title', options.name));
-        if (options.badge) name.appendChild(el('span', 'cloud-badge cx-row__badge', options.badge));
-        if (options.sub) name.appendChild(el('span', 'cx-row__sub', options.sub));
-        main.appendChild(name);
-        li.appendChild(main);
-        li.appendChild(el('span', 'cx-col cx-col--type', options.type || ''));
-        li.appendChild(el('span', 'cx-col cx-col--size', options.size || ''));
-        li.appendChild(el('span', 'cx-col cx-col--date', options.date || ''));
-        var actions = el('span', 'cx-col--actions');
-        (options.actions || []).forEach(function (node) { actions.appendChild(node); });
-        li.appendChild(actions);
-        return li;
+    function renderRecipientsInto(container, shares) {
+        var list = el('ul', 'cx-recipients');
+        shares.forEach(function (share) {
+            var item = el('li', 'cx-recipient');
+            var who = el('span', 'cx-recipient__email', share.recipient_email || share.email || '');
+            item.appendChild(who);
+            item.appendChild(badge(share.status === 'accepted' ? 'Accepted' : 'Invited', share.status === 'accepted' ? 'valid' : 'neutral'));
+            item.appendChild(button('Revoke', 'btn btn-secondary cloud-btn cx-btn--small', function () {
+                return sync.removeShare(share.share_id).then(load);
+            }));
+            list.appendChild(item);
+        });
+        container.appendChild(list);
     }
 
     var FILE_ICONS = {
@@ -389,216 +604,157 @@
         video: ['fa-file-video', 'cx-icon--video'], pdf: ['fa-file-pdf', 'cx-icon--pdf'], other: ['fa-file', '']
     };
 
-    function fileRow(file, sessionId, shareId) {
-        var category = cx.fileCategory(file.name);
+    function fileItem(file, shareId) {
         var available = cx.isAvailable(file);
-        var canPreview = available && !!cx.previewType(file);
-        var actions = [];
-        var onOpen = null;
-        var openLabel = '';
-        if (available && category === 'race') {
-            onOpen = function () { openInApp({ sessionId: sessionId, shareId: shareId, sha256: file.sha256, label: file.name }); };
-            openLabel = 'Open ' + file.name + ' in RACE Insight';
-            actions.push(iconButton('Open in RACE Insight', 'fa-up-right-from-square', onOpen));
-        } else if (canPreview) {
-            onOpen = function () { return openViewer(file, shareId); };
-            openLabel = 'View ' + file.name;
-            actions.push(iconButton('View', 'fa-eye', onOpen));
-        } else if (available) {
-            onOpen = function () { return download(file, shareId); };
-            openLabel = 'Download ' + file.name;
-        }
-        if (available) actions.push(iconButton('Download', 'fa-download', function () { return download(file, shareId); }));
+        var category = cx.fileCategory(file.name);
+        var li = el('li', 'cx-file' + (available ? '' : ' is-muted'));
         var look = FILE_ICONS[category];
-        return row({
-            iconName: look[0], iconClass: look[1], name: file.name, onOpen: onOpen, openLabel: openLabel,
-            badge: available ? '' : 'Archived', type: cx.typeLabel(file.name), size: formatBytes(file.size),
-            actions: actions, muted: !available
-        });
+        li.appendChild(icon(look[0], 'cx-file__icon ' + look[1]));
+        var texts = el('div', 'cx-file__texts');
+        texts.appendChild(el('span', 'cx-file__label', cx.typeLabel(file.name)));
+        var meta = el('span', 'cx-file__meta');
+        var shown = el('span', 'cx-file__name', cx.displayFileName(file.name));
+        shown.title = file.name;
+        meta.appendChild(shown);
+        meta.appendChild(el('span', 'cx-file__size', formatBytes(file.size)));
+        if (!available) meta.appendChild(badge('Archived', 'warn'));
+        texts.appendChild(meta);
+        li.appendChild(texts);
+        var actions = el('span', 'cx-file__actions');
+        if (available && cx.previewType(file)) actions.appendChild(iconButton('View ' + file.name, 'fa-eye', function () { return openViewer(file, shareId); }));
+        if (available) actions.appendChild(iconButton('Download ' + file.name, 'fa-download', function () { return download(file, shareId); }));
+        li.appendChild(actions);
+        return li;
     }
 
-    function isAccepted(shareId) {
-        var share = cx.findShare(model, shareId);
-        return !!share && share.status === 'accepted';
-    }
-
-    function setToolbar(loc) {
-        var inSession = loc.type === 'session';
-        var inShare = loc.type === 'share';
-        show('cx-open-btn', inSession || (inShare && isAccepted(loc.id)));
-        show('cx-share-btn', inSession);
-    }
-
-    function empty(text) {
-        $('cx-empty').textContent = text;
-        show('cx-empty', !!text);
-    }
-
-    function recipientSummary(recipients) {
-        return recipients.map(function (r) {
-            return r.email + (r.status === 'accepted' ? '' : ' (invited)');
-        }).join(', ');
-    }
-
-    function render() {
-        var token = ++renderToken;
-        var steps = cx.trail(model, current);
-        if (!steps) { current = { type: 'mine' }; steps = cx.trail(model, current); }
-        renderTree();
-        renderBreadcrumbs(steps);
-        setToolbar(current);
-        var list = $('cx-list');
-        list.textContent = '';
-        empty('');
-
-        if (current.type === 'mine') {
-            model.projects.forEach(function (p) {
-                list.appendChild(row({
-                    iconName: p.id === cx.LIBRARY_PROJECT_ID ? 'fa-book' : 'fa-folder', iconClass: 'cx-icon--folder',
-                    name: p.name, onOpen: function () { navigate({ type: 'project', id: p.id }); },
-                    type: 'Project', size: p.sessions.length + (p.sessions.length === 1 ? ' session' : ' sessions'),
-                    date: formatDate(p.updated_at)
-                }));
-            });
-            if (!model.projects.length) empty('Nothing synced yet. Turn on cloud sync in the RACE Insight desktop app.');
+    function renderDetails(row) {
+        var body = $('cx-details-body');
+        body.textContent = '';
+        if (!row) {
+            var empty = el('div', 'cx-details__empty');
+            empty.appendChild(icon('fa-file-lines'));
+            empty.appendChild(el('p', 'cloud-muted', 'Select a session to see its files.'));
+            body.appendChild(empty);
             return;
         }
+        var head = el('div', 'cx-details__head');
+        head.appendChild(el('h3', 'cx-details__title', row.name));
+        if (row.ownerName) head.appendChild(el('span', 'cloud-muted cx-details__owner', row.kind === 'invitation' ? row.ownerName + ' invited you' : 'Shared by ' + row.ownerName));
+        var badges = el('span', 'cx-badges');
+        badges.appendChild(badge(row.status.label, row.status.tone));
+        if (row.sharedWith > 0) badges.appendChild(badge('Shared with ' + row.sharedWith, 'accent'));
+        head.appendChild(badges);
+        body.appendChild(head);
 
-        if (current.type === 'project') {
-            var project = cx.findProject(model, current.id);
-            project.sessions.forEach(function (s) {
-                list.appendChild(row({
-                    iconName: 'fa-folder', iconClass: 'cx-icon--folder', name: s.name,
-                    badge: s.shared_with ? 'Shared with ' + s.shared_with : '',
-                    onOpen: function () { navigate({ type: 'session', id: s.id }); },
-                    type: 'Session', date: formatDate(s.updated_at),
-                    actions: [
-                        iconButton('Open in RACE Insight', 'fa-up-right-from-square', function () {
-                            openInApp({ sessionId: s.id, label: s.name });
-                        }),
-                        iconButton('Share', 'fa-share-nodes', function () { openShare(s); })
-                    ]
-                }));
-            });
-            if (!project.sessions.length) empty('This project has no synced sessions.');
+        var actions = el('div', 'cx-details__actions');
+        body.appendChild(actions);
+        var shareId = row.kind === 'shared' ? row.shareId : null;
+        var d = details[row.key] || null;
+
+        if (row.kind === 'invitation') {
+            actions.appendChild(button('Accept', 'btn btn-primary cloud-btn', function () { return sync.acceptShare(row.shareId).then(load); }));
+            actions.appendChild(button('Decline', 'btn btn-secondary cloud-btn', function () { return sync.removeShare(row.shareId).then(load); }));
             return;
         }
-
-        if (current.type === 'shared') {
-            model.pending.forEach(function (invite) {
-                list.appendChild(row({
-                    iconName: 'fa-envelope', iconClass: 'cx-icon--invite', name: invite.name,
-                    sub: invite.owner_name + ' invited you', type: 'Invitation',
-                    actions: [
-                        button('Accept', 'btn btn-primary cloud-btn', function () { return sync.acceptShare(invite.share_id).then(load); }),
-                        button('Decline', 'btn btn-secondary cloud-btn', function () { return sync.removeShare(invite.share_id).then(load); })
-                    ]
-                }));
-            });
-            model.shared.forEach(function (share) {
-                var accepted = share.status === 'accepted';
-                var actions = [];
-                if (accepted) {
-                    actions.push(iconButton('Open in RACE Insight', 'fa-up-right-from-square', function () {
-                        openInApp({ shareId: share.share_id, label: share.name });
-                    }));
-                }
-                actions.push(iconButton('Remove from my list', 'fa-xmark', function () { return sync.removeShare(share.share_id).then(load); }));
-                list.appendChild(row({
-                    iconName: 'fa-folder', iconClass: accepted ? 'cx-icon--shared' : '', name: share.name,
-                    sub: 'Shared by ' + share.owner_name, badge: accepted ? '' : 'No longer shared', muted: !accepted,
-                    onOpen: accepted ? function () { navigate({ type: 'share', id: share.share_id }); } : null,
-                    type: 'Shared session', actions: actions
-                }));
-            });
-            if (!model.pending.length && !model.shared.length) empty('Nobody has shared a session with you yet.');
+        if (row.kind === 'deleted') {
+            body.appendChild(el('p', 'cloud-muted', 'This session is no longer in your cloud. Revoke the invitations you no longer need.'));
+            renderRecipientsInto(section(body, 'Shared with'), recipientsOf(row.key.slice(4)));
             return;
         }
-
-        if (current.type === 'outgoing') {
-            model.outgoing.forEach(function (entry) {
-                var people = entry.recipients.length;
-                var found = entry.exists ? cx.findSession(model, entry.session_id) : null;
-                list.appendChild(row({
-                    iconName: 'fa-folder', iconClass: 'cx-icon--shared', name: entry.name,
-                    sub: recipientSummary(entry.recipients), muted: !entry.exists,
-                    onOpen: entry.exists ? function () { navigate({ type: 'session', id: entry.session_id }); } : null,
-                    type: entry.project_name || 'Session', size: people + (people === 1 ? ' person' : ' people'),
-                    actions: found ? [iconButton('Manage sharing', 'fa-user-gear', function () { openShare(found.session); })] : []
-                }));
-            });
-            if (!model.outgoing.length) empty('You have not shared any sessions. Open a session and choose Share.');
-            return;
+        if (row.live) {
+            actions.appendChild(button('Open in RACE Insight', 'btn btn-primary cloud-btn', function () {
+                openInApp(row.kind === 'shared' ? { shareId: row.shareId, label: row.name } : { sessionId: row.sessionId, label: row.name });
+            }, 'fa-up-right-from-square'));
+            var apx = d && d.files ? d.files.filter(function (f) { return cx.extension(f.name) === 'apx' && cx.isAvailable(f); })[0] : null;
+            if (apx) {
+                actions.appendChild(button('Download', 'btn btn-secondary cloud-btn', function () {
+                    // Saved under the session's name; the cloud keeps it as <hash>.apx.
+                    return sync.downloadFile(apx, shareId).then(function (buffer) { save(safeName(row.name) + '.apx', buffer); });
+                }, 'fa-download'));
+            }
+        }
+        if (row.kind === 'own') {
+            actions.appendChild(button('Share', 'btn btn-secondary cloud-btn', function () { openShare(row); }, 'fa-share-nodes'));
+        }
+        if (row.kind === 'shared') {
+            actions.appendChild(button('Remove from my list', 'btn btn-secondary cloud-btn', function () {
+                return sync.removeShare(row.shareId).then(load);
+            }, 'fa-xmark'));
         }
 
-        // A session's files: yours, or one shared with you.
-        var shareId = current.type === 'share' ? current.id : null;
-        if (shareId && !isAccepted(shareId)) { empty('This session is no longer shared with you.'); return; }
-        var sessionId = shareId ? '' : current.id;
-        empty('Loading files…');
-        filesFor(current).then(function (files) {
-            if (token !== renderToken) return;
-            empty(files.length ? '' : 'This session has no files.');
-            files.slice().sort(function (a, b) {
-                var ra = cx.fileCategory(a.name) === 'race' ? 0 : 1;
-                var rb = cx.fileCategory(b.name) === 'race' ? 0 : 1;
-                return ra - rb || a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
-            }).forEach(function (file) { list.appendChild(fileRow(file, sessionId, shareId)); });
-        }, function (err) {
-            if (token !== renderToken) return;
-            empty('');
-            setError(err);
-        });
+        if (row.kind === 'own' || row.live) {
+            var facts = el('dl', 'cx-facts');
+            fact(facts, 'Track', row.track);
+            fact(facts, 'Car', row.car);
+            fact(facts, 'Driver', row.driver);
+            fact(facts, 'Date', formatDate(row.date));
+            if (row.laps != null) fact(facts, 'Laps', String(row.laps));
+            body.appendChild(facts);
+        }
+
+        if (row.kind === 'own') {
+            var shares = recipientsOf(row.sessionId);
+            if (shares.length) renderRecipientsInto(section(body, 'Shared with'), shares);
+        }
+
+        if (!row.live) {
+            body.appendChild(el('p', 'cloud-muted', 'This session is no longer shared with you.'));
+            return;
+        }
+        var filesSection = section(body, 'Files');
+        if (!d) { filesSection.appendChild(el('p', 'cloud-muted cx-details__note', 'Loading files…')); return; }
+        if (d.error) { filesSection.appendChild(el('p', 'cloud-error cx-details__note', d.error)); return; }
+        if (!d.files.length) { filesSection.appendChild(el('p', 'cloud-muted cx-details__note', 'No files in this session.')); return; }
+        var list = el('ul', 'cx-files');
+        cx.sortFiles(d.files).forEach(function (file) { list.appendChild(fileItem(file, shareId)); });
+        filesSection.appendChild(list);
     }
 
-    $('cx-open-btn').addEventListener('click', function () {
-        if (current.type === 'session') {
-            var found = cx.findSession(model, current.id);
-            openInApp({ sessionId: current.id, label: found ? found.session.name : 'this session' });
-        } else if (current.type === 'share') {
-            var share = cx.findShare(model, current.id);
-            openInApp({ shareId: current.id, label: share ? share.name : 'this session' });
-        }
+    function safeName(name) {
+        var clean = String(name || 'session').replace(/[<>:"/\\|?*\u0000-\u001f]+/g, ' ').replace(/[. ]+$/, '').trim();
+        return clean.slice(0, 120) || 'session';
+    }
+
+    $('cx-details-back').addEventListener('click', function () { select(null); });
+
+    $('cx-search').addEventListener('input', function () {
+        query = $('cx-search').value || '';
+        if (model) render();
     });
-
-    $('cx-share-btn').addEventListener('click', function () {
-        if (current.type !== 'session') return;
-        var found = cx.findSession(model, current.id);
-        if (found) openShare(found.session);
+    $('cx-sort').addEventListener('change', function () {
+        sortBy = $('cx-sort').value || 'date';
+        if (model) render();
+    });
+    $('cx-refresh').addEventListener('click', function () {
+        if (!loading) loading = load().then(function (state) { loading = null; return state; });
     });
 
     /* ---- Sharing (per session) ---- */
 
-    function outgoingFor(sessionId) {
-        return (rawShares.outgoing || []).filter(function (s) {
-            return s.session_id === sessionId && (s.status === 'pending' || s.status === 'accepted');
-        });
-    }
-
-    function renderRecipients(sessionId) {
+    function renderShareRecipients(sessionId) {
         var list = $('cloud-share-recipients');
         list.textContent = '';
-        var active = outgoingFor(sessionId);
+        var active = recipientsOf(sessionId);
         active.forEach(function (share) {
             var item = el('li', 'cloud-row');
             item.appendChild(el('span', '', share.recipient_email));
             item.appendChild(el('span', 'cloud-badge', share.status === 'accepted' ? 'Accepted' : 'Invited'));
             item.appendChild(button('Revoke', 'btn btn-secondary cloud-btn', function () {
-                return sync.removeShare(share.share_id).then(load).then(function () { renderRecipients(sessionId); });
+                return sync.removeShare(share.share_id).then(load).then(function () { renderShareRecipients(sessionId); });
             }));
             list.appendChild(item);
         });
         if (!active.length) list.appendChild(el('li', 'cloud-muted', 'Nobody yet.'));
     }
 
-    function openShare(session) {
-        shareTarget = session;
-        $('cloud-share-name').textContent = session.name || session.id;
+    function openShare(row) {
+        shareTarget = { id: row.sessionId, name: row.name };
+        $('cloud-share-name').textContent = row.name;
         $('cloud-share-emails').value = '';
         $('cloud-share-ai').checked = false;
         $('cloud-share-expires').value = '';
         show('cloud-share-error', false);
-        renderRecipients(session.id);
+        renderShareRecipients(row.sessionId);
         $('cloud-share-dialog').showModal();
     }
 
@@ -620,23 +776,31 @@
             .then(function () {
                 $('cloud-share-emails').value = '';
                 shareError('');
-                return load().then(function (state) { if (state) renderRecipients(shareTarget.id); });
+                return load().then(function (state) { if (state) renderShareRecipients(shareTarget.id); });
             })
             .catch(function (err) { shareError(sync.friendlyError(err)); });
     });
 
     /* ---- Access and loading ---- */
 
+    function resetData() {
+        dataToken += 1;
+        details = {};
+        detailQueue = [];
+        detailActive = 0;
+        detailInFlight = {};
+        fileCache = {};
+    }
+
     /** Hides and empties everything that shows account data. */
     function clearContent() {
         ['cloud-account', 'cloud-explorer', 'cloud-locked', 'cloud-signin-btn', 'cloud-consent'].forEach(function (id) { show(id, false); });
         model = null;
         rawShares = {};
-        fileCache = {};
-        renderToken += 1;
+        resetData();
         $('cx-list').textContent = '';
         $('cx-tree').textContent = '';
-        $('cx-breadcrumbs').textContent = '';
+        $('cx-details-body').textContent = '';
         closeViewer();
         ['cloud-share-dialog', 'cx-open-dialog'].forEach(function (id) { if ($(id).open) $(id).close(); });
     }
@@ -673,8 +837,8 @@
     }
 
     /**
-     * Loads projects, sessions and shares only after the account is confirmed
-     * to have an active subscription. Resolves to the loaded state, or null.
+     * Loads sessions and shares only after the account is confirmed to have
+     * an active subscription. Resolves to the loaded state, or null.
      */
     function load() {
         setError(null);
@@ -689,7 +853,13 @@
                 var state = { account: access.account, units: results[0], shares: results[1] };
                 rawShares = state.shares || {};
                 model = cx.buildModel(state.units, state.shares);
-                fileCache = {};
+                resetData();
+                // A selected share may have been an invitation until now (or the other way round).
+                var shareMatch = /^(?:sh|inv):(.+)$/.exec(selectedKey || '');
+                if (shareMatch) {
+                    var pending = model.pending.some(function (p) { return p.share_id === shareMatch[1]; });
+                    selectedKey = (pending ? 'inv:' : 'sh:') + shareMatch[1];
+                }
                 setStatus('');
                 renderAccount(state.account);
                 show('cloud-explorer', true);

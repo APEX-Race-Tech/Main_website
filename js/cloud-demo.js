@@ -52,48 +52,59 @@
         var now = Date.now();
         var iso = function (daysAgo) { return new Date(now - daysAgo * DAY).toISOString(); };
 
-        // Real session units hold <session id>.apx and the .risession document.
-        // Race 1 also carries a video, a PDF, an image and a note so the
-        // previewer can be tried; synced sessions do not include such files today.
-        var sessionFiles = {
-            s1: [
-                { name: 's1.apx', sha256: sha('b'), size: 31500000, storage: 'standard' },
-                { name: 'session_spa_r1.risession', sha256: sha('e'), size: 182000, storage: 'standard' },
+        // Real session units hold <session id>.apx (the id is the SHA-256 of the
+        // logger file) and the session_<id prefix>.risession document with the
+        // logger metadata. Spa race 1 also carries a video, a PDF, an image and a
+        // note so the previewer can be tried; synced sessions do not include
+        // such files today.
+        var ids = {
+            s1: '3f9a1c7e5b2d4a6081f2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f6a7b8',
+            s2: '8c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d',
+            s3: '0b7e6d5c4b3a29180f1e2d3c4b5a69788796a5b4c3d2e1f0a9b8c7d6e5f4a3b2',
+            s4: 'd4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3',
+            s5: '5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b'
+        };
+        var docs = {};
+        function session(key, info) {
+            var id = ids[key];
+            var docName = 'session_' + id.slice(0, 16) + '.risession';
+            docs[docName] = {
+                schema: 'race-insight-session', version: 1, file_name: info.file, laps: new Array(info.laps).fill({}),
+                metadata: { Venue: info.track, Vehicle: info.car, Driver: info.driver, Date: info.date }
+            };
+            return [
+                { name: id + '.apx', sha256: id, size: info.size, storage: 'standard' },
+                { name: docName, sha256: sha(info.docChar), size: 182000, storage: info.archived ? 'archived' : 'standard' }
+            ].concat(info.extra || []);
+        }
+        var sessionFiles = {};
+        sessionFiles[ids.s1] = session('s1', { track: 'Spa-Francorchamps', car: 'Formula Vee', driver: 'Sample Driver',
+            date: '2026-11-22', file: 'spa 2026-11-22 14-05-10_Race_1.ld', laps: 14, size: 31500000, docChar: 'e', extra: [
                 { name: 'onboard_cam.mp4', sha256: sha('a'), size: 310000000, storage: 'standard' },
                 { name: 'setup_sheet.pdf', sha256: sha('f'), size: 2400, storage: 'standard' },
                 { name: 'pit_board.png', sha256: sha('c'), size: 141000, storage: 'standard' },
                 { name: 'notes.txt', sha256: sha('7'), size: 1200, storage: 'standard' }
-            ],
-            s2: [
-                { name: 's2.apx', sha256: sha('5'), size: 14800000, storage: 'standard' },
-                { name: 'session_spa_q.risession', sha256: sha('6'), size: 95000, storage: 'standard' }
-            ],
-            s3: [
-                { name: 's3.apx', sha256: sha('2'), size: 11200000, storage: 'standard' },
-                { name: 'session_spa_fp2.risession', sha256: sha('3'), size: 88000, storage: 'standard' }
-            ],
-            s4: [
-                { name: 's4.apx', sha256: sha('1'), size: 600000, storage: 'standard' },
-                { name: 'session_anglesey.risession', sha256: sha('8'), size: 41000, storage: 'standard' }
-            ],
-            s5: [
-                { name: 's5.apx', sha256: sha('0'), size: 40100000, storage: 'standard' },
-                { name: 'session_monza_long_run.risession', sha256: sha('d'), size: 120000, storage: 'archived' }
-            ]
-        };
+            ] });
+        sessionFiles[ids.s2] = session('s2', { track: 'Spa-Francorchamps', car: 'Formula Vee', driver: 'Sample Driver',
+            date: '2026-11-21', file: 'spa 2026-11-21 10-30-00_Qualifying.ld', laps: 8, size: 14800000, docChar: '6' });
+        sessionFiles[ids.s3] = session('s3', { track: 'Spa-Francorchamps', car: 'Formula Vee', driver: 'Alex Teammate',
+            date: '2026-11-20', file: 'spa 2026-11-20 15-45-12_FP2.ld', laps: 11, size: 11200000, docChar: '3' });
+        sessionFiles[ids.s4] = session('s4', { track: 'Anglesey Coastal', car: 'Clio Cup', driver: 'Sample Driver',
+            date: '2026-10-18', file: 'anglesey_lap.vbo', laps: 3, size: 600000, docChar: '8' });
+        sessionFiles[ids.s5] = session('s5', { track: 'Monza', car: 'Formula Vee', driver: 'Sample Driver',
+            date: '2026-10-27', file: 'monza 2026-10-27 11-02-44_Long_run.ld', laps: 22, size: 40100000, docChar: 'd', archived: true });
 
+        // The desktop app names each session unit after its venue.
         var units = {
             projects: [
-                { id: '_library', name: '', updated_at: iso(40) },
-                { id: 'p1', name: 'Spa-Francorchamps 2026', updated_at: iso(1) },
-                { id: 'p2', name: 'Monza Test Day', updated_at: iso(30) }
+                { id: '_library', name: '', updated_at: iso(1) }
             ],
             sessions: [
-                { id: 's1', name: 'Race 1', project_id: 'p1', updated_at: iso(1) },
-                { id: 's2', name: 'Qualifying', project_id: 'p1', updated_at: iso(2) },
-                { id: 's3', name: 'FP2', project_id: 'p1', updated_at: iso(3) },
-                { id: 's5', name: 'Long run', project_id: 'p2', updated_at: iso(30) },
-                { id: 's4', name: 'Anglesey VBOX lap', project_id: '_library', updated_at: iso(40) }
+                { id: ids.s1, name: 'Spa-Francorchamps', project_id: '_library', updated_at: iso(1) },
+                { id: ids.s2, name: 'Spa-Francorchamps', project_id: '_library', updated_at: iso(2) },
+                { id: ids.s3, name: 'Spa-Francorchamps', project_id: '_library', updated_at: iso(3) },
+                { id: ids.s5, name: 'Monza', project_id: '_library', updated_at: iso(30) },
+                { id: ids.s4, name: 'Anglesey Coastal', project_id: '_library', updated_at: iso(40) }
             ]
         };
 
@@ -101,18 +112,21 @@
         var shareId = function () { shareSeq += 1; return ('00000000000000000000000000000000' + shareSeq.toString(16)).slice(-32); };
         var shares = {
             outgoing: [
-                { share_id: shareId(), session_id: 's1', status: 'accepted', recipient_email: 'engineer@example.com' },
-                { share_id: shareId(), session_id: 's1', status: 'pending', recipient_email: 'coach@example.com' },
-                { share_id: shareId(), session_id: 's2', status: 'accepted', recipient_email: 'teammate@example.com' }
+                { share_id: shareId(), session_id: ids.s1, status: 'accepted', recipient_email: 'engineer@example.com' },
+                { share_id: shareId(), session_id: ids.s1, status: 'pending', recipient_email: 'coach@example.com' },
+                { share_id: shareId(), session_id: ids.s2, status: 'accepted', recipient_email: 'teammate@example.com' }
             ],
             inbox: [
-                { share_id: shareId(), session_name: 'Le Mans Stint 3', owner_name: 'Ada', status: 'accepted' }
+                { share_id: shareId(), session_name: 'Le Mans', owner_name: 'Ada', status: 'accepted' }
             ],
             pending: [
-                { share_id: shareId(), session_name: 'Daytona Night Practice', owner_name: 'Bo' }
+                { share_id: shareId(), session_name: 'Daytona', owner_name: 'Bo' }
             ]
         };
-        var inboxFiles = sessionFiles.s1.slice(1, 4);
+        var inboxId = '9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b1a0f9e8d';
+        ids.inbox = inboxId;
+        var inboxFiles = session('inbox', { track: 'Circuit de la Sarthe', car: 'LMP3', driver: 'Ada',
+            date: '2026-06-14', file: 'lemans 2026-06-14 03-12-40_Stint_3.ld', laps: 12, size: 52400000, docChar: '4' });
 
         var copy = function (value) { return JSON.parse(JSON.stringify(value)); };
         var later = function (value) { return new Promise(function (resolve) { setTimeout(function () { resolve(copy(value)); }, 150); }); };
@@ -133,6 +147,7 @@
                     'Front wing: 4    Rear wing: 7', 'Tyre pressures, hot: 26.5 psi', 'Brake bias: 56.5 %']));
             }
             if (ext === 'mp4' || ext === 'mov' || ext === 'webm') return fail('There is no sample video in the preview.');
+            if (ext === 'risession' && docs[file.name]) return Promise.resolve(new TextEncoder().encode(JSON.stringify(docs[file.name])).buffer);
             return Promise.resolve(new TextEncoder().encode('Sample file: ' + file.name + '\n').buffer);
         }
 
@@ -140,8 +155,8 @@
             demo: true,
             configured: true,
             account: function () {
-                return later({ entitlement: { active: true, edition: 'Pro (sample)' },
-                    quota: { bytes_used: 3.2e9, bytes_reserved: 0, limit: 10 * 1024 * 1024 * 1024 }, consent_version: 1 });
+                return later({ entitlement: { active: true, edition: 'paid' },
+                    quota: { bytes_used: 0.2 * 1024 * 1024 * 1024, bytes_reserved: 0, limit: 15 * 1024 * 1024 * 1024 }, consent_version: 1 });
             },
             listUnits: function () { return later(units); },
             listShares: function () { return later(shares); },
@@ -204,7 +219,7 @@
             confirmPasswordReset: notReal, changePassword: notReal, updateProfile: notReal, deleteAccount: notReal,
             friendlyError: function (err) { return (err && err.message) || 'Something went wrong.'; }
         };
-        return { sync: sync, auth: demoAuth };
+        return { sync: sync, auth: demoAuth, ids: ids };
     }
 
     if (typeof module !== 'undefined' && module.exports) {

@@ -56,12 +56,83 @@ test('isAvailable: archived files are not', () => {
     assert.equal(cx.isAvailable(null), false);
 });
 
-test('openInAppUrl: own session, shared session, one file', () => {
+test('openInAppUrl: exactly the shape the desktop validator accepts', () => {
     const sha = 'a'.repeat(64);
-    assert.equal(cx.openInAppUrl({ sessionId: 'abc_1' }), 'raceinsight://cloud/open?session=abc_1');
-    assert.equal(cx.openInAppUrl({ sessionId: 'abc_1', sha256: sha }), `raceinsight://cloud/open?session=abc_1&file=${sha}`);
+    const id = '3f9a1c7e5b2d4a6081f2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f6a7b8';
+    assert.equal(cx.openInAppUrl({ sessionId: id }), `raceinsight://cloud/open?session=${id}`);
+    assert.equal(cx.openInAppUrl({ sessionId: 'abc_1-X' }), 'raceinsight://cloud/open?session=abc_1-X');
+    assert.equal(cx.openInAppUrl({ sessionId: id, sha256: sha }), `raceinsight://cloud/open?session=${id}&file=${sha}`);
     assert.equal(cx.openInAppUrl({ shareId: 'f'.repeat(32), sha256: sha }), `raceinsight://cloud/open?share=${'f'.repeat(32)}&file=${sha}`);
-    assert.equal(cx.openInAppUrl({ sessionId: 'a&b=c' }), 'raceinsight://cloud/open?session=a%26b%3Dc', 'values are encoded');
+    assert.equal(cx.openInAppUrl({ sessionId: id, sha256: sha.toUpperCase() }), `raceinsight://cloud/open?session=${id}&file=${sha}`,
+        'the file hash is sent in lower case');
+});
+
+test('openInAppUrl: refuses ids the desktop app would ignore; drops a bad file hash', () => {
+    const id = 'b'.repeat(64);
+    assert.equal(cx.openInAppUrl({ sessionId: 'a&b=c' }), null);
+    assert.equal(cx.openInAppUrl({ sessionId: 'x'.repeat(65) }), null, 'longer than 64');
+    assert.equal(cx.openInAppUrl({ sessionId: '' }), null);
+    assert.equal(cx.openInAppUrl({ sessionId: 'my session' }), null);
+    assert.equal(cx.openInAppUrl({ shareId: 'F'.repeat(32) }), null, 'share ids are lower-case hex');
+    assert.equal(cx.openInAppUrl({ shareId: 'f'.repeat(31) }), null);
+    assert.equal(cx.openInAppUrl(null), null);
+    assert.equal(cx.openInAppUrl({ sessionId: id, sha256: 'zz' }), `raceinsight://cloud/open?session=${id}`);
+    assert.equal(cx.openInAppUrl({ sessionId: id, label: 'Spa' }), `raceinsight://cloud/open?session=${id}`, 'no other keys');
+    for (const url of [cx.openInAppUrl({ sessionId: id, sha256: 'c'.repeat(64) }), cx.openInAppUrl({ shareId: '1'.repeat(32) })]) {
+        assert.ok(url.length <= 512);
+        assert.match(url, /^raceinsight:\/\/cloud\/open\?(session=[A-Za-z0-9_-]{1,64}|share=[0-9a-f]{32})(&file=[0-9a-f]{64})?$/);
+    }
+});
+
+test('names: hashes are recognised and shortened', () => {
+    const sha = '3f9a1c7e5b2d4a6081f2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f6a7b8';
+    assert.equal(cx.looksLikeHash(sha + '.apx'), true);
+    assert.equal(cx.looksLikeHash(sha), true);
+    assert.equal(cx.looksLikeHash('session_3f9a1c7e5b2d4a60.risession'), true);
+    assert.equal(cx.looksLikeHash('Spa-Francorchamps'), false);
+    assert.equal(cx.looksLikeHash('race.ld'), false);
+    assert.equal(cx.shortHash(sha), '3f9a1c7e…a7b8');
+    assert.equal(cx.displayFileName(sha + '.apx'), '3f9a1c7e…a7b8.apx');
+    assert.equal(cx.displayFileName('onboard.mp4'), 'onboard.mp4');
+});
+
+test('parseSessionDocument: reads file name, string metadata and lap count; refuses anything else', () => {
+    const doc = cx.parseSessionDocument(JSON.stringify({ schema: 'race-insight-session', version: 1, file_name: 'spa.ld',
+        metadata: { Venue: 'Spa', Laps: 3 }, laps: [{}, {}] }));
+    assert.equal(doc.fileName, 'spa.ld');
+    assert.deepEqual(plain(doc.metadata), { Venue: 'Spa' }, 'numbers are dropped');
+    assert.equal(doc.laps, 2);
+    assert.equal(cx.parseSessionDocument('{"schema":"race-insight-session","version":2}'), null);
+    assert.equal(cx.parseSessionDocument('{"schema":"other","version":1}'), null);
+    assert.equal(cx.parseSessionDocument('not json'), null);
+    assert.equal(cx.parseSessionDocument(null), null);
+    const polluted = cx.parseSessionDocument('{"schema":"race-insight-session","version":1,"metadata":{"__proto__":"x"}}');
+    assert.equal(Object.keys(polluted.metadata).length, 0);
+    assert.equal(Object.getPrototypeOf(polluted.metadata), Object.getPrototypeOf(cx.parseSessionDocument(
+        '{"schema":"race-insight-session","version":1}').metadata));
+});
+
+test('normalizeDate: ISO, day-first and unix seconds', () => {
+    assert.equal(cx.normalizeDate('2025-07-13'), '2025-07-13');
+    assert.equal(cx.normalizeDate('2025-07-13T22:15:00Z'), '2025-07-13');
+    assert.equal(cx.normalizeDate('13/07/2025'), '2025-07-13');
+    assert.equal(cx.normalizeDate('3-7-2025'), '2025-07-03');
+    assert.equal(cx.normalizeDate('1752364800'), '2025-07-13');
+    assert.equal(cx.normalizeDate(''), null);
+    assert.equal(cx.normalizeDate('soon'), null);
+});
+
+test('sessionFacts: human name, track, car, driver and date like the desktop app', () => {
+    const facts = cx.sessionFacts({ fileName: 'formulavee_rudskogen 2025-07-13 00-43-53_Stint_1.ld', laps: 4,
+        metadata: { Venue: 'Rudskogen', Vehicle: 'Formula Vee', Driver: 'Vignesh D', 'Log Date': '12/07/2025' } }, 'Rudskogen');
+    assert.deepEqual(plain(facts), { name: 'formulavee_rudskogen 2025-07-13 00-43-53_Stint_1', track: 'Rudskogen',
+        car: 'Formula Vee', driver: 'Vignesh D', date: '2025-07-13', laps: 4 }, 'the file-name date beats Log Date');
+    assert.equal(cx.sessionFacts({ fileName: 'a.ld', metadata: { Date: '01/08/2025', 'Log Date': '2025-07-31' } }, '').date, '2025-08-01');
+    const hashOnly = cx.sessionFacts({ fileName: 'b'.repeat(64) + '.apx', metadata: { Track: 'Monza' } }, 'c'.repeat(64));
+    assert.equal(hashOnly.name, 'Monza', 'never a hash as the name');
+    assert.equal(cx.sessionFacts(null, 'Spa').name, 'Spa');
+    assert.equal(cx.sessionFacts(null, 'd'.repeat(64)).name, 'Untitled session');
+    assert.equal(cx.sessionFacts(null, 'Spa').track, null, 'nothing is guessed without the document');
 });
 
 const UNITS = {
@@ -125,18 +196,51 @@ test('buildModel: Shared with others groups active shares by session', () => {
     assert.deepEqual(model.outgoing.map((o) => [o.name, o.project_name, o.recipients.length, o.exists]),
         [['Deleted session', '', 1, false], ['Race', 'Spa 2026', 2, true]]);
     assert.deepEqual(model.outgoing[1].recipients.map((r) => r.status), ['accepted', 'pending']);
-    assert.deepEqual(plain(cx.trail(cx.buildModel(UNITS, SHARES), { type: 'outgoing' })).map((t) => t.label), ['Shared with others']);
 });
 
-test('trail: breadcrumbs, and null for something that no longer exists', () => {
+test('buildRows: My sessions use document facts once loaded, and show sharing', () => {
     const model = cx.buildModel(UNITS, SHARES);
-    const labels = (loc) => { const t = cx.trail(model, loc); return t && plain(t.map((s) => s.label)); };
-    assert.deepEqual(labels({ type: 'mine' }), ['My files']);
-    assert.deepEqual(labels({ type: 'project', id: 'p2' }), ['My files', 'Spa 2026']);
-    assert.deepEqual(labels({ type: 'session', id: 's1' }), ['My files', 'Spa 2026', 'Race']);
-    assert.deepEqual(labels({ type: 'shared' }), ['Shared with me']);
-    assert.deepEqual(labels({ type: 'share', id: '4'.repeat(32) }), ['Shared with me', 'Le Mans']);
-    assert.equal(labels({ type: 'session', id: 'nope' }), null);
-    assert.equal(labels({ type: 'project', id: 'nope' }), null);
-    assert.equal(labels({ type: 'share', id: 'nope' }), null);
+    const before = cx.buildRows(model, 'mine', {});
+    assert.deepEqual(plain(before.map((r) => r.key)), ['s:s4', 's:s3', 's:s2', 's:s1']);
+    const race = before.find((r) => r.sessionId === 's1');
+    assert.equal(race.name, 'Race');
+    assert.equal(race.sharedWith, 2);
+    assert.deepEqual(plain(race.status), { label: 'In cloud', tone: 'valid' });
+    const details = { 's:s1': { size: 3000, archived: true, facts: { name: 'spa race', track: 'Spa', car: 'F4', driver: 'Ada', date: '2026-11-02', laps: 9 } } };
+    const after = cx.buildRows(model, 'mine', details).find((r) => r.sessionId === 's1');
+    assert.equal(after.name, 'spa race');
+    assert.equal(after.track, 'Spa');
+    assert.equal(after.size, 3000);
+    assert.deepEqual(plain(after.status), { label: 'Archived', tone: 'warn' });
+});
+
+test('buildRows: Shared with me lists invitations first; Shared with others has recipients', () => {
+    const model = cx.buildModel(UNITS, SHARES);
+    const shared = cx.buildRows(model, 'shared', {});
+    assert.deepEqual(plain(shared.map((r) => [r.key, r.kind, r.name, r.ownerName, r.status.label])), [
+        ['inv:' + '5'.repeat(32), 'invitation', 'Daytona', 'Bo', 'Invitation'],
+        ['sh:' + '4'.repeat(32), 'shared', 'Le Mans', 'Ada', 'Shared with you']]);
+    const outgoing = cx.buildRows(model, 'outgoing', {});
+    assert.deepEqual(plain(outgoing.map((r) => [r.key, r.sharedWith, r.invited])), [['s:s1', 2, 1]]);
+});
+
+test('filterAndSort: search over name, track, car, driver and owner; three sorts', () => {
+    const rows = [
+        { key: 'a', kind: 'own', name: 'Alpha', track: 'Spa', car: 'F4', driver: 'Ada', date: '2026-01-01', size: 10 },
+        { key: 'b', kind: 'own', name: 'Bravo', track: 'Monza', car: 'GT3', driver: 'Bo', date: '2026-03-01', size: 30 },
+        { key: 'c', kind: 'own', name: 'Charlie', track: 'Spa', car: 'GT3', driver: 'Cy', date: null, updated_at: '2026-02-01T00:00:00Z', size: 20 },
+        { key: 'i', kind: 'invitation', name: 'Zulu', ownerName: 'Dee', date: null, size: null }
+    ];
+    const keys = (list) => plain(list.map((r) => r.key));
+    assert.deepEqual(keys(cx.filterAndSort(rows, '', 'date')), ['i', 'b', 'c', 'a'], 'newest first, invitations on top');
+    assert.deepEqual(keys(cx.filterAndSort(rows, '', 'name')), ['i', 'a', 'b', 'c']);
+    assert.deepEqual(keys(cx.filterAndSort(rows, '', 'size')), ['i', 'b', 'c', 'a']);
+    assert.deepEqual(keys(cx.filterAndSort(rows, 'spa gt3', 'date')), ['c']);
+    assert.deepEqual(keys(cx.filterAndSort(rows, 'ADA', 'date')), ['a']);
+    assert.deepEqual(keys(cx.filterAndSort(rows, 'dee', 'date')), ['i']);
+});
+
+test('sortFiles: session data, document, other RACE Insight files, then the rest', () => {
+    const files = [{ name: 'z.png' }, { name: 'n.ld' }, { name: 'session_1.risession' }, { name: 'abc.apx' }, { name: 'a.txt' }];
+    assert.deepEqual(plain(cx.sortFiles(files).map((f) => f.name)), ['abc.apx', 'session_1.risession', 'n.ld', 'a.txt', 'z.png']);
 });

@@ -37,12 +37,12 @@ test('the sample PDF is a well-formed one-page PDF', () => {
 });
 
 test('sample sync: subscribed account, and sharing changes Shared with others', async () => {
-    const { sync, auth } = demo.createDemo({ fetch: async () => ({ arrayBuffer: async () => new ArrayBuffer(4) }) });
+    const { sync, auth, ids } = demo.createDemo({ fetch: async () => ({ arrayBuffer: async () => new ArrayBuffer(4) }) });
     assert.equal(sync.demo, true);
     assert.equal((await sync.account()).entitlement.active, true);
-    const before = (await sync.listShares()).outgoing.filter((s) => s.session_id === 's3').length;
-    await sync.createShare('s3', ['new@example.com']);
-    const after = (await sync.listShares()).outgoing.filter((s) => s.session_id === 's3').length;
+    const before = (await sync.listShares()).outgoing.filter((s) => s.session_id === ids.s3).length;
+    await sync.createShare(ids.s3, ['new@example.com']);
+    const after = (await sync.listShares()).outgoing.filter((s) => s.session_id === ids.s3).length;
     assert.equal(after, before + 1);
     await assert.rejects(sync.downloadFile({ name: 'clip.mp4' }), /no sample video/);
     assert.equal(auth.currentUser.uid, 'sample-user');

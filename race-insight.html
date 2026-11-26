@@ -212,7 +212,7 @@
     <!-- Local Stylesheets -->
     <link rel="stylesheet" href="css/main.css?v=224f5cfa5c">
     <link rel="stylesheet" href="css/race-insight.css?v=b5413d94b8">
-    <link rel="stylesheet" href="css/cloud.css?v=947ae16b12">
+    <link rel="stylesheet" href="css/cloud.css?v=8ab75c3c57">
     
     <!-- Polyfills for Edge compatibility -->
     <script>
@@ -866,7 +866,7 @@
         </div>
     </div>
 
-    <!-- Cloud files: file explorer for synced sessions (js/cloud-app.js) -->
+    <!-- Cloud files: synced sessions in the desktop app's layout (js/cloud-app.js) -->
     <dialog id="cloud-modal" class="cx-modal" aria-labelledby="cloud-modal-title">
         <div class="cx-modal__head">
             <div class="cx-modal__title">
@@ -874,16 +874,18 @@
                 <h2 id="cloud-modal-title">Cloud files</h2>
                 <span id="cloud-demo-badge" class="cloud-badge cx-demo-badge" hidden>Sample data</span>
             </div>
-            <div id="cloud-account" class="cx-quota" hidden>
-                <div class="cx-quota__text">
-                    <span id="cloud-edition" class="cloud-badge"></span>
-                    <span id="cloud-quota-text"></span>
-                </div>
+            <button id="cloud-modal-close" type="button" class="cx-icon-btn cx-modal__close" aria-label="Close Cloud files"><i class="fas fa-xmark" aria-hidden="true"></i></button>
+        </div>
+
+        <div id="cloud-account" class="cx-storage" hidden>
+            <span class="cx-storage__icon" aria-hidden="true"><i class="fas fa-cloud"></i></span>
+            <span id="cloud-edition" class="cloud-badge cx-storage__plan"></span>
+            <div class="cx-storage__usage">
+                <div class="cx-storage__text"><span class="cx-storage__label">Cloud storage</span><span id="cloud-quota-text"></span></div>
                 <div class="cloud-quota" role="progressbar" aria-label="Cloud storage used" aria-valuemin="0" aria-valuemax="100">
                     <div id="cloud-quota-bar" class="cloud-quota__bar"></div>
                 </div>
             </div>
-            <button id="cloud-modal-close" type="button" class="cx-icon-btn cx-modal__close" aria-label="Close Cloud files"><i class="fas fa-xmark" aria-hidden="true"></i></button>
         </div>
 
         <div class="cx-modal__messages">
@@ -904,21 +906,42 @@
         </section>
 
         <section id="cloud-explorer" class="cx" hidden>
-            <div class="cx-toolbar">
-                <nav id="cx-breadcrumbs" class="cx-breadcrumbs" aria-label="Folder path"></nav>
-                <div class="cx-toolbar__actions">
-                    <button id="cx-open-btn" type="button" class="btn btn-secondary cloud-btn" hidden><i class="fas fa-up-right-from-square" aria-hidden="true"></i> Open in RACE Insight</button>
-                    <button id="cx-share-btn" type="button" class="btn btn-secondary cloud-btn" hidden><i class="fas fa-share-nodes" aria-hidden="true"></i> Share</button>
-                </div>
-            </div>
-            <div class="cx-body">
-                <nav id="cx-tree" class="cx-tree" aria-label="Folders"></nav>
-                <div class="cx-main">
-                    <div class="cx-head" aria-hidden="true">
-                        <span>Name</span><span class="cx-col cx-col--type">Type</span><span class="cx-col cx-col--size">Size</span><span class="cx-col cx-col--date">Modified</span><span class="cx-col--actions"></span>
+            <nav id="cx-tree" class="cx-nav" aria-label="Cloud folders"></nav>
+            <div class="cx-main">
+                <div class="cx-toolbar" role="toolbar" aria-label="Cloud files">
+                    <div class="cx-search">
+                        <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+                        <input id="cx-search" type="search" placeholder="Search name, track, car, driver" aria-label="Search cloud files" autocomplete="off">
                     </div>
-                    <ul id="cx-list" class="cx-list"></ul>
-                    <p id="cx-empty" class="cloud-muted cx-empty" hidden></p>
+                    <label class="cx-sort">Sort
+                        <select id="cx-sort" aria-label="Sort by">
+                            <option value="date">Date</option>
+                            <option value="name">Name</option>
+                            <option value="size">Size</option>
+                        </select>
+                    </label>
+                    <button id="cx-refresh" type="button" class="cx-icon-btn cx-toolbar__refresh" aria-label="Refresh" title="Refresh"><i class="fas fa-rotate-right" aria-hidden="true"></i></button>
+                </div>
+                <div class="cx-content">
+                    <div class="cx-table-wrap">
+                        <table class="cx-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Name</th>
+                                    <th scope="col" class="cx-col--track">Track</th>
+                                    <th scope="col" class="cx-col--date">Date</th>
+                                    <th scope="col" class="cx-col--size">Size</th>
+                                    <th scope="col" class="cx-col--status">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cx-list"></tbody>
+                        </table>
+                        <p id="cx-empty" class="cloud-muted cx-empty" hidden></p>
+                    </div>
+                    <aside id="cx-details" class="cx-details" aria-label="Details">
+                        <button id="cx-details-back" type="button" class="cx-details__back"><i class="fas fa-arrow-left" aria-hidden="true"></i> All sessions</button>
+                        <div id="cx-details-body" class="cx-details__body"></div>
+                    </aside>
                 </div>
             </div>
         </section>
@@ -941,7 +964,8 @@
             <p id="cx-open-text" class="cloud-muted">Your browser may ask to open RACE Insight. Allow it to continue.</p>
             <p class="cloud-muted">Nothing happened? Install or update the RACE Insight desktop app, then try again.</p>
             <div class="cloud-row cloud-row--end">
-                <a class="btn btn-secondary" href="#download" id="cx-open-get">Get RACE Insight</a>
+                <a class="btn btn-secondary" href="#download" id="cx-open-get">Install or update</a>
+                <a class="btn btn-secondary" href="#" id="cx-open-again" rel="noopener">Try again</a>
                 <button value="close" class="btn btn-primary">OK</button>
             </div>
         </form>
@@ -1181,10 +1205,10 @@
     <script src="js/cognito-auth.js?v=e832b211b6"></script>
     <script src="js/cloud-config.js?v=a077f17e8a"></script>
     <script src="js/cloud-sync.js?v=4b4427f2f4"></script>
-    <script src="js/cloud-demo.js?v=c904281c9f"></script>
+    <script src="js/cloud-demo.js?v=648340c364"></script>
     <script src="js/cloud-gate.js?v=bd443cc628"></script>
-    <script src="js/cloud-explorer.js?v=6b99fc221a"></script>
-    <script src="js/cloud-app.js?v=549e0422c4"></script>
+    <script src="js/cloud-explorer.js?v=ae3b937453"></script>
+    <script src="js/cloud-app.js?v=8f1006d476"></script>
     <!-- race-insight.js loads after the sign-in scripts -->
     <script src="js/release-feed.js?v=cda430f08c"></script>
     <script src="js/download-flow.js?v=0737a3451b"></script>
