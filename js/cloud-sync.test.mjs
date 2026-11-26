@@ -73,6 +73,13 @@ function fakeCloud({ rawOptIn = true } = {}) {
             return json(200, { rev });
         }
         m = path.match(/^\/v1\/sessions\/([^/]+)$/);
+        if (m && init.method === 'DELETE') {
+            const head = units.get(m[1]);
+            if (!head) return json(404, { error: 'not_found' });
+            if (head.head_rev !== body.parent) return json(409, { error: 'conflict', message: 'changed' });
+            units.delete(m[1]);
+            return json(200, { id: m[1], deleted: true });
+        }
         if (m) return units.has(m[1]) ? json(200, units.get(m[1])) : json(404, { error: 'not_found' });
         if (path === '/v1/shares' && init.method === 'POST') return json(202, { status: 'invite_sent', echo: body });
         return json(404, { error: 'not_found', message: path });
@@ -154,4 +161,15 @@ test('unit documents with paths or internal names are refused', () => {
     assert.throws(() => decodeUnitDocument(doc('__cache.tcache'), 'session', 's'));
     assert.throws(() => decodeUnitDocument(doc('ok.ld'), 'session', 'other'));
     assert.equal(decodeUnitDocument(doc('ok.ld'), 'session', 's')[0].name, 'ok.ld');
+});
+
+test('removeSession deletes at the current head and validates its input', async () => {
+    const cloud = fakeCloud();
+    const sync = client(cloud);
+    cloud.units.set('s1', { id: 's1', head_rev: '0000000003', blobs: [] });
+    await assert.rejects(sync.removeSession('s1', '0000000002'), (e) => e.code === 'conflict');
+    assert.equal((await sync.removeSession('s1', '0000000003')).deleted, true);
+    assert.equal(cloud.units.has('s1'), false);
+    assert.throws(() => sync.removeSession('../x', '1'), (e) => e.code === 'invalid_parameter');
+    await assert.rejects(sync.removeSession('s1', null), (e) => e.code === 'invalid_parameter');
 });

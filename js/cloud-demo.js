@@ -54,9 +54,7 @@
 
         // Real session units hold <session id>.apx (the id is the SHA-256 of the
         // logger file) and the session_<id prefix>.risession document with the
-        // logger metadata. Spa race 1 also carries a video, a PDF, an image and a
-        // note so the previewer can be tried; synced sessions do not include
-        // such files today.
+        // logger metadata.
         var ids = {
             s1: '3f9a1c7e5b2d4a6081f2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f6a7b8',
             s2: '8c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d',
@@ -75,16 +73,11 @@
             return [
                 { name: id + '.apx', sha256: id, size: info.size, storage: 'standard' },
                 { name: docName, sha256: sha(info.docChar), size: 182000, storage: info.archived ? 'archived' : 'standard' }
-            ].concat(info.extra || []);
+            ];
         }
         var sessionFiles = {};
         sessionFiles[ids.s1] = session('s1', { track: 'Spa-Francorchamps', car: 'Formula Vee', driver: 'Sample Driver',
-            date: '2026-11-22', file: 'spa 2026-11-22 14-05-10_Race_1.ld', laps: 14, size: 31500000, docChar: 'e', extra: [
-                { name: 'onboard_cam.mp4', sha256: sha('a'), size: 310000000, storage: 'standard' },
-                { name: 'setup_sheet.pdf', sha256: sha('f'), size: 2400, storage: 'standard' },
-                { name: 'pit_board.png', sha256: sha('c'), size: 141000, storage: 'standard' },
-                { name: 'notes.txt', sha256: sha('7'), size: 1200, storage: 'standard' }
-            ] });
+            date: '2026-11-22', file: 'spa 2026-11-22 14-05-10_Race_1.ld', laps: 14, size: 31500000, docChar: 'e' });
         sessionFiles[ids.s2] = session('s2', { track: 'Spa-Francorchamps', car: 'Formula Vee', driver: 'Sample Driver',
             date: '2026-11-21', file: 'spa 2026-11-21 10-30-00_Qualifying.ld', laps: 8, size: 14800000, docChar: '6' });
         sessionFiles[ids.s3] = session('s3', { track: 'Spa-Francorchamps', car: 'Formula Vee', driver: 'Alex Teammate',
@@ -100,11 +93,11 @@
                 { id: '_library', name: '', updated_at: iso(1) }
             ],
             sessions: [
-                { id: ids.s1, name: 'Spa-Francorchamps', project_id: '_library', updated_at: iso(1) },
-                { id: ids.s2, name: 'Spa-Francorchamps', project_id: '_library', updated_at: iso(2) },
-                { id: ids.s3, name: 'Spa-Francorchamps', project_id: '_library', updated_at: iso(3) },
-                { id: ids.s5, name: 'Monza', project_id: '_library', updated_at: iso(30) },
-                { id: ids.s4, name: 'Anglesey Coastal', project_id: '_library', updated_at: iso(40) }
+                { id: ids.s1, name: 'Spa-Francorchamps', project_id: '_library', updated_at: iso(1), head_rev: '0000000003' },
+                { id: ids.s2, name: 'Spa-Francorchamps', project_id: '_library', updated_at: iso(2), head_rev: '0000000002' },
+                { id: ids.s3, name: 'Spa-Francorchamps', project_id: '_library', updated_at: iso(3), head_rev: '0000000001' },
+                { id: ids.s5, name: 'Monza', project_id: '_library', updated_at: iso(30), head_rev: '0000000001' },
+                { id: ids.s4, name: 'Anglesey Coastal', project_id: '_library', updated_at: iso(40), head_rev: '0000000001' }
             ]
         };
 
@@ -177,6 +170,11 @@
                 shares.pending = shares.pending.filter(function (s) { return s.share_id !== id; });
                 if (invite) shares.inbox.push({ share_id: id, session_name: invite.session_name, owner_name: invite.owner_name, status: 'accepted' });
                 return later({ share_id: id, status: 'accepted' });
+            },
+            removeSession: function (id) {
+                units.sessions = units.sessions.filter(function (x) { return x.id !== id; });
+                shares.outgoing.forEach(function (x) { if (x.session_id === id) x.status = 'revoked'; });
+                return later({ id: id, deleted: true });
             },
             removeShare: function (id) {
                 shares.outgoing.forEach(function (s) { if (s.share_id === id) s.status = 'revoked'; });

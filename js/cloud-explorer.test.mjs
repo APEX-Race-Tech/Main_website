@@ -92,8 +92,6 @@ test('names: hashes are recognised and shortened', () => {
     assert.equal(cx.looksLikeHash('Spa-Francorchamps'), false);
     assert.equal(cx.looksLikeHash('race.ld'), false);
     assert.equal(cx.shortHash(sha), '3f9a1c7e…a7b8');
-    assert.equal(cx.displayFileName(sha + '.apx'), '3f9a1c7e…a7b8.apx');
-    assert.equal(cx.displayFileName('onboard.mp4'), 'onboard.mp4');
 });
 
 test('parseSessionDocument: reads file name, string metadata and lap count; refuses anything else', () => {
@@ -206,6 +204,8 @@ test('buildRows: My sessions use document facts once loaded, and show sharing', 
     assert.equal(race.name, 'Race');
     assert.equal(race.sharedWith, 2);
     assert.deepEqual(plain(race.status), { label: 'In cloud', tone: 'valid' });
+    assert.equal(cx.buildRows(cx.buildModel({ sessions: [{ id: 'z', name: 'Z', head_rev: '0000000004' }] }, {}), 'mine', {})[0].headRev,
+        '0000000004', 'the head revision a delete needs');
     const details = { 's:s1': { size: 3000, archived: true, facts: { name: 'spa race', track: 'Spa', car: 'F4', driver: 'Ada', date: '2026-11-02', laps: 9 } } };
     const after = cx.buildRows(model, 'mine', details).find((r) => r.sessionId === 's1');
     assert.equal(after.name, 'spa race');
@@ -240,7 +240,11 @@ test('filterAndSort: search over name, track, car, driver and owner; three sorts
     assert.deepEqual(keys(cx.filterAndSort(rows, 'dee', 'date')), ['i']);
 });
 
-test('sortFiles: session data, document, other RACE Insight files, then the rest', () => {
-    const files = [{ name: 'z.png' }, { name: 'n.ld' }, { name: 'session_1.risession' }, { name: 'abc.apx' }, { name: 'a.txt' }];
-    assert.deepEqual(plain(cx.sortFiles(files).map((f) => f.name)), ['abc.apx', 'session_1.risession', 'n.ld', 'a.txt', 'z.png']);
+test('downloadName: "<track> <date>.apx", sanitised, never a hash', () => {
+    assert.equal(cx.downloadName({ track: 'Spa-Francorchamps', date: '2026-11-22', name: 'x' }), 'Spa-Francorchamps 2026-11-22.apx');
+    assert.equal(cx.downloadName({ track: 'Monza', date: null, updated_at: '2026-10-27T09:00:00Z', name: 'x' }), 'Monza 2026-10-27.apx');
+    assert.equal(cx.downloadName({ track: null, date: null, name: 'spa race 1' }), 'spa race 1.apx');
+    assert.equal(cx.downloadName({ track: 'A/B: "C"?', date: '2026-01-02' }), 'A B C 2026-01-02.apx');
+    assert.equal(cx.downloadName({ track: null, name: 'e'.repeat(64) }), 'RACE Insight session.apx');
+    assert.equal(cx.downloadName({ track: 'CON', date: null, name: 'x' }), 'CON session.apx');
 });

@@ -4,10 +4,11 @@
  * with me, Shared with others), a searchable session table and a details pane
  * with the session's files and actions.
  *
- * Sessions show the track, car, driver and date from their .risession
- * document; raw file hashes appear only in the details pane. Opens sessions
- * in the desktop app, previews images, videos and PDFs, downloads verified
- * files and shares sessions. Sessions are created by the desktop app only.
+ * A session is one item, like one file in the desktop app: selecting it
+ * shows its details, never a folder of files. Its .apx and .risession stay
+ * internal; the track, car, driver and date come from the .risession. Opens
+ * sessions in the desktop app, downloads the verified .apx under a readable
+ * name, shares and removes sessions. Sessions are created by the desktop app.
  * Exposes window.RaCloudApp ({ open, close }). The folder and selection are
  * kept in the URL hash ("#cloud", "#cloud/s=<id>", ...), so links work.
  * All text from the service is set with textContent, never as HTML.
@@ -40,7 +41,7 @@
     var loading = null;          // the load() in flight
     var renderQueued = false;
     var shareTarget = null;
-    var viewer = { token: 0, url: null, file: null, shareId: null, buffer: null };
+    var confirmingRemove = null;  // row key whose delete is waiting for confirmation
     var authSubscribed = false;
     var authSeen = false;
     var currentUid = null;
@@ -130,10 +131,6 @@
         setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
     }
 
-    function download(file, shareId) {
-        return sync.downloadFile(file, shareId).then(function (buffer) { save(file.name, buffer); });
-    }
-
     /* ---- Location: folder and selection in the hash ---- */
 
     function stateFromLocation(loc) {
@@ -210,7 +207,6 @@
     dialog.addEventListener('close', function () {
         // The close event arrives a moment after close(); skip it if the popup was reopened meanwhile.
         if (dialog.open) { closingFromHash = false; return; }
-        closeViewer();
         ['cloud-share-dialog', 'cx-open-dialog'].forEach(function (id) { if ($(id).open) $(id).close(); });
         if (!closingFromHash) clearCloudHash();
         closingFromHash = false;
@@ -312,77 +308,6 @@
 
     $('cx-open-get').addEventListener('click', function () { $('cx-open-dialog').close(); close(); });
 
-    /* ---- Viewer ---- */
-
-    function closeViewer() {
-        viewer.token += 1;
-        if (viewer.url) URL.revokeObjectURL(viewer.url);
-        viewer.url = null;
-        viewer.file = null;
-        viewer.buffer = null;
-        $('cx-viewer-body').textContent = '';
-        if ($('cx-viewer').open) $('cx-viewer').close();
-    }
-
-    /** Previews an image, video or PDF after its SHA-256 is verified. */
-    function openViewer(file, shareId) {
-        var mime = cx.previewType(file);
-        if (!mime) return download(file, shareId);
-        closeViewer();
-        var token = viewer.token;
-        viewer.file = file;
-        viewer.shareId = shareId || null;
-        $('cx-viewer-title').textContent = file.name;
-        var body = $('cx-viewer-body');
-        body.appendChild(el('p', 'cloud-muted cx-viewer__loading', 'Loading ' + formatBytes(file.size) + '…'));
-        $('cx-viewer').showModal();
-        return sync.downloadFile(file, shareId).then(function (buffer) {
-            if (token !== viewer.token) return; // closed or replaced meanwhile
-            viewer.buffer = buffer;
-            viewer.url = URL.createObjectURL(new Blob([buffer], { type: mime }));
-            body.textContent = '';
-            var node;
-            if (mime.indexOf('image/') === 0) {
-                node = el('img', 'cx-viewer__media');
-                node.alt = file.name;
-            } else if (mime.indexOf('video/') === 0) {
-                node = el('video', 'cx-viewer__media');
-                node.controls = true;
-                node.playsInline = true;
-            } else {
-                node = el('iframe', 'cx-viewer__pdf');
-                node.title = file.name;
-            }
-            node.src = viewer.url;
-            body.appendChild(node);
-            if (mime === 'application/pdf') {
-                // Phone browsers often cannot show a PDF inside the page.
-                var tab = el('a', 'cx-viewer__newtab', 'Open the PDF in a new tab');
-                tab.href = viewer.url;
-                tab.target = '_blank';
-                tab.rel = 'noopener';
-                body.appendChild(tab);
-            }
-        }, function (err) {
-            if (token !== viewer.token) return;
-            body.textContent = '';
-            body.appendChild(el('p', 'cloud-error cx-viewer__loading', sync.friendlyError(err)));
-        });
-    }
-
-    $('cx-viewer-close').addEventListener('click', closeViewer);
-    $('cx-viewer').addEventListener('close', function () {
-        if (!$('cx-viewer').open) closeViewer(); // not if another file opened meanwhile
-    });
-    $('cx-viewer').addEventListener('click', function (event) {
-        if (event.target === $('cx-viewer')) closeViewer();
-    });
-    $('cx-viewer-download').addEventListener('click', function () {
-        if (!viewer.file) return;
-        if (viewer.buffer) { save(viewer.file.name, viewer.buffer); return; }
-        download(viewer.file, viewer.shareId).catch(setError);
-    });
-
     /* ---- Session files and documents ---- */
 
     function filesFor(row) {
@@ -469,6 +394,7 @@
 
     function select(row) {
         selectedKey = row ? row.key : null;
+        confirmingRemove = null;
         replaceHash(locationFor(row));
         render();
         if (row && needsDetails(row)) fetchDetails(row); // the selected row goes ahead of the queue
@@ -599,32 +525,37 @@
         container.appendChild(list);
     }
 
-    var FILE_ICONS = {
-        race: ['fa-chart-line', 'cx-icon--race'], image: ['fa-file-image', 'cx-icon--image'],
-        video: ['fa-file-video', 'cx-icon--video'], pdf: ['fa-file-pdf', 'cx-icon--pdf'], other: ['fa-file', '']
-    };
+    /** Downloads the session's one .apx file, verified, under a readable name. */
+    function downloadSession(row) {
+        return filesFor(row).then(function (files) {
+            var apx = files.filter(function (f) { return cx.extension(f.name) === 'apx'; })[0];
+            if (!apx) throw new Error('This session has no session file in the cloud yet.');
+            if (!cx.isAvailable(apx)) throw Object.assign(new Error('archived'), { code: 'archived' });
+            return sync.downloadFile(apx, row.kind === 'shared' ? row.shareId : null).then(function (buffer) {
+                save(cx.downloadName(row), buffer);
+            });
+        });
+    }
 
-    function fileItem(file, shareId) {
-        var available = cx.isAvailable(file);
-        var category = cx.fileCategory(file.name);
-        var li = el('li', 'cx-file' + (available ? '' : ' is-muted'));
-        var look = FILE_ICONS[category];
-        li.appendChild(icon(look[0], 'cx-file__icon ' + look[1]));
-        var texts = el('div', 'cx-file__texts');
-        texts.appendChild(el('span', 'cx-file__label', cx.typeLabel(file.name)));
-        var meta = el('span', 'cx-file__meta');
-        var shown = el('span', 'cx-file__name', cx.displayFileName(file.name));
-        shown.title = file.name;
-        meta.appendChild(shown);
-        meta.appendChild(el('span', 'cx-file__size', formatBytes(file.size)));
-        if (!available) meta.appendChild(badge('Archived', 'warn'));
-        texts.appendChild(meta);
-        li.appendChild(texts);
-        var actions = el('span', 'cx-file__actions');
-        if (available && cx.previewType(file)) actions.appendChild(iconButton('View ' + file.name, 'fa-eye', function () { return openViewer(file, shareId); }));
-        if (available) actions.appendChild(iconButton('Download ' + file.name, 'fa-download', function () { return download(file, shareId); }));
-        li.appendChild(actions);
-        return li;
+    function removeSession(row) {
+        if (!row.headRev) return Promise.reject(new Error('Refresh and try again.'));
+        return sync.removeSession(row.sessionId, row.headRev).then(function () {
+            selectedKey = null;
+            confirmingRemove = null;
+            replaceHash(locationFor(null));
+            return load();
+        });
+    }
+
+    function renderRemove(body, row) {
+        var box = el('div', 'cx-confirm');
+        box.appendChild(el('p', '', 'Delete “' + row.name + '” from the cloud? It moves to Recently deleted in the desktop app, '
+            + 'where you can restore it for a while. People you shared it with lose access.'));
+        var buttons = el('div', 'cx-confirm__buttons');
+        buttons.appendChild(button('Delete', 'btn btn-primary cloud-btn cx-btn--danger', function () { return removeSession(row); }));
+        buttons.appendChild(button('Cancel', 'btn btn-secondary cloud-btn', function () { confirmingRemove = null; render(); }));
+        box.appendChild(buttons);
+        body.appendChild(box);
     }
 
     function renderDetails(row) {
@@ -633,7 +564,7 @@
         if (!row) {
             var empty = el('div', 'cx-details__empty');
             empty.appendChild(icon('fa-file-lines'));
-            empty.appendChild(el('p', 'cloud-muted', 'Select a session to see its files.'));
+            empty.appendChild(el('p', 'cloud-muted', 'Select a session to see its details.'));
             body.appendChild(empty);
             return;
         }
@@ -648,8 +579,7 @@
 
         var actions = el('div', 'cx-details__actions');
         body.appendChild(actions);
-        var shareId = row.kind === 'shared' ? row.shareId : null;
-        var d = details[row.key] || null;
+        var d = details[row.key] || {};
 
         if (row.kind === 'invitation') {
             actions.appendChild(button('Accept', 'btn btn-primary cloud-btn', function () { return sync.acceptShare(row.shareId).then(load); }));
@@ -665,16 +595,15 @@
             actions.appendChild(button('Open in RACE Insight', 'btn btn-primary cloud-btn', function () {
                 openInApp(row.kind === 'shared' ? { shareId: row.shareId, label: row.name } : { sessionId: row.sessionId, label: row.name });
             }, 'fa-up-right-from-square'));
-            var apx = d && d.files ? d.files.filter(function (f) { return cx.extension(f.name) === 'apx' && cx.isAvailable(f); })[0] : null;
-            if (apx) {
-                actions.appendChild(button('Download', 'btn btn-secondary cloud-btn', function () {
-                    // Saved under the session's name; the cloud keeps it as <hash>.apx.
-                    return sync.downloadFile(apx, shareId).then(function (buffer) { save(safeName(row.name) + '.apx', buffer); });
-                }, 'fa-download'));
-            }
+            actions.appendChild(button('Download', 'btn btn-secondary cloud-btn', function () { return downloadSession(row); }, 'fa-download'));
         }
         if (row.kind === 'own') {
             actions.appendChild(button('Share', 'btn btn-secondary cloud-btn', function () { openShare(row); }, 'fa-share-nodes'));
+            actions.appendChild(button('Delete from cloud', 'btn btn-secondary cloud-btn cx-btn--danger-outline', function () {
+                confirmingRemove = row.key;
+                render();
+            }, 'fa-trash-can'));
+            if (confirmingRemove === row.key) renderRemove(body, row);
         }
         if (row.kind === 'shared') {
             actions.appendChild(button('Remove from my list', 'btn btn-secondary cloud-btn', function () {
@@ -682,37 +611,25 @@
             }, 'fa-xmark'));
         }
 
-        if (row.kind === 'own' || row.live) {
+        if (row.live) {
             var facts = el('dl', 'cx-facts');
             fact(facts, 'Track', row.track);
             fact(facts, 'Car', row.car);
             fact(facts, 'Driver', row.driver);
-            fact(facts, 'Date', formatDate(row.date));
+            fact(facts, 'Date', formatDate(row.date || row.updated_at));
             if (row.laps != null) fact(facts, 'Laps', String(row.laps));
+            fact(facts, 'Size', row.size == null ? (d.error ? '' : 'Checking…') : formatBytes(row.size));
+            fact(facts, 'Sync', row.status.label === 'Archived' ? 'Archived (restore it in the desktop app)' : row.status.label);
             body.appendChild(facts);
+            if (d.error) body.appendChild(el('p', 'cloud-error cx-details__note', d.error));
+        } else {
+            body.appendChild(el('p', 'cloud-muted', 'This session is no longer shared with you.'));
         }
 
         if (row.kind === 'own') {
             var shares = recipientsOf(row.sessionId);
             if (shares.length) renderRecipientsInto(section(body, 'Shared with'), shares);
         }
-
-        if (!row.live) {
-            body.appendChild(el('p', 'cloud-muted', 'This session is no longer shared with you.'));
-            return;
-        }
-        var filesSection = section(body, 'Files');
-        if (!d) { filesSection.appendChild(el('p', 'cloud-muted cx-details__note', 'Loading files…')); return; }
-        if (d.error) { filesSection.appendChild(el('p', 'cloud-error cx-details__note', d.error)); return; }
-        if (!d.files.length) { filesSection.appendChild(el('p', 'cloud-muted cx-details__note', 'No files in this session.')); return; }
-        var list = el('ul', 'cx-files');
-        cx.sortFiles(d.files).forEach(function (file) { list.appendChild(fileItem(file, shareId)); });
-        filesSection.appendChild(list);
-    }
-
-    function safeName(name) {
-        var clean = String(name || 'session').replace(/[<>:"/\\|?*\u0000-\u001f]+/g, ' ').replace(/[. ]+$/, '').trim();
-        return clean.slice(0, 120) || 'session';
     }
 
     $('cx-details-back').addEventListener('click', function () { select(null); });
@@ -801,7 +718,7 @@
         $('cx-list').textContent = '';
         $('cx-tree').textContent = '';
         $('cx-details-body').textContent = '';
-        closeViewer();
+        confirmingRemove = null;
         ['cloud-share-dialog', 'cx-open-dialog'].forEach(function (id) { if ($(id).open) $(id).close(); });
     }
 

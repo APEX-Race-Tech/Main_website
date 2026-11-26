@@ -233,6 +233,17 @@
                 return call('POST', '/v1/shares', body);
             },
             acceptShare: function (id) { return call('POST', '/v1/shares/' + checkShareId(id) + '/accept'); },
+            /**
+             * Moves one of your sessions to Recently deleted (restorable from the
+             * desktop app for a while). parent is its current head revision.
+             */
+            removeSession: function (id, parent) {
+                checkUnitId(id);
+                if (typeof parent !== 'string' || !/^\d+$/.test(parent)) {
+                    return Promise.reject(new SyncError(0, 'invalid_parameter', 'Invalid revision'));
+                }
+                return call('DELETE', '/v1/sessions/' + id, { parent: parent });
+            },
             /** Owner: revoke. Recipient: remove an accepted share or decline an invitation. */
             removeShare: function (id) { return call('DELETE', '/v1/shares/' + checkShareId(id)); },
 

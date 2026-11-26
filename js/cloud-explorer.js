@@ -8,9 +8,11 @@
  *   Shared with me       sessions other users shared, and pending invitations
  *   Shared with others   your sessions with an active invitation or share
  *
- * Track, car, driver and date come from each session's .risession document
- * (race-insight-session v1, written by the desktop app). A value the document
- * does not hold stays null and the page shows a dash; nothing is guessed.
+ * A session is one item, like one file in the desktop app; its .apx and
+ * .risession files stay internal. Track, car, driver and date come from the
+ * session's .risession document (race-insight-session v1, written by the
+ * desktop app). A value the document does not hold stays null and the page
+ * shows a dash; nothing is guessed.
  */
 (function (root) {
     'use strict';
@@ -118,12 +120,6 @@
     function looksLikeHash(name) {
         var text = String(name || '').trim();
         return HASH_NAME.test(text) || /^session_[0-9a-f]{16}\.risession$/i.test(text);
-    }
-
-    /** A file name with a long hash shortened: "1a2b3c4d…9f0e.apx". */
-    function displayFileName(name) {
-        var match = HASH_NAME.exec(String(name || ''));
-        return match ? shortHash(match[1]) + match[2] : String(name || '');
     }
 
     var MAX_SESSION_DOCUMENT_BYTES = 4 * 1024 * 1024;
@@ -239,7 +235,7 @@
             }
             projects[pid].sessions.push({
                 id: s.id, name: s.name || 'Untitled session', project_id: pid, updated_at: s.updated_at || null,
-                shared_with: activeShares(shares, s.id).length
+                head_rev: typeof s.head_rev === 'string' ? s.head_rev : null, shared_with: activeShares(shares, s.id).length
             });
         });
         var list = order.map(function (id) { return projects[id]; });
@@ -344,7 +340,7 @@
 
     function baseRow(key, kind) {
         return {
-            key: key, kind: kind, sessionId: null, shareId: null, name: '', track: null, car: null, driver: null, date: null,
+            key: key, kind: kind, sessionId: null, shareId: null, headRev: null, name: '', track: null, car: null, driver: null, date: null,
             laps: null, updated_at: null, size: null, ownerName: null, sharedWith: 0, invited: 0, recipients: null, live: false,
             status: { label: '', tone: 'neutral' }
         };
@@ -373,6 +369,7 @@
             var d = details[row.key] || {};
             applyFacts(row, d.facts || sessionFacts(null, session.name));
             row.sessionId = session.id;
+            row.headRev = session.head_rev || null;
             row.updated_at = session.updated_at;
             row.size = d.size == null ? null : d.size;
             row.sharedWith = recipients ? recipients.length : session.shared_with || 0;
@@ -440,15 +437,17 @@
         }).map(function (x) { return x.row; });
     }
 
-    /** Files of a session for the details pane: session data, session document, other RACE Insight files, then the rest. */
-    function sortFiles(files) {
-        var rank = function (f) {
-            var ext = extension(f.name);
-            return ext === 'apx' ? 0 : ext === 'risession' ? 1 : fileCategory(f.name) === 'race' ? 2 : 3;
-        };
-        return (files || []).slice().sort(function (a, b) {
-            return rank(a) - rank(b) || String(a.name).localeCompare(String(b.name), undefined, { numeric: true, sensitivity: 'base' });
-        });
+    /**
+     * Readable name for a session's .apx download: "<track> <date>.apx" when
+     * both are known, otherwise the session name. Never the cloud's hash name.
+     */
+    function downloadName(row) {
+        var day = row.date || (row.updated_at ? normalizeDate(row.updated_at) : null);
+        var base = row.track ? [row.track, day].filter(Boolean).join(' ') : row.name;
+        if (!base || looksLikeHash(base)) base = 'RACE Insight session';
+        base = String(base).replace(/[<>:"/\\|?*\u0000-\u001f]+/g, ' ').replace(/\s+/g, ' ').replace(/[. ]+$/, '').trim().slice(0, 120);
+        if (/^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])$/i.test(base)) base += ' session';
+        return (base || 'RACE Insight session') + '.apx';
     }
 
     var api = {
@@ -458,9 +457,9 @@
         isAvailable: isAvailable, openInAppUrl: openInAppUrl, buildModel: buildModel,
         locationToHash: locationToHash, hashToLocation: hashToLocation,
         findProject: findProject, findSession: findSession, findShare: findShare,
-        shortHash: shortHash, looksLikeHash: looksLikeHash, displayFileName: displayFileName,
+        shortHash: shortHash, looksLikeHash: looksLikeHash,
         parseSessionDocument: parseSessionDocument, normalizeDate: normalizeDate, sessionFacts: sessionFacts,
-        buildRows: buildRows, filterAndSort: filterAndSort, sortFiles: sortFiles
+        buildRows: buildRows, filterAndSort: filterAndSort, downloadName: downloadName
     };
 
     if (typeof module !== 'undefined' && module.exports) module.exports = api;

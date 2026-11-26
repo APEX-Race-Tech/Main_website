@@ -43,8 +43,8 @@ const INVITE_ID = '5'.repeat(32);
 const UNITS = {
     projects: [{ id: '_library', name: '' }],
     sessions: [
-        { id: S1, name: 'Spa-Francorchamps', project_id: '_library', updated_at: '2026-11-20T10:00:00Z' },
-        { id: S2, name: 'Monza', project_id: '_library', updated_at: '2026-11-01T10:00:00Z' }
+        { id: S1, name: 'Spa-Francorchamps', project_id: '_library', updated_at: '2026-11-20T10:00:00Z', head_rev: '0000000002' },
+        { id: S2, name: 'Monza', project_id: '_library', updated_at: '2026-11-01T10:00:00Z', head_rev: '0000000001' }
     ]
 };
 const DOC_S1 = `session_${S1.slice(0, 16)}.risession`;
@@ -92,6 +92,7 @@ function fakeSync({ configured = true, account = SUBSCRIBED, units = UNITS, shar
         createShare: (...args) => answer(`createShare:${args[0]}:${args[1].join(',')}`, {}),
         acceptShare: (id) => answer(`accept:${id}`, {}),
         removeShare: (id) => answer(`remove:${id}`, {}),
+        removeSession: (id, parent) => answer(`removeSession:${id}:${parent}`, {}),
         friendlyError: (err) => (err && err.message) || 'Cloud sync failed.'
     };
 }
@@ -136,7 +137,6 @@ function fakeDom() {
         'cloud-signin-btn', 'cloud-account', 'cloud-edition', 'cloud-quota-text', 'cloud-quota-bar',
         'cloud-consent', 'cloud-explorer', 'cx-tree', 'cx-search', 'cx-sort', 'cx-refresh', 'cx-list', 'cx-empty',
         'cx-details', 'cx-details-back', 'cx-details-body',
-        'cx-viewer', 'cx-viewer-title', 'cx-viewer-body', 'cx-viewer-download', 'cx-viewer-close',
         'cx-open-dialog', 'cx-open-text', 'cx-open-get', 'cx-open-again', 'nav-signin-btn',
         'cloud-share-dialog', 'cloud-share-name', 'cloud-share-emails', 'cloud-share-ai', 'cloud-share-expires',
         'cloud-share-error', 'cloud-share-recipients', 'cloud-share-submit'].forEach((id) => make('div', id));
@@ -226,7 +226,7 @@ test('popup: stays closed until opened; open() shows the storage bar, folders an
     assert.equal(app.n('cloud-edition').textContent, 'Cloud plan');
     assert.deepEqual(app.navLabels(), ['My sessions', 'Shared with me', 'Shared with others']);
     assert.equal(app.rows().length, 2);
-    assert.match(app.details().textContent, /Select a session to see its files/);
+    assert.match(app.details().textContent, /Select a session to see its details/);
 });
 
 test('table: sessions show human names, track and date from their documents, never a hash', async () => {
@@ -341,17 +341,19 @@ test('popup: reopening uses the loaded data', async () => {
 
 /* ---- Selection and details ---- */
 
-test('details: selecting a session shows its facts, files (short hashes only) and actions', async () => {
+test('details: a session is one item: facts, sharing and actions, no file list', async () => {
     const app = await runApp({ auth: fakeAuth({ user: ADA }), sync: fakeSync(), hash: '#cloud' });
     await app.select('spa 2026-11-22 14-05-10_Race_1');
-    assert.equal(app.location.hash, `#cloud/s=${S1}`, 'the selection is in the link');
+    assert.equal(app.location.hash, `#cloud/s=${S1}`, 'the selection is in the link; no folder is opened');
+    assert.equal(app.rows().length, 2, 'the table still lists the sessions');
     const text = app.details().textContent;
-    for (const value of ['Spa-Francorchamps', 'Formula Vee', 'Ada Driver', 'Laps3', 'RACE Insight session data', 'a1a1a1a1…a1a1.apx']) {
+    for (const value of ['Spa-Francorchamps', 'Formula Vee', 'Ada Driver', 'Laps3', 'Size31 MB', 'SyncArchived']) {
         assert.ok(text.includes(value), value);
     }
-    assert.ok(app.detailButton('Open in RACE Insight'));
-    assert.ok(app.detailButton('Download'));
-    assert.ok(app.detailButton('Share'));
+    for (const hidden of ['.apx', '.risession', 'a1a1a1a1', 'onboard.mp4', 'Files']) {
+        assert.ok(!text.includes(hidden), `no ${hidden} in the details`);
+    }
+    for (const label of ['Open in RACE Insight', 'Download', 'Share', 'Delete from cloud']) assert.ok(app.detailButton(label), label);
     assert.equal(app.n('cloud-explorer').classList.contains('has-selection'), true);
     app.n('cx-details-back').click();
     await settle();
@@ -391,21 +393,27 @@ test('open in app: with sample data the desktop app is not launched', async () =
     assert.match(app.n('cx-open-text').textContent, /With real data/);
 });
 
-test('details: Download saves the .apx under the session name; files can be viewed or downloaded', async () => {
+test('details: Download saves the one .apx as "<track> <date>.apx"', async () => {
     const sync = fakeSync();
-    const app = await runApp({ auth: fakeAuth({ user: ADA }), sync, hash: `#cloud/s=${S1}` });
+    const app = await runApp({ auth: fakeAuth({ user: ADA }), sync, hash: `#cloud/s=${S2}` });
     await app.press(app.detailButton('Download'));
-    assert.ok(sync.calls.includes(`download:${S1}.apx:`));
-    assert.equal(app.dom.clicked.at(-1).download, 'spa 2026-11-22 14-05-10_Race_1.apx');
-    const view = find(app.details(), (c) => c.attrs && c.attrs['aria-label'] === 'View onboard.mp4');
-    await app.press(view);
-    assert.equal(app.n('cx-viewer').open, true);
-    assert.equal(app.n('cx-viewer-body').children[0].tagName, 'video');
-    app.n('cx-viewer-close').click();
-    assert.equal(app.n('cx-viewer').open, false);
-    const archived = find(app.details(), (c) => c.className && c.className.includes('cx-file is-muted'));
-    assert.match(archived.textContent, /Archived/);
-    assert.equal(find(archived, (c) => c.tagName === 'button'), null, 'archived files have no actions');
+    assert.ok(sync.calls.includes(`download:${S2}.apx:`));
+    assert.equal(app.dom.clicked.at(-1).download, 'Monza 2026-10-27.apx');
+});
+
+test('details: Delete from cloud asks first, then deletes at the current head', async () => {
+    const sync = fakeSync();
+    const app = await runApp({ auth: fakeAuth({ user: ADA }), sync, hash: `#cloud/s=${S2}` });
+    await app.press(app.detailButton('Delete from cloud'));
+    assert.match(app.details().textContent, /Recently deleted/);
+    assert.ok(!sync.calls.some((c) => c.startsWith('removeSession')), 'nothing is deleted before the confirmation');
+    await app.press(app.detailButton('Cancel'));
+    assert.ok(!app.details().textContent.includes('Recently deleted'));
+    await app.press(app.detailButton('Delete from cloud'));
+    await app.press(app.detailButton('Delete'));
+    assert.ok(sync.calls.includes(`removeSession:${S2}:0000000001`));
+    assert.equal(app.location.hash, '#cloud');
+    assert.equal(sync.calls.filter((c) => c === 'listUnits').length, 2, 'the list reloads');
 });
 
 test('toolbar: search filters by name, track, car and driver; sort by name', async () => {
@@ -453,6 +461,10 @@ test('Shared with me: counts, accepts invitations and opens shared sessions by s
     await app.select('monza_long_run');
     assert.equal(app.location.hash, `#cloud/sh=${SHARE_ID}`);
     assert.match(app.details().textContent, /Shared by Ada/);
+    assert.ok(!app.details().textContent.includes('.apx'), 'no file list for a shared session either');
+    await app.press(app.detailButton('Download'));
+    assert.ok(sync.calls.includes(`download:${S2}.apx:${SHARE_ID}`));
+    assert.ok(app.detailButton('Remove from my list'));
     await app.press(app.detailButton('Open in RACE Insight'));
     assert.deepEqual(app.appLinks(), [`raceinsight://cloud/open?share=${SHARE_ID}`]);
 });
